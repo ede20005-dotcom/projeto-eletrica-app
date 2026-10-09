@@ -1,0 +1,125 @@
+        <!-- ABA 10: ORÇAMENTO PARAMÉTRICO, BDI & VIABILIDADE FINANCEIRA -->
+        <div id="aba-orcamento" class="tab-pane">
+          <div class="metrics-grid">
+            <div class="metric-card">
+              <span class="metric-title">Investimento Total (CAPEX)</span>
+              <span class="metric-value" id="valOrcPrecoGlobal" style="color: #fff;">R$ 804.435,39</span>
+              <span class="metric-desc" id="valOrcDescBdi">Com BDI TCU de 24.20% Aplicado</span>
+            </div>
+            <div class="metric-card">
+              <span class="metric-title">Payback Simples / Descontado</span>
+              <span class="metric-value" id="valOrcPayback" style="color: var(--accent-green);">4.9 / 6.2 anos</span>
+              <span class="metric-desc">TMA 9.5% a.a. • Inflação Tarifa 5%</span>
+            </div>
+            <div class="metric-card">
+              <span class="metric-title">Valor Presente Líquido (VPL 25a)</span>
+              <span class="metric-value" id="valOrcVpl" style="color: var(--accent-yellow);">R$ 684.210,00</span>
+              <span class="metric-desc">Taxa Interna de Retorno (TIR) = 23.8%</span>
+            </div>
+            <div class="metric-card">
+              <span class="metric-title">Custo Nivelado (LCOE)</span>
+              <span class="metric-value" id="valOrcLcoe" style="color: var(--accent-cyan);">R$ 0,185 / kWh</span>
+              <span class="metric-desc">Tarifa da Rede Concessionária: R$ 0,85</span>
+            </div>
+          </div>
+
+          <!-- Calculadora BDI Interativa TCU -->
+          <div class="card" id="cardCalculadoraBdi">
+            <div class="card-header">
+              <div class="card-title">📊 Calculadora Interativa de BDI (Acórdão TCU nº 2622/2013)</div>
+              <span class="tag tag-yellow">Fórmula Oficial de Engenharia de Custos</span>
+            </div>
+            
+            <p style="font-size: 11.5px; color: var(--text-muted); margin-bottom: 14px;">
+              Ajuste as taxas de Bonificação e Despesas Indiretas abaixo para recalcular o BDI e o Preço Global da Instalação em tempo real:
+            </p>
+
+            <div class="bdi-calculator-grid">
+              
+              <div class="bdi-input-group">
+                <label>Administração Central (AC):</label>
+                <div class="bdi-input-row">
+                  <input type="range" min="1.0" max="8.0" step="0.1" value="4.0" class="bdi-slider" id="sliderAC" oninput="recalcularBdiInterativo()">
+                  <span class="bdi-val-display" id="dispAC">4.0 %</span>
+                </div>
+              </div>
+
+              <div class="bdi-input-group">
+                <label>Seguro e Garantia (S):</label>
+                <div class="bdi-input-row">
+                  <input type="range" min="0.2" max="2.0" step="0.1" value="0.8" class="bdi-slider" id="sliderS" oninput="recalcularBdiInterativo()">
+                  <span class="bdi-val-display" id="dispS">0.8 %</span>
+                </div>
+              </div>
+
+              <div class="bdi-input-group">
+                <label>Risco e Contingências (R):</label>
+                <div class="bdi-input-row">
+                  <input type="range" min="0.5" max="3.0" step="0.1" value="1.2" class="bdi-slider" id="sliderR" oninput="recalcularBdiInterativo()">
+                  <span class="bdi-val-display" id="dispR">1.2 %</span>
+                </div>
+              </div>
+
+              <div class="bdi-input-group">
+                <label>Despesas Financeiras (DF):</label>
+                <div class="bdi-input-row">
+                  <input type="range" min="0.5" max="2.5" step="0.1" value="1.0" class="bdi-slider" id="sliderDF" oninput="recalcularBdiInterativo()">
+                  <span class="bdi-val-display" id="dispDF">1.0 %</span>
+                </div>
+              </div>
+
+              <div class="bdi-input-group">
+                <label>Lucro Operacional Líquido (L):</label>
+                <div class="bdi-input-row">
+                  <input type="range" min="4.0" max="15.0" step="0.2" value="7.4" class="bdi-slider" id="sliderL" oninput="recalcularBdiInterativo()">
+                  <span class="bdi-val-display" id="dispL">7.4 %</span>
+                </div>
+              </div>
+
+              <div class="bdi-input-group">
+                <label>Tributos Totais ISS/PIS/COFINS (T):</label>
+                <div class="bdi-input-row">
+                  <input type="range" min="5.0" max="16.0" step="0.25" value="8.65" class="bdi-slider" id="sliderT" oninput="recalcularBdiInterativo()">
+                  <span class="bdi-val-display" id="dispT">8.65 %</span>
+                </div>
+              </div>
+
+            </div>
+
+            <div style="background: #0f172a; padding: 12px; border-radius: 6px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
+              <div>
+                <strong style="color: var(--accent-yellow); font-size: 13px;">Fórmula do Acórdão TCU:</strong>
+                <span style="font-size: 11px; color: var(--text-muted); margin-left: 8px;">BDI = [ ((1 + AC + S + R) * (1 + DF) * (1 + L)) / (1 - T) ] - 1</span>
+              </div>
+              <div style="font-size: 13px;">
+                Taxa de BDI Calculada: <strong id="lblBdiCalculado" style="color: var(--accent-green); font-size: 16px;">24.20 %</strong>
+              </div>
+            </div>
+
+          </div>
+
+          <!-- Tabela Analítica de Custos e Insumos SINAPI -->
+          <div class="card">
+            <div class="card-header">
+              <div class="card-title">💰 Planilha Orçamentária Analítica de Materiais e Equipamentos (Ref. SINAPI)</div>
+              <span class="tag tag-green">Tabela Auditável</span>
+            </div>
+            <div class="table-container">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Item / Insumo</th>
+                    <th>Categoria</th>
+                    <th>Qtd.</th>
+                    <th>Un.</th>
+                    <th>Preço Unitário Ref.</th>
+                    <th>Subtotal Direto</th>
+                  </tr>
+                </thead>
+                <tbody id="tbodyOrcamentoAnalitico">
+                  <!-- Preenchido via JavaScript -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>

@@ -1,0 +1,27 @@
+        <!-- ABA 7: MAQUETE 3D WEBGL (THREE.JS) -->
+        <div id="aba-3d" class="tab-pane">
+          <div class="card">
+            <div class="card-header">
+              <div class="card-title">🌐 Maquete Tridimensional Interativa dos Circuitos e Renováveis (Three.js WebGL)</div>
+              <div style="display: flex; gap: 6px; flex-wrap: wrap;">
+                <button class="btn btn-primary scene-btn active" id="btnSceneResidencial" onclick="alternarCenario3D('residencial')">🏠 Residencial 3D</button>
+                <button class="btn btn-outline scene-btn" id="btnSceneAgro" onclick="alternarCenario3D('agro')">🚜 Agro & Renováveis</button>
+                <button class="btn btn-outline scene-btn" id="btnSceneIntegrado" onclick="alternarCenario3D('integrado')">🌐 Visão Global</button>
+                <button class="btn btn-outline" onclick="toggleModoWireframe()">🔲 Wireframe</button>
+                <button class="btn btn-outline" onclick="isolarTubulacao()">⚡ Isolar Tubulações</button>
+                <button class="btn btn-outline" onclick="resetarCamera3D()">🎥 Resetar Câmera</button>
+              </div>
+            </div>
+
+            <div class="cad-viewport" style="height: 560px;">
+              <canvas id="threeCanvas" class="cad-canvas"></canvas>
+            </div>
+
+            <div style="margin-top: 12px; font-size: 11.5px; color: var(--text-muted); display: flex; justify-content: space-between; flex-wrap: wrap; gap: 8px;">
+              <span>• Use o <strong>Botão Esquerdo</strong> para rotacionar em órbita livre (360°).</span>
+              <span>• Use a <strong>Roda do Mouse (Scroll)</strong> para aplicar Zoom contínuo.</span>
+              <span>• Use o <strong>Botão Direito</strong> para mover/arrastar (Pan).</span>
+              <span class="tag tag-yellow">Renderizador WebGL Nativo com Sombras e Eletrodutos</span>
+            </div>
+          </div>
+        </div>

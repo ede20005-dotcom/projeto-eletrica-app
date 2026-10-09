@@ -1,0 +1,105 @@
+        <!-- ABA 4: ESTUDO DE COORDENAÇÃO & SELETIVIDADE DE PROTEÇÕES -->
+        <div id="aba-seletividade" class="tab-pane">
+          <div class="metrics-grid">
+            <div class="metric-card">
+              <span class="metric-title">Disjuntor a Montante (Geral)</span>
+              <span class="metric-value" style="color: var(--accent-red);">125 A DIN</span>
+              <span class="metric-desc">Curva C • Icu = 6.0 kA • Im = 625A a 1250A</span>
+            </div>
+            <div class="metric-card">
+              <span class="metric-title">Maior Disjuntor a Jusante</span>
+              <span class="metric-value" style="color: var(--accent-yellow);">40 A DIN</span>
+              <span class="metric-desc">Curva C Chuveiros • Im = 200A a 400A</span>
+            </div>
+            <div class="metric-card">
+              <span class="metric-title">Razão de Seletividade Térmica</span>
+              <span class="metric-value" style="color: var(--accent-green);">3.12 x</span>
+              <span class="metric-desc">Conforme NBR 5410 (Critério Exigido ≥ 1.60x)</span>
+            </div>
+            <div class="metric-card">
+              <span class="metric-title">Grau de Seletividade Global</span>
+              <span class="metric-value" style="color: var(--accent-cyan);">TOTAL</span>
+              <span class="metric-desc">Atuação Seletiva Sem Desarme do Geral</span>
+            </div>
+          </div>
+
+          <!-- Canvas Gráfico Log-Log de Seletividade -->
+          <div class="card">
+            <div class="card-header">
+              <div class="card-title">📈 Gráfico Tempo x Corrente (Curvas Características Bi-Logarítmicas)</div>
+              <div style="display: flex; gap: 8px; align-items: center;">
+                <span class="tag tag-green">NBR 5410 / IEC 60947-2</span>
+                <a href="/api/v1/eletrica/export/dxf-seletividade" class="btn btn-outline" download>📥 Baixar DXF Seletividade</a>
+              </div>
+            </div>
+
+            <div class="cad-viewport" style="height: 520px;">
+              <div class="cad-toolbar">
+                <button class="btn btn-outline" style="padding: 4px 8px; font-size: 11px;" onclick="desenharGraficoSeletividade()">🔄 Atualizar</button>
+                <button class="btn btn-outline" style="padding: 4px 8px; font-size: 11px;" onclick="simularFaltaSeletividade(500)">⚡ Simular Falta 500A</button>
+                <button class="btn btn-outline" style="padding: 4px 8px; font-size: 11px;" onclick="simularFaltaSeletividade(1500)">💥 Simular Curto 1.5kA</button>
+              </div>
+              <canvas id="seletividadeCanvas" class="cad-canvas"></canvas>
+            </div>
+            <div style="margin-top: 10px; font-size: 11.5px; color: var(--text-muted); display: flex; gap: 20px; flex-wrap: wrap;">
+              <span><strong style="color: var(--accent-red);">━ Vermelho:</strong> Disjuntor Geral 125A Curva C</span>
+              <span><strong style="color: var(--accent-yellow);">━ Amarelo:</strong> Chuveiro 40A Curva C</span>
+              <span><strong style="color: var(--accent-green);">━ Verde:</strong> Tomadas Cozinha 20A Curva C</span>
+              <span><strong style="color: var(--accent-cyan);">━ Ciano:</strong> Iluminação Social 10A Curva B</span>
+            </div>
+          </div>
+
+          <!-- Matriz de Seletividade dos Circuitos -->
+          <div class="card" id="cardMatrizSeletividade">
+            <div class="card-header">
+              <div class="card-title">⚖️ Matriz Analítica de Coordenação e Seletividade Circuito a Circuito</div>
+              <span class="tag tag-blue">Proteção Escalonada em Camadas</span>
+            </div>
+            <div class="table-container">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Circuito</th>
+                    <th>Carga Protegida</th>
+                    <th>Disjuntor Jusante</th>
+                    <th>Disjuntor Montante</th>
+                    <th>Razão In</th>
+                    <th>Limite Magnético Is</th>
+                    <th>Grau de Seletividade</th>
+                    <th>Parecer Técnico de Conformidade</th>
+                  </tr>
+                </thead>
+                <tbody id="tbodySeletividade">
+                  <!-- Preenchido via JavaScript -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- Comparativo Teórico Curvas B, C e D -->
+          <div class="card">
+            <div class="card-header">
+              <div class="card-title">🛡️ Critérios de Escolha entre Curvas de Disparo Magnético B, C e D</div>
+            </div>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 14px;">
+              <div style="background: #0f172a; padding: 14px; border-radius: 6px; border-top: 3px solid var(--accent-cyan);">
+                <div style="font-weight: 700; color: var(--accent-cyan); margin-bottom: 6px;">CURVA B (3 a 5 x In)</div>
+                <p style="font-size: 11.5px; color: var(--text-muted); line-height: 1.5;">
+                  Indicada para circuitos resistivos e condutores de grande comprimento (queda de tensão). Disparo magnético entre 3 e 5 vezes a corrente nominal. Utilizada nos Circuitos 1 e 2 de Iluminação LED.
+                </p>
+              </div>
+              <div style="background: #0f172a; padding: 14px; border-radius: 6px; border-top: 3px solid var(--accent-yellow);">
+                <div style="font-weight: 700; color: var(--accent-yellow); margin-bottom: 6px;">CURVA C (5 a 10 x In)</div>
+                <p style="font-size: 11.5px; color: var(--text-muted); line-height: 1.5;">
+                  Padrão geral para tomadas residenciais, eletrodomésticos e pequenos motores com correntes de partida moderadas. Suporta picos sem desarme indevido. Utilizada nos Circuitos de TUGs e Chuveiros.
+                </p>
+              </div>
+              <div style="background: #0f172a; padding: 14px; border-radius: 6px; border-top: 3px solid var(--accent-red);">
+                <div style="font-weight: 700; color: var(--accent-red); margin-bottom: 6px;">CURVA D (10 a 20 x In)</div>
+                <p style="font-size: 11.5px; color: var(--text-muted); line-height: 1.5;">
+                  Projetada para cargas com correntes de partida severas (inrush), como transformadores de comando, motogeradores a biogás e bombas industriais. Evita desarme na magnetização do núcleo.
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>

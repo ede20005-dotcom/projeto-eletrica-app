@@ -1,0 +1,3400 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Antigravity — Plataforma Integrada de Engenharia Elétrica & Renováveis (NBR 5410 / NBR 16690)</title>
+  <!-- Three.js e OrbitControls para visualização 3D WebGL Offline / CDN com fallback -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+  <style>
+    :root {
+      --bg-dark: #0a0f1d;
+      --bg-sidebar: #0f172a;
+      --bg-card: #1e293b;
+      --bg-hover: #334155;
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+      --accent-yellow: #f59e0b;
+      --accent-blue: #38bdf8;
+      --accent-green: #10b981;
+      --accent-red: #ef4444;
+      --accent-purple: #c084fc;
+      --accent-cyan: #06b6d4;
+      --border-color: #334155;
+      --sidebar-width: 290px;
+      --sidebar-collapsed: 60px;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      background: var(--bg-dark);
+      color: var(--text-main);
+      min-height: 100vh;
+      overflow-x: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+
+    #app-container {
+      display: flex;
+      width: 100vw;
+      min-height: 100vh;
+      overflow: hidden;
+    }
+
+    /* SIDEBAR (MENU LATERAL HIERÁRQUICO) */
+    aside#sidebar {
+      width: var(--sidebar-width);
+      background: var(--bg-sidebar);
+      border-right: 1px solid var(--border-color);
+      display: flex;
+      flex-direction: column;
+      flex-shrink: 0;
+      transition: width 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+      position: sticky;
+      top: 0;
+      height: 100vh;
+      z-index: 1000;
+      user-select: none;
+      box-shadow: 4px 0 20px rgba(0, 0, 0, 0.4);
+    }
+    aside#sidebar.collapsed {
+      width: var(--sidebar-collapsed);
+    }
+
+    .sidebar-header {
+      padding: 14px 16px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid var(--border-color);
+      background: #090d16;
+      min-height: 60px;
+    }
+    .sidebar-brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      overflow: hidden;
+      white-space: nowrap;
+    }
+    .sidebar-logo {
+      background: var(--accent-yellow);
+      color: #000;
+      font-weight: 900;
+      font-size: 16px;
+      width: 32px;
+      height: 32px;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      box-shadow: 0 0 10px rgba(245, 158, 11, 0.4);
+    }
+    .sidebar-title {
+      font-size: 13px;
+      font-weight: 700;
+      color: #fff;
+      display: flex;
+      flex-direction: column;
+    }
+    .sidebar-title small {
+      font-size: 10px;
+      color: var(--accent-yellow);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    .btn-toggle-sidebar {
+      background: transparent;
+      border: 1px solid var(--border-color);
+      color: var(--text-muted);
+      width: 28px;
+      height: 28px;
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      font-size: 13px;
+      transition: all 0.2s;
+      flex-shrink: 0;
+    }
+    .btn-toggle-sidebar:hover {
+      background: var(--bg-hover);
+      color: #fff;
+    }
+
+    .sidebar-search-box {
+      padding: 10px 14px;
+      border-bottom: 1px solid var(--border-color);
+      background: #0d1322;
+    }
+    .sidebar-search-input {
+      width: 100%;
+      background: #1e293b;
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+      padding: 7px 10px;
+      color: #fff;
+      font-size: 11px;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+    .sidebar-search-input:focus {
+      border-color: var(--accent-yellow);
+    }
+    aside#sidebar.collapsed .sidebar-search-box,
+    aside#sidebar.collapsed .sidebar-title {
+      display: none;
+    }
+
+    .sidebar-nav {
+      flex: 1;
+      overflow-y: auto;
+      overflow-x: hidden;
+      padding: 10px 8px;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      scrollbar-width: thin;
+      scrollbar-color: #334155 transparent;
+    }
+    .sidebar-nav::-webkit-scrollbar { width: 4px; }
+    .sidebar-nav::-webkit-scrollbar-thumb { background: #334155; border-radius: 4px; }
+
+    .nav-group {
+      border-radius: 6px;
+      overflow: hidden;
+      margin-bottom: 2px;
+    }
+    .nav-group-header {
+      padding: 10px 12px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      cursor: pointer;
+      background: transparent;
+      border-radius: 6px;
+      color: var(--text-main);
+      font-size: 12px;
+      font-weight: 700;
+      transition: background 0.15s;
+      white-space: nowrap;
+    }
+    .nav-group-header:hover {
+      background: var(--bg-hover);
+    }
+    .nav-group-header.open {
+      color: var(--accent-yellow);
+      background: rgba(245, 158, 11, 0.08);
+    }
+    .nav-group-title {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .nav-group-icon {
+      font-size: 15px;
+      width: 20px;
+      text-align: center;
+      flex-shrink: 0;
+    }
+    .nav-group-arrow {
+      font-size: 9px;
+      color: var(--text-muted);
+      transition: transform 0.2s;
+    }
+    .nav-group-header.open .nav-group-arrow {
+      transform: rotate(90deg);
+    }
+    aside#sidebar.collapsed .nav-group-header .nav-group-arrow,
+    aside#sidebar.collapsed .nav-group-header span:not(.nav-group-icon) {
+      display: none;
+    }
+
+    .nav-subitems {
+      display: none;
+      flex-direction: column;
+      padding-left: 14px;
+      margin: 4px 0 6px 0;
+      border-left: 2px solid #334155;
+      gap: 2px;
+    }
+    .nav-group.open .nav-subitems {
+      display: flex;
+    }
+    aside#sidebar.collapsed .nav-subitems {
+      display: none !important;
+    }
+    .nav-subitem {
+      padding: 7px 10px;
+      font-size: 11px;
+      color: var(--text-muted);
+      border-radius: 4px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      text-decoration: none;
+      transition: all 0.15s;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .nav-subitem:hover {
+      color: #fff;
+      background: var(--bg-hover);
+    }
+    .nav-subitem.active {
+      color: var(--accent-yellow);
+      font-weight: 700;
+      background: rgba(245, 158, 11, 0.12);
+    }
+    .nav-subitem-badge {
+      font-size: 9px;
+      padding: 1px 5px;
+      border-radius: 4px;
+      background: #334155;
+      color: #e2e8f0;
+      margin-left: auto;
+    }
+
+    /* CONTEÚDO PRINCIPAL & CABEÇALHO */
+    #main-content {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      min-width: 0;
+      background: var(--bg-dark);
+      overflow-y: auto;
+      height: 100vh;
+    }
+
+    header {
+      background: #090d16;
+      border-bottom: 1px solid var(--border-color);
+      padding: 10px 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+    .header-left {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .header-brand {
+      display: flex;
+      flex-direction: column;
+    }
+    .brand-title {
+      font-size: 15px;
+      font-weight: 800;
+      letter-spacing: -0.3px;
+      color: #fff;
+    }
+    .brand-subtitle {
+      font-size: 10px;
+      color: var(--accent-yellow);
+      font-weight: 600;
+    }
+    .header-actions {
+      display: flex;
+      gap: 6px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    .btn {
+      padding: 6px 12px;
+      border-radius: 6px;
+      font-size: 11px;
+      font-weight: 600;
+      border: 1px solid transparent;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      text-decoration: none;
+      transition: all 0.2s;
+    }
+    .btn-primary { background: var(--accent-yellow); color: #000; font-weight: 700; }
+    .btn-primary:hover { background: #d97706; }
+    .btn-green { background: var(--accent-green); color: #000; font-weight: 700; }
+    .btn-green:hover { background: #059669; color: #fff; }
+    .btn-blue { background: #0284c7; color: #fff; }
+    .btn-blue:hover { background: #0369a1; }
+    .btn-outline { background: transparent; border-color: var(--border-color); color: var(--text-main); }
+    .btn-outline:hover { background: var(--bg-card); }
+
+    /* Barra Superior de Abas com Scrollbar Fina */
+    .tabs-nav {
+      background: #111827;
+      display: flex;
+      border-bottom: 1px solid var(--border-color);
+      padding: 0 16px;
+      overflow-x: auto;
+      scrollbar-width: thin;
+      scrollbar-color: #334155 transparent;
+      flex-shrink: 0;
+    }
+    .tabs-nav::-webkit-scrollbar { height: 4px; }
+    .tabs-nav::-webkit-scrollbar-thumb { background: #334155; border-radius: 4px; }
+    .tabs-nav::-webkit-scrollbar-track { background: #0f172a; }
+
+    .tab-btn {
+      padding: 10px 14px;
+      background: transparent;
+      border: none;
+      color: var(--text-muted);
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      border-bottom: 3px solid transparent;
+      transition: all 0.2s;
+      white-space: nowrap;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .tab-btn:hover { color: var(--text-main); }
+    .tab-btn.active {
+      color: var(--accent-yellow);
+      border-bottom-color: var(--accent-yellow);
+      background: rgba(245, 158, 11, 0.05);
+    }
+
+    main {
+      flex: 1;
+      padding: 20px;
+      max-width: 1600px;
+      margin: 0 auto;
+      width: 100%;
+    }
+    .tab-pane { display: none; }
+    .tab-pane.active { display: block; animation: fadeIn 0.2s ease-in; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
+
+    /* Grid de Estatísticas e Cards */
+    .metrics-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 14px;
+      margin-bottom: 20px;
+    }
+    .metric-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      padding: 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+    .metric-title {
+      font-size: 11px;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    .metric-value {
+      font-size: 20px;
+      font-weight: 800;
+      color: var(--text-main);
+    }
+    .metric-desc {
+      font-size: 10px;
+      color: var(--accent-yellow);
+    }
+
+    .card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      padding: 18px;
+      margin-bottom: 20px;
+    }
+    .card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 14px;
+      border-bottom: 1px solid var(--border-color);
+      padding-bottom: 10px;
+    }
+    .card-title {
+      font-size: 15px;
+      font-weight: 700;
+      color: #fff;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    /* Tabelas de Engenharia */
+    .table-container {
+      overflow-x: auto;
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 11.5px;
+      text-align: left;
+    }
+    th {
+      background: #0f172a;
+      color: var(--text-muted);
+      padding: 9px 12px;
+      font-weight: 600;
+      border-bottom: 1px solid var(--border-color);
+      white-space: nowrap;
+    }
+    td {
+      padding: 9px 12px;
+      border-bottom: 1px solid #1e293b;
+      color: var(--text-main);
+    }
+    tr:nth-child(even) { background: rgba(30, 41, 59, 0.4); }
+    tr:hover { background: rgba(245, 158, 11, 0.08); }
+
+    .tag {
+      display: inline-block;
+      padding: 2px 7px;
+      border-radius: 4px;
+      font-size: 9px;
+      font-weight: 700;
+      text-transform: uppercase;
+    }
+    .tag-yellow { background: rgba(245, 158, 11, 0.2); color: var(--accent-yellow); border: 1px solid rgba(245, 158, 11, 0.3); }
+    .tag-green { background: rgba(16, 185, 129, 0.2); color: var(--accent-green); border: 1px solid rgba(16, 185, 129, 0.3); }
+    .tag-blue { background: rgba(56, 189, 248, 0.2); color: var(--accent-blue); border: 1px solid rgba(56, 189, 248, 0.3); }
+    .tag-red { background: rgba(239, 68, 68, 0.2); color: var(--accent-red); border: 1px solid rgba(239, 68, 68, 0.3); }
+    .tag-purple { background: rgba(192, 132, 252, 0.2); color: var(--accent-purple); border: 1px solid rgba(192, 132, 252, 0.3); }
+
+    /* Canvas CAD e Gráficos */
+    .cad-viewport {
+      width: 100%;
+      height: 540px;
+      background: #050811;
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      position: relative;
+      overflow: hidden;
+    }
+    canvas.cad-canvas {
+      width: 100%;
+      height: 100%;
+      display: block;
+    }
+    .cad-toolbar {
+      position: absolute;
+      top: 12px;
+      right: 12px;
+      display: flex;
+      gap: 8px;
+      z-index: 10;
+      background: rgba(15, 23, 42, 0.85);
+      padding: 6px 10px;
+      border-radius: 6px;
+      border: 1px solid var(--border-color);
+      backdrop-filter: blur(4px);
+    }
+
+    /* Calculadora BDI */
+    .bdi-calculator-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 16px;
+      margin-bottom: 16px;
+    }
+    .bdi-input-group {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      background: #0f172a;
+      padding: 10px 14px;
+      border-radius: 6px;
+      border: 1px solid var(--border-color);
+    }
+    .bdi-input-group label {
+      font-size: 11px;
+      color: var(--text-muted);
+      font-weight: 600;
+    }
+    .bdi-input-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .bdi-slider {
+      flex: 1;
+      accent-color: var(--accent-yellow);
+    }
+    .bdi-val-display {
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--accent-yellow);
+      min-width: 50px;
+      text-align: right;
+    }
+
+    footer {
+      background: #090d16;
+      border-top: 1px solid var(--border-color);
+      padding: 10px 20px;
+      font-size: 11px;
+      color: var(--text-muted);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: auto;
+    }
+    .heartbeat-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--accent-green);
+      display: inline-block;
+      margin-right: 6px;
+      animation: pulse 2s infinite;
+    }
+    @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.3; } 100% { opacity: 1; } }
+  </style>
+</head>
+<body>
+  <div id="app-container">
+
+    <!-- SIDEBAR (MENU LATERAL HIERÁRQUICO) -->
+    <aside id="sidebar">
+      <div class="sidebar-header">
+        <div class="sidebar-brand">
+          <div class="sidebar-logo">⚡</div>
+          <div class="sidebar-title">
+            <strong>Antigravity Elétrica</strong>
+            <small>Plataforma Normativa</small>
+          </div>
+        </div>
+        <button class="btn-toggle-sidebar" id="btnToggleSidebar" title="Recolher / Expandir Menu" onclick="toggleSidebar()">◀</button>
+      </div>
+
+      <div class="sidebar-search-box">
+        <input type="text" id="navSearchInput" class="sidebar-search-input" placeholder="🔍 Filtrar módulos ou normas..." onkeyup="filtrarSidebar()">
+      </div>
+
+      <nav class="sidebar-nav" id="sidebarNav">
+        
+        <!-- GRUPO 1: BAIXA TENSÃO NBR 5410 -->
+        <div class="nav-group open" id="grp-bt">
+          <div class="nav-group-header open" onclick="toggleGrupo('grp-bt')">
+            <div class="nav-group-title">
+              <span class="nav-group-icon">⚡</span>
+              <span>1. Baixa Tensão & NBR 5410</span>
+            </div>
+            <span class="nav-group-arrow">▶</span>
+          </div>
+          <div class="nav-subitems">
+            <a class="nav-subitem active" data-tab="aba-visao-geral" onclick="navegarParaAba('aba-visao-geral')">📋 Visão Geral & Demandas</a>
+            <a class="nav-subitem" data-tab="aba-cargas" onclick="navegarParaAba('aba-cargas')">🏠 Levantamento por Cômodo <span class="nav-subitem-badge">11</span></a>
+            <a class="nav-subitem" data-tab="aba-circuitos" onclick="navegarParaAba('aba-circuitos')">⚡ QDC & Fases Balanceadas <span class="nav-subitem-badge">18</span></a>
+            <a class="nav-subitem" onclick="navegarParaAba('aba-visao-geral', 'balanco')">⚖️ Distribuição Fases R-S-T</a>
+          </div>
+        </div>
+
+        <!-- GRUPO 2: COORDENAÇÃO & SELETIVIDADE -->
+        <div class="nav-group" id="grp-seletividade">
+          <div class="nav-group-header" onclick="toggleGrupo('grp-seletividade')">
+            <div class="nav-group-title">
+              <span class="nav-group-icon">📈</span>
+              <span>2. Coordenação & Seletividade</span>
+            </div>
+            <span class="nav-group-arrow">▶</span>
+          </div>
+          <div class="nav-subitems">
+            <a class="nav-subitem" data-tab="aba-seletividade" onclick="navegarParaAba('aba-seletividade')">📈 Gráfico Tempo x Corrente (Log-Log)</a>
+            <a class="nav-subitem" onclick="navegarParaAba('aba-seletividade', 'matriz')">⚖️ Matriz de Seletividade dos Circuitos</a>
+            <a class="nav-subitem" onclick="navegarParaAba('aba-seletividade', 'curvas')">🛡️ Curvas B, C e D Disjuntores DIN</a>
+            <a class="nav-subitem" href="/api/v1/eletrica/export/dxf-seletividade" download>📥 Baixar DXF Seletividade NBR 5410</a>
+          </div>
+        </div>
+
+        <!-- GRUPO 3: USINAS SOLARES & STRINGBOX -->
+        <div class="nav-group" id="grp-solar">
+          <div class="nav-group-header" onclick="toggleGrupo('grp-solar')">
+            <div class="nav-group-title">
+              <span class="nav-group-icon">☀️</span>
+              <span>3. Energia Solar & Stringbox</span>
+            </div>
+            <span class="nav-group-arrow">▶</span>
+          </div>
+          <div class="nav-subitems">
+            <a class="nav-subitem" data-tab="aba-renovaveis" onclick="navegarParaAba('aba-renovaveis', 'solar')">☀️ Usinas Fotovoltaicas On-Grid</a>
+            <a class="nav-subitem" data-tab="aba-stringbox" onclick="navegarParaAba('aba-stringbox')">📦 Diagrama Stringbox Solar CC</a>
+            <a class="nav-subitem" onclick="selecionarPerfilRenovaveis('residencial')">🏡 Modelo Residencial (8.8 kWp)</a>
+            <a class="nav-subitem" onclick="selecionarPerfilRenovaveis('predial')">🏢 Modelo Predial (49.5 kWp)</a>
+            <a class="nav-subitem" onclick="selecionarPerfilRenovaveis('fazenda')">🚜 Modelo Fazenda (150 kWp)</a>
+            <a class="nav-subitem" href="/api/v1/renovaveis/export/dxf-solar" download>📥 Baixar DXF Usina Solar</a>
+            <a class="nav-subitem" href="/api/v1/renovaveis/export/dxf-stringbox" download>📥 Baixar DXF Stringbox CC</a>
+          </div>
+        </div>
+
+        <!-- GRUPO 4: ENERGIA EÓLICA & AEROGERADORES -->
+        <div class="nav-group" id="grp-eolica">
+          <div class="nav-group-header" onclick="toggleGrupo('grp-eolica')">
+            <div class="nav-group-title">
+              <span class="nav-group-icon">💨</span>
+              <span>4. Geração Eólica & Turbinas</span>
+            </div>
+            <span class="nav-group-arrow">▶</span>
+          </div>
+          <div class="nav-subitems">
+            <a class="nav-subitem" data-tab="aba-renovaveis" onclick="navegarParaAba('aba-renovaveis', 'eolica')">💨 Aerogeradores HAWT / VAWT</a>
+            <a class="nav-subitem" onclick="navegarParaAba('aba-3d', 'agro')">🌐 Visualizar Turbina 3D</a>
+            <a class="nav-subitem" href="/api/v1/renovaveis/export/dxf-eolica" download>📥 Baixar DXF Eólica (IEC 61400)</a>
+          </div>
+        </div>
+
+        <!-- GRUPO 5: BIODIGESTOR & BIOGÁS AGRO -->
+        <div class="nav-group" id="grp-biogas">
+          <div class="nav-group-header" onclick="toggleGrupo('grp-biogas')">
+            <div class="nav-group-title">
+              <span class="nav-group-icon">🧪</span>
+              <span>5. Biodigestor & Biogás Agro</span>
+            </div>
+            <span class="nav-group-arrow">▶</span>
+          </div>
+          <div class="nav-subitems">
+            <a class="nav-subitem" data-tab="aba-renovaveis" onclick="navegarParaAba('aba-renovaveis', 'biodigestor')">🧪 Cava Trapezoidal PEAD</a>
+            <a class="nav-subitem" onclick="navegarParaAba('aba-renovaveis', 'chp')">🔥 Motogerador Ciclo Otto CHP</a>
+            <a class="nav-subitem" href="/api/v1/renovaveis/export/dxf-biodigestor" download>📥 Baixar DXF Biodigestor</a>
+          </div>
+        </div>
+
+        <!-- GRUPO 6: MICRO-HIDRELÉTRICA PCH RURAL -->
+        <div class="nav-group" id="grp-pch">
+          <div class="nav-group-header" onclick="toggleGrupo('grp-pch')">
+            <div class="nav-group-title">
+              <span class="nav-group-icon">💧</span>
+              <span>6. Micro-Hidrelétrica PCH Rural</span>
+            </div>
+            <span class="nav-group-arrow">▶</span>
+          </div>
+          <div class="nav-subitems">
+            <a class="nav-subitem" data-tab="aba-hidreletrica" onclick="navegarParaAba('aba-hidreletrica')">💧 Dimensionamento Queda & Vazão</a>
+            <a class="nav-subitem" onclick="navegarParaAba('aba-hidreletrica', 'conduto')">🌊 Conduto Forçado PEAD PN10 & Golpe</a>
+            <a class="nav-subitem" onclick="navegarParaAba('aba-hidreletrica', 'turbina')">⚙️ Turbinas Pelton & Francis</a>
+            <a class="nav-subitem" href="/api/v1/renovaveis/export/dxf-hidreletrica" download>📥 Baixar DXF Hidrelétrica PCH</a>
+          </div>
+        </div>
+
+        <!-- GRUPO 7: ESQUEMAS 2D CAD & DXF -->
+        <div class="nav-group" id="grp-cad">
+          <div class="nav-group-header" onclick="toggleGrupo('grp-cad')">
+            <div class="nav-group-title">
+              <span class="nav-group-icon">📐</span>
+              <span>7. Esquemas 2D CAD & DXF</span>
+            </div>
+            <span class="nav-group-arrow">▶</span>
+          </div>
+          <div class="nav-subitems">
+            <a class="nav-subitem" data-tab="aba-2d" onclick="navegarParaAba('aba-2d')">📐 Planta Baixa Unifilar Canvas</a>
+            <a class="nav-subitem" onclick="navegarParaAba('aba-stringbox')">📦 Esquema Stringbox Solar Canvas</a>
+            <a class="nav-subitem" onclick="navegarParaAba('aba-seletividade')">📈 Gráfico Seletividade Canvas</a>
+            <a class="nav-subitem" href="/api/v1/eletrica/export/dxf-planta" download>📥 DXF Planta NBR 5444</a>
+            <a class="nav-subitem" href="/api/v1/eletrica/export/dxf-unifilar" download>📥 DXF Diagrama Unifilar QDC</a>
+          </div>
+        </div>
+
+        <!-- GRUPO 8: MAQUETE 3D WEBGL (THREE.JS) -->
+        <div class="nav-group" id="grp-3d">
+          <div class="nav-group-header" onclick="toggleGrupo('grp-3d')">
+            <div class="nav-group-title">
+              <span class="nav-group-icon">🌐</span>
+              <span>8. Maquete 3D & Eletrodutos</span>
+            </div>
+            <span class="nav-group-arrow">▶</span>
+          </div>
+          <div class="nav-subitems">
+            <a class="nav-subitem" data-tab="aba-3d" onclick="navegarParaAba('aba-3d', 'residencial')">🏠 Cenário Residencial 3D</a>
+            <a class="nav-subitem" onclick="navegarParaAba('aba-3d', 'agro')">🚜 Cenário Agro & Renováveis</a>
+            <a class="nav-subitem" onclick="navegarParaAba('aba-3d', 'integrado')">🌐 Visão Integrada Global</a>
+          </div>
+        </div>
+
+        <!-- GRUPO 9: ORÇAMENTO, BDI & ART CREA -->
+        <div class="nav-group" id="grp-orcamento">
+          <div class="nav-group-header" onclick="toggleGrupo('grp-orcamento')">
+            <div class="nav-group-title">
+              <span class="nav-group-icon">💰</span>
+              <span>9. Orçamento BDI & ART CREA</span>
+            </div>
+            <span class="nav-group-arrow">▶</span>
+          </div>
+          <div class="nav-subitems">
+            <a class="nav-subitem" data-tab="aba-orcamento" onclick="navegarParaAba('aba-orcamento')">💰 Orçamento Paramétrico SINAPI</a>
+            <a class="nav-subitem" onclick="navegarParaAba('aba-orcamento', 'bdi')">📊 Calculadora BDI Interativa (TCU)</a>
+            <a class="nav-subitem" onclick="navegarParaAba('aba-orcamento', 'viabilidade')">📈 Análise Viabilidade (VPL / TIR)</a>
+            <a class="nav-subitem" data-tab="aba-materiais" onclick="navegarParaAba('aba-materiais')">📦 Lista de Materiais Quantitativa</a>
+            <a class="nav-subitem" onclick="navegarParaAba('aba-materiais')">📜 Minuta de ART CREA / CFT</a>
+            <a class="nav-subitem" href="/api/v1/eletrica/export/docx-memorial" download>📄 Exportar Laudo DOCX</a>
+          </div>
+        </div>
+
+        <!-- GRUPO 10: AGENTE IA & COPILOT NORMATIVO -->
+        <div class="nav-group" id="grp-ia">
+          <div class="nav-group-header" onclick="toggleGrupo('grp-ia')">
+            <div class="nav-group-title">
+              <span class="nav-group-icon">🤖</span>
+              <span>10. Agente IA & Copilot Normativo</span>
+            </div>
+            <span class="nav-group-arrow">▶</span>
+          </div>
+          <div class="nav-subitems">
+            <a class="nav-subitem" data-tab="aba-ia-copilot" onclick="navegarParaAba('aba-ia-copilot')">💬 Chat Copilot de Engenharia</a>
+            <a class="nav-subitem" onclick="navegarParaAba('aba-ia-copilot', 'auditoria')">🔍 Auditoria Normativa NBR 5410</a>
+            <a class="nav-subitem" onclick="navegarParaAba('aba-ia-copilot', 'seletividade')">📈 Análise de Seletividade & DR</a>
+            <a class="nav-subitem" onclick="navegarParaAba('aba-ia-copilot', 'stringbox')">☀️ Parecer Stringbox NBR 16690</a>
+            <a class="nav-subitem" href="/ia_central_agentes_eletrica.html" target="_blank">🌐 Central Multiprovedor (Nova Janela)</a>
+          </div>
+        </div>
+
+      </nav>
+    </aside>
+
+    <!-- ÁREA DE CONTEÚDO PRINCIPAL -->
+    <div id="main-content">
+      
+      <!-- Topo do Sistema -->
+      <header>
+        <div class="header-left">
+          <button class="btn btn-outline" style="padding: 6px 10px; font-size: 14px;" onclick="toggleSidebar()" title="Expandir/Recolher Menu Lateral">☰</button>
+          <div class="header-brand">
+            <div class="brand-title">Antigravity Electrical & Renewable Energy Platform</div>
+            <div class="brand-subtitle">ABNT NBR 5410 / NR-10 / NBR 5419 / NBR 16690 / IEC 61400 / LEI 14.300 / TCU 2622</div>
+          </div>
+        </div>
+        <div class="header-actions">
+          <a href="/api/v1/eletrica/export/dxf-planta" class="btn btn-outline" download>📥 DXF Planta</a>
+          <a href="/api/v1/eletrica/export/dxf-unifilar" class="btn btn-outline" download>📥 DXF QDC</a>
+          <a href="/api/v1/eletrica/export/dxf-seletividade" class="btn btn-outline" download>📈 DXF Seletividade</a>
+          <a href="/api/v1/renovaveis/export/dxf-stringbox" class="btn btn-outline" download>☀️ DXF Stringbox</a>
+          <a href="/api/v1/renovaveis/export/dxf-hidreletrica" class="btn btn-outline" download>💧 DXF PCH Rural</a>
+          <a href="/api/v1/eletrica/export/docx-memorial" class="btn btn-primary" download>📄 Exportar Laudo DOCX</a>
+        </div>
+      </header>
+
+      <!-- Barra de Abas Superiores (Sincronizada com o Sidebar) -->
+      <nav class="tabs-nav" id="topTabsNav">
+        <button class="tab-btn active" data-tab="aba-visao-geral" onclick="navegarParaAba('aba-visao-geral')">📋 Visão Geral & Normas</button>
+        <button class="tab-btn" data-tab="aba-cargas" onclick="navegarParaAba('aba-cargas')">🏠 Cargas & Cômodos</button>
+        <button class="tab-btn" data-tab="aba-circuitos" onclick="navegarParaAba('aba-circuitos')">⚡ QDC & Fases</button>
+        <button class="tab-btn" data-tab="aba-seletividade" onclick="navegarParaAba('aba-seletividade')">📈 Seletividade NBR 5410</button>
+        <button class="tab-btn" data-tab="aba-2d" onclick="navegarParaAba('aba-2d')">📐 Planta 2D CAD</button>
+        <button class="tab-btn" data-tab="aba-stringbox" onclick="navegarParaAba('aba-stringbox')">☀️ Stringbox Solar CC</button>
+        <button class="tab-btn" data-tab="aba-3d" onclick="navegarParaAba('aba-3d')">🌐 Maquete 3D WebGL</button>
+        <button class="tab-btn" data-tab="aba-renovaveis" onclick="navegarParaAba('aba-renovaveis')">☀️ Renováveis & Biogás</button>
+        <button class="tab-btn" data-tab="aba-hidreletrica" onclick="navegarParaAba('aba-hidreletrica')">💧 Hidrelétrica PCH</button>
+        <button class="tab-btn" data-tab="aba-orcamento" onclick="navegarParaAba('aba-orcamento')">💰 Orçamento BDI & Viabilidade</button>
+        <button class="tab-btn" data-tab="aba-materiais" onclick="navegarParaAba('aba-materiais')">📦 Materiais & ART CREA</button>
+        <button class="tab-btn" data-tab="aba-ia-copilot" onclick="navegarParaAba('aba-ia-copilot')" style="border-left: 2px solid #eab308; color: #fde047;">🤖 Copilot IA Normativo</button>
+      </nav>
+
+      <main>
+
+        <!-- ABA 1: VISÃO GERAL & NORMAS -->
+        <div id="aba-visao-geral" class="tab-pane active">
+          <div class="metrics-grid">
+            <div class="metric-card">
+              <span class="metric-title">Potência Total Instalada</span>
+              <span class="metric-value" id="valPotInstalada">48.2 kW</span>
+              <span class="metric-desc">Soma Cargas Iluminação + TUG + TUE</span>
+            </div>
+            <div class="metric-card">
+              <span class="metric-title">Demanda Máxima Provável</span>
+              <span class="metric-value" id="valDemanda">34.6 kVA</span>
+              <span class="metric-desc">Fatores de Demanda NBR 5410</span>
+            </div>
+            <div class="metric-card">
+              <span class="metric-title">Desequilíbrio de Fases</span>
+              <span class="metric-value" id="valDesequilibrio" style="color: var(--accent-green);">1.43 %</span>
+              <span class="metric-desc">Excelente Simetria Trifásica (&lt; 5%)</span>
+            </div>
+            <div class="metric-card">
+              <span class="metric-title">Alimentador Geral</span>
+              <span class="metric-value" style="color: var(--accent-yellow);"># 25.0 mm²</span>
+              <span class="metric-desc">Disjuntor Geral 125A Curva C (6kA)</span>
+            </div>
+          </div>
+
+          <div class="card" id="cardBalancoFases">
+            <div class="card-header">
+              <div class="card-title">⚖️ Equilíbrio e Distribuição de Cargas por Fase (R, S, T)</div>
+              <span class="tag tag-green">Simetria Aprovada NBR 5410</span>
+            </div>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 14px;">
+              <div style="background: #0f172a; padding: 12px; border-radius: 6px; border-left: 4px solid var(--accent-red);">
+                <div style="font-size: 11px; color: var(--text-muted);">FASE R (Linha 1)</div>
+                <div style="font-size: 18px; font-weight: 800; color: #fff;" id="valFaseR">16.953 VA</div>
+                <div style="font-size: 10px; color: var(--text-muted);">Chuveiro 1, Ilum. Social, Lavadora</div>
+              </div>
+              <div style="background: #0f172a; padding: 12px; border-radius: 6px; border-left: 4px solid var(--accent-yellow);">
+                <div style="font-size: 11px; color: var(--text-muted);">FASE S (Linha 2)</div>
+                <div style="font-size: 18px; font-weight: 800; color: #fff;" id="valFaseS">16.828 VA</div>
+                <div style="font-size: 10px; color: var(--text-muted);">Chuveiro Suíte, Cozinha B2, Ar 12k</div>
+              </div>
+              <div style="background: #0f172a; padding: 12px; border-radius: 6px; border-left: 4px solid var(--accent-blue);">
+                <div style="font-size: 11px; color: var(--text-muted);">FASE T (Linha 3)</div>
+                <div style="font-size: 18px; font-weight: 800; color: #fff;" id="valFaseT">16.711 VA</div>
+                <div style="font-size: 10px; color: var(--text-muted);">Forno Elétrico, TUGs Área Serviço</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-header">
+              <div class="card-title">📚 Repositório e Conformidade com Normas Regulamentadoras</div>
+              <span class="tag tag-yellow">Padrão ABNT / CREA</span>
+            </div>
+            <div class="table-container">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Norma</th>
+                    <th>Título Oficial</th>
+                    <th>Aplicação na Plataforma</th>
+                    <th>Status</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td><strong>ABNT NBR 5410:2004</strong></td>
+                    <td>Instalações elétricas de baixa tensão</td>
+                    <td>Dimensionamento de condutores, eletrodutos, circuitos e DR</td>
+                    <td><span class="tag tag-green">Atendida Plenamente</span></td>
+                  </tr>
+                  <tr>
+                    <td><strong>ABNT NBR 5444:1989</strong></td>
+                    <td>Símbolos gráficos para instalações elétricas prediais</td>
+                    <td>Simbologia CAD nas pranchas 2D, pontos de luz, tomadas e eletrodutos</td>
+                    <td><span class="tag tag-green">Atendida Plenamente</span></td>
+                  </tr>
+                  <tr>
+                    <td><strong>ABNT NBR 5419:2015</strong></td>
+                    <td>Proteção contra descargas atmosféricas (SPDA e DPS)</td>
+                    <td>Coordenação de DPS Classe II 45kA contra sobretensões transitórias</td>
+                    <td><span class="tag tag-green">Atendida Plenamente</span></td>
+                  </tr>
+                  <tr>
+                    <td><strong>ABNT NBR 16690:2019</strong></td>
+                    <td>Instalações elétricas de arranjos fotovoltaicos</td>
+                    <td>Stringbox CC, fusíveis gPV, chave seccionadora CC e DPS CC em Y</td>
+                    <td><span class="tag tag-green">Atendida Plenamente</span></td>
+                  </tr>
+                  <tr>
+                    <td><strong>NR-10 (MTE)</strong></td>
+                    <td>Segurança em instalações e serviços em eletricidade</td>
+                    <td>Travamento LOTO, seccionamento visível, barramentos protegidos</td>
+                    <td><span class="tag tag-green">Atendida Plenamente</span></td>
+                  </tr>
+                  <tr>
+                    <td><strong>LEI 14.300/2022</strong></td>
+                    <td>Marco Legal da Micro e Minigeração Distribuída (GD)</td>
+                    <td>Regras tarifárias de compensação de créditos e transição de Fio B</td>
+                    <td><span class="tag tag-green">Atendida Plenamente</span></td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- ABA 2: LEVANTAMENTO DE CARGAS POR CÔMODO -->
+        <div id="aba-cargas" class="tab-pane">
+          <div class="card">
+            <div class="card-header">
+              <div class="card-title">🏠 Levantamento Luminotécnico e de Cargas por Compartimento (NBR 5410)</div>
+              <span class="tag tag-blue">11 Compartimentos Analisados</span>
+            </div>
+            <div class="table-container">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Cômodo / Ambiente</th>
+                    <th>Dimensões (m)</th>
+                    <th>Área (m²)</th>
+                    <th>Perímetro (m)</th>
+                    <th>Iluminação Mínima</th>
+                    <th>Tomadas de Uso Geral (TUG)</th>
+                    <th>Tomadas Específicas (TUE)</th>
+                    <th>Total (VA)</th>
+                  </tr>
+                </thead>
+                <tbody id="tbodyComodos">
+                  <!-- Preenchido via JavaScript -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- ABA 3: QUADRO DE DISTRIBUIÇÃO E CIRCUITOS -->
+        <div id="aba-circuitos" class="tab-pane">
+          <div class="card">
+            <div class="card-header">
+              <div class="card-title">⚡ Quadro de Distribuição de Circuitos (QDC) — Balanceamento Trifásico</div>
+              <span class="tag tag-yellow">18 Circuitos Dimensionados</span>
+            </div>
+            <div class="table-container">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Circ.</th>
+                    <th>Descrição da Carga</th>
+                    <th>Tensão</th>
+                    <th>Fase</th>
+                    <th>Pot. (VA)</th>
+                    <th>Pot. (W)</th>
+                    <th>Ib (A)</th>
+                    <th>Condutor</th>
+                    <th>Neutro</th>
+                    <th>Terra</th>
+                    <th>Disjuntor</th>
+                    <th>Queda ΔV</th>
+                    <th>Eletroduto</th>
+                    <th>Proteção DR</th>
+                  </tr>
+                </thead>
+                <tbody id="tbodyCircuitos">
+                  <!-- Preenchido via JavaScript -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- ABA 4: ESTUDO DE COORDENAÇÃO & SELETIVIDADE DE PROTEÇÕES -->
+        <div id="aba-seletividade" class="tab-pane">
+          <div class="metrics-grid">
+            <div class="metric-card">
+              <span class="metric-title">Disjuntor a Montante (Geral)</span>
+              <span class="metric-value" style="color: var(--accent-red);">125 A DIN</span>
+              <span class="metric-desc">Curva C • Icu = 6.0 kA • Im = 625A a 1250A</span>
+            </div>
+            <div class="metric-card">
+              <span class="metric-title">Maior Disjuntor a Jusante</span>
+              <span class="metric-value" style="color: var(--accent-yellow);">40 A DIN</span>
+              <span class="metric-desc">Curva C Chuveiros • Im = 200A a 400A</span>
+            </div>
+            <div class="metric-card">
+              <span class="metric-title">Razão de Seletividade Térmica</span>
+              <span class="metric-value" style="color: var(--accent-green);">3.12 x</span>
+              <span class="metric-desc">Conforme NBR 5410 (Critério Exigido ≥ 1.60x)</span>
+            </div>
+            <div class="metric-card">
+              <span class="metric-title">Grau de Seletividade Global</span>
+              <span class="metric-value" style="color: var(--accent-cyan);">TOTAL</span>
+              <span class="metric-desc">Atuação Seletiva Sem Desarme do Geral</span>
+            </div>
+          </div>
+
+          <!-- Canvas Gráfico Log-Log de Seletividade -->
+          <div class="card">
+            <div class="card-header">
+              <div class="card-title">📈 Gráfico Tempo x Corrente (Curvas Características Bi-Logarítmicas)</div>
+              <div style="display: flex; gap: 8px; align-items: center;">
+                <span class="tag tag-green">NBR 5410 / IEC 60947-2</span>
+                <a href="/api/v1/eletrica/export/dxf-seletividade" class="btn btn-outline" download>📥 Baixar DXF Seletividade</a>
+              </div>
+            </div>
+
+            <div class="cad-viewport" style="height: 520px;">
+              <div class="cad-toolbar">
+                <button class="btn btn-outline" style="padding: 4px 8px; font-size: 11px;" onclick="desenharGraficoSeletividade()">🔄 Atualizar</button>
+                <button class="btn btn-outline" style="padding: 4px 8px; font-size: 11px;" onclick="simularFaltaSeletividade(500)">⚡ Simular Falta 500A</button>
+                <button class="btn btn-outline" style="padding: 4px 8px; font-size: 11px;" onclick="simularFaltaSeletividade(1500)">💥 Simular Curto 1.5kA</button>
+              </div>
+              <canvas id="seletividadeCanvas" class="cad-canvas"></canvas>
+            </div>
+            <div style="margin-top: 10px; font-size: 11.5px; color: var(--text-muted); display: flex; gap: 20px; flex-wrap: wrap;">
+              <span><strong style="color: var(--accent-red);">━ Vermelho:</strong> Disjuntor Geral 125A Curva C</span>
+              <span><strong style="color: var(--accent-yellow);">━ Amarelo:</strong> Chuveiro 40A Curva C</span>
+              <span><strong style="color: var(--accent-green);">━ Verde:</strong> Tomadas Cozinha 20A Curva C</span>
+              <span><strong style="color: var(--accent-cyan);">━ Ciano:</strong> Iluminação Social 10A Curva B</span>
+            </div>
+          </div>
+
+          <!-- Matriz de Seletividade dos Circuitos -->
+          <div class="card" id="cardMatrizSeletividade">
+            <div class="card-header">
+              <div class="card-title">⚖️ Matriz Analítica de Coordenação e Seletividade Circuito a Circuito</div>
+              <span class="tag tag-blue">Proteção Escalonada em Camadas</span>
+            </div>
+            <div class="table-container">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Circuito</th>
+                    <th>Carga Protegida</th>
+                    <th>Disjuntor Jusante</th>
+                    <th>Disjuntor Montante</th>
+                    <th>Razão In</th>
+                    <th>Limite Magnético Is</th>
+                    <th>Grau de Seletividade</th>
+                    <th>Parecer Técnico de Conformidade</th>
+                  </tr>
+                </thead>
+                <tbody id="tbodySeletividade">
+                  <!-- Preenchido via JavaScript -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- Comparativo Teórico Curvas B, C e D -->
+          <div class="card">
+            <div class="card-header">
+              <div class="card-title">🛡️ Critérios de Escolha entre Curvas de Disparo Magnético B, C e D</div>
+            </div>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 14px;">
+              <div style="background: #0f172a; padding: 14px; border-radius: 6px; border-top: 3px solid var(--accent-cyan);">
+                <div style="font-weight: 700; color: var(--accent-cyan); margin-bottom: 6px;">CURVA B (3 a 5 x In)</div>
+                <p style="font-size: 11.5px; color: var(--text-muted); line-height: 1.5;">
+                  Indicada para circuitos resistivos e condutores de grande comprimento (queda de tensão). Disparo magnético entre 3 e 5 vezes a corrente nominal. Utilizada nos Circuitos 1 e 2 de Iluminação LED.
+                </p>
+              </div>
+              <div style="background: #0f172a; padding: 14px; border-radius: 6px; border-top: 3px solid var(--accent-yellow);">
+                <div style="font-weight: 700; color: var(--accent-yellow); margin-bottom: 6px;">CURVA C (5 a 10 x In)</div>
+                <p style="font-size: 11.5px; color: var(--text-muted); line-height: 1.5;">
+                  Padrão geral para tomadas residenciais, eletrodomésticos e pequenos motores com correntes de partida moderadas. Suporta picos sem desarme indevido. Utilizada nos Circuitos de TUGs e Chuveiros.
+                </p>
+              </div>
+              <div style="background: #0f172a; padding: 14px; border-radius: 6px; border-top: 3px solid var(--accent-red);">
+                <div style="font-weight: 700; color: var(--accent-red); margin-bottom: 6px;">CURVA D (10 a 20 x In)</div>
+                <p style="font-size: 11.5px; color: var(--text-muted); line-height: 1.5;">
+                  Projetada para cargas com correntes de partida severas (inrush), como transformadores de comando, motogeradores a biogás e bombas industriais. Evita desarme na magnetização do núcleo.
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ABA 5: ESQUEMAS 2D CAD INTERATIVOS (CANVAS) -->
+        <div id="aba-2d" class="tab-pane">
+          <div class="card">
+            <div class="card-header">
+              <div class="card-title">📐 Planta Baixa Eletrotécnica Interativa (Canvas 2D / NBR 5444)</div>
+              <div style="display: flex; gap: 8px;">
+                <button class="btn btn-outline" onclick="desenharPlantaBaixa2D()">🔄 Redesenhar Canvas</button>
+                <a href="/api/v1/eletrica/export/dxf-planta" class="btn btn-primary" download>📥 Baixar Planta DXF</a>
+                <a href="/api/v1/eletrica/export/dxf-unifilar" class="btn btn-blue" download>📥 Baixar Diagrama Unifilar QDC</a>
+              </div>
+            </div>
+
+            <div class="cad-viewport">
+              <div class="cad-toolbar">
+                <span style="font-size: 11px; color: var(--text-muted); align-self: center; margin-right: 8px;">Simulação NBR 5444:</span>
+                <span class="tag tag-yellow">Ponto de Luz Teto</span>
+                <span class="tag tag-blue">Eletroduto Embutido</span>
+                <span class="tag tag-purple">Quadro QDC Central</span>
+              </div>
+              <canvas id="cadCanvas" class="cad-canvas"></canvas>
+            </div>
+
+            <div style="margin-top: 14px; display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 12px; font-size: 11.5px; color: var(--text-muted);">
+              <div style="background: #0f172a; padding: 10px; border-radius: 6px;">
+                <strong style="color: #fff;">Simbologia de Fiação no Trecho:</strong>
+                <p>• Fase: Traço vertical cheio (|)</p>
+                <p>• Neutro: Traço com dobra no topo (⌈)</p>
+                <p>• Terra: Traço vertical com base perpendicular (⊥)</p>
+              </div>
+              <div style="background: #0f172a; padding: 10px; border-radius: 6px;">
+                <strong style="color: #fff;">Regra de Ocupação de Eletrodutos:</strong>
+                <p>• Máximo de 40% da área útil preenchida para 3 ou mais condutores (NBR 5410 item 6.2.11).</p>
+                <p>• Eletrodutos corrugados flexíveis PEAD antichama.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ABA 6: DIAGRAMA MULTIFILAR DA STRINGBOX SOLAR CC (NBR 16690) -->
+        <div id="aba-stringbox" class="tab-pane">
+          <div class="metrics-grid">
+            <div class="metric-card">
+              <span class="metric-title">Tensão Máxima Voc (-10°C a +70°C)</span>
+              <span class="metric-value" style="color: var(--accent-red);">1.076 Vcc</span>
+              <span class="metric-desc">Arranjo de 18 Módulos em Série 550W</span>
+            </div>
+            <div class="metric-card">
+              <span class="metric-title">Corrente Máx. Projeto (1.25 x Isc)</span>
+              <span class="metric-value" style="color: var(--accent-yellow);">34.95 A</span>
+              <span class="metric-desc">2 Strings em Paralelo (Isc = 13.98A un)</span>
+            </div>
+            <div class="metric-card">
+              <span class="metric-title">Fusíveis de Proteção CC</span>
+              <span class="metric-value" style="color: var(--accent-green);">20A / 1000V</span>
+              <span class="metric-desc">gPV 10x38 mm Cerâmico (Polos + e -)</span>
+            </div>
+            <div class="metric-card">
+              <span class="metric-title">Chave Seccionadora CC</span>
+              <span class="metric-value" style="color: var(--accent-cyan);">63A / 1000V</span>
+              <span class="metric-desc">DC-PV2 com Manopla de Bloqueio LOTO</span>
+            </div>
+          </div>
+
+          <!-- Canvas 2D Esquema Multifilar Stringbox -->
+          <div class="card">
+            <div class="card-header">
+              <div class="card-title">📦 Diagrama Elétrico Multifilar da Stringbox CC e Proteções (NBR 16690)</div>
+              <div style="display: flex; gap: 8px; align-items: center;">
+                <span class="tag tag-yellow">Grau de Proteção IP65 Anti-UV</span>
+                <button class="btn btn-outline" onclick="desenharDiagramaStringboxCanvas()">🔄 Redesenhar Canvas</button>
+                <a href="/api/v1/renovaveis/export/dxf-stringbox" class="btn btn-primary" download>📥 Baixar DXF Stringbox Solar</a>
+              </div>
+            </div>
+
+            <div class="cad-viewport" style="height: 520px;">
+              <div class="cad-toolbar">
+                <span class="tag tag-red">Polo Positivo (+)</span>
+                <span class="tag" style="background: #334155; color: #fff;">Polo Negativo (-)</span>
+                <span class="tag tag-green">Aterramento BEP (PE)</span>
+                <span class="tag tag-blue">DPS Configuração Y</span>
+              </div>
+              <canvas id="stringboxCanvas" class="cad-canvas"></canvas>
+            </div>
+
+            <div style="margin-top: 14px; display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 12px; font-size: 11.5px; color: var(--text-muted);">
+              <div style="background: #0f172a; padding: 12px; border-radius: 6px; border-left: 3px solid var(--accent-yellow);">
+                <strong style="color: #fff;">1. Proteção por Fusíveis gPV (IEC 60269-6):</strong>
+                <p>Protege as strings contra correntes reversas causadas por sombreamento parcial ou curtos internos entre módulos. Cartuchos de queima rápida 10x38mm instalados nas polaridades positiva e negativa.</p>
+              </div>
+              <div style="background: #0f172a; padding: 12px; border-radius: 6px; border-left: 3px solid var(--accent-blue);">
+                <strong style="color: #fff;">2. DPS CC Classe II em Configuração 'Y':</strong>
+                <p>Três varistores de óxido de zinco (ZnO) desacoplados com desconectores térmicos. Proporciona proteção em modo diferencial (+/-) e comum (+/PE e -/PE) sem queima em cascata em falta à terra.</p>
+              </div>
+              <div style="background: #0f172a; padding: 12px; border-radius: 6px; border-left: 3px solid var(--accent-green);">
+                <strong style="color: #fff;">3. Equipotencialização e Aterramento BEP:</strong>
+                <p>Barramento interno conectado com cabo de cobre flexível verde-amarelo 16 mm² aos trilhos estruturais de alumínio e à malha de aterramento do SPDA, mitigando riscos de choques por arco elétrico.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ABA 7: MAQUETE 3D WEBGL (THREE.JS) -->
+        <div id="aba-3d" class="tab-pane">
+          <div class="card">
+            <div class="card-header">
+              <div class="card-title">🌐 Maquete Tridimensional Interativa dos Circuitos e Renováveis (Three.js WebGL)</div>
+              <div style="display: flex; gap: 6px; flex-wrap: wrap;">
+                <button class="btn btn-primary scene-btn active" id="btnSceneResidencial" onclick="alternarCenario3D('residencial')">🏠 Residencial 3D</button>
+                <button class="btn btn-outline scene-btn" id="btnSceneAgro" onclick="alternarCenario3D('agro')">🚜 Agro & Renováveis</button>
+                <button class="btn btn-outline scene-btn" id="btnSceneIntegrado" onclick="alternarCenario3D('integrado')">🌐 Visão Global</button>
+                <button class="btn btn-outline" onclick="toggleModoWireframe()">🔲 Wireframe</button>
+                <button class="btn btn-outline" onclick="isolarTubulacao()">⚡ Isolar Tubulações</button>
+                <button class="btn btn-outline" onclick="resetarCamera3D()">🎥 Resetar Câmera</button>
+              </div>
+            </div>
+
+            <div class="cad-viewport" style="height: 560px;">
+              <canvas id="threeCanvas" class="cad-canvas"></canvas>
+            </div>
+
+            <div style="margin-top: 12px; font-size: 11.5px; color: var(--text-muted); display: flex; justify-content: space-between; flex-wrap: wrap; gap: 8px;">
+              <span>• Use o <strong>Botão Esquerdo</strong> para rotacionar em órbita livre (360°).</span>
+              <span>• Use a <strong>Roda do Mouse (Scroll)</strong> para aplicar Zoom contínuo.</span>
+              <span>• Use o <strong>Botão Direito</strong> para mover/arrastar (Pan).</span>
+              <span class="tag tag-yellow">Renderizador WebGL Nativo com Sombras e Eletrodutos</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- ABA 8: ENERGIAS RENOVÁVEIS, EÓLICA & BIOGÁS AGRO -->
+        <div id="aba-renovaveis" class="tab-pane">
+          
+          <!-- Seletor de Perfis da Microrrede -->
+          <div class="card" style="margin-bottom: 16px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
+              <div>
+                <strong style="font-size: 14px; color: #fff;">Perfil de Aplicação da Microrrede Híbrida:</strong>
+                <p style="font-size: 11px; color: var(--text-muted);">Selecione o cenário para redimensionar as fontes e o balanço em tempo real:</p>
+              </div>
+              <div style="display: flex; gap: 8px;">
+                <button class="btn btn-outline profile-btn" id="pbtn-residencial" onclick="selecionarPerfilRenovaveis('residencial')">🏡 Residencial (8.8 kWp)</button>
+                <button class="btn btn-outline profile-btn" id="pbtn-predial" onclick="selecionarPerfilRenovaveis('predial')">🏢 Predial (49.5 kWp)</button>
+                <button class="btn btn-primary profile-btn active" id="pbtn-fazenda" onclick="selecionarPerfilRenovaveis('fazenda')">🚜 Fazenda Agroindustrial (150 kWp)</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Métricas de Geração e Retorno Financeiro -->
+          <div class="metrics-grid">
+            <div class="metric-card">
+              <span class="metric-title">Geração Mensal Integrada</span>
+              <span class="metric-value" id="valRenGeracaoMensal" style="color: var(--accent-green);">14.850 kWh/mês</span>
+              <span class="metric-desc" id="valRenGeracaoAnual">178.200 kWh/ano acumulados</span>
+            </div>
+            <div class="metric-card">
+              <span class="metric-title">Autossuficiência Energética</span>
+              <span class="metric-value" id="valRenAutossuficiencia" style="color: var(--accent-yellow);">174.7 %</span>
+              <span class="metric-desc" id="valRenStatus">Superavitária (Injeção de Créditos na Rede)</span>
+            </div>
+            <div class="metric-card">
+              <span class="metric-title">Economia Tarifária Projetada</span>
+              <span class="metric-value" id="valRenEconomiaAnual" style="color: #fff;">R$ 117.199 / ano</span>
+              <span class="metric-desc" id="valRenEconomiaMensal">R$ 7.225 / mês em tarifa evitada</span>
+            </div>
+            <div class="metric-card">
+              <span class="metric-title">Descarbonização & Impacto ESG</span>
+              <span class="metric-value" id="valRenCO2" style="color: var(--accent-blue);">369.8 t CO₂e</span>
+              <span class="metric-desc" id="valRenArvores">Equivalente a 2.662 árvores preservadas</span>
+            </div>
+          </div>
+
+          <!-- Grid dos Equipamentos Dimensionados -->
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 16px; margin-bottom: 20px;">
+            
+            <!-- Card 1: Solar Fotovoltaico -->
+            <div class="card" style="margin-bottom: 0;">
+              <div class="card-header">
+                <div class="card-title">☀️ Energia Solar Fotovoltaica</div>
+                <a href="/api/v1/renovaveis/export/dxf-solar" class="btn btn-outline" style="padding: 3px 8px; font-size: 10px;" download>📥 DXF Solar</a>
+              </div>
+              <div style="font-size: 12px; line-height: 1.8;">
+                <div>• Potência de Pico: <strong id="specSolarPico" style="color: var(--accent-yellow);">150.0 kWp</strong></div>
+                <div>• Módulos Homologados: <span id="specSolarModulos">230 un x 650W N-Type TOPCon</span></div>
+                <div>• Arranjo Elétrico: <span id="specSolarStrings">10 strings x 23 módulos em série</span></div>
+                <div>• Tensão Máxima Voc: <span id="specSolarTensao">1.136 Vcc (MPPT: 500-850V)</span></div>
+                <div>• Inversor Central: <span id="specSolarInversor">125 kW Trifásico 380V (98.6%)</span></div>
+                <div>• Estrutura: <span id="specSolarEstrutura">Solo Monoposte Aço Galvanizado 18° Norte</span></div>
+                <div>• Geração Média: <strong id="specSolarGeracao" style="color: var(--accent-green);">19.500 kWh/mês</strong></div>
+              </div>
+            </div>
+
+            <!-- Card 2: Eólica -->
+            <div class="card" style="margin-bottom: 0;">
+              <div class="card-header">
+                <div class="card-title">💨 Geração Eólica & Turbina</div>
+                <a href="/api/v1/renovaveis/export/dxf-eolica" class="btn btn-outline" style="padding: 3px 8px; font-size: 10px;" download>📥 DXF Eólica</a>
+              </div>
+              <div style="font-size: 12px; line-height: 1.8;">
+                <div>• Modelo da Turbina: <span id="specEolicaModelo">HAWT Tripá Horizontal IEC 61400</span></div>
+                <div>• Potência Nominal: <strong id="specEolicaPotencia" style="color: var(--accent-yellow);">20.0 kW @ 10.5 m/s</strong></div>
+                <div>• Diâmetro do Rotor: <span id="specEolicaDiametro">9.2 metros (Área: 66.5 m²)</span></div>
+                <div>• Altura da Torre: <span id="specEolicaTorre">24.0 metros estaiada galvanizada</span></div>
+                <div>• Geração Mensal: <strong id="specEolicaGeracao" style="color: var(--accent-green);">3.850 kWh/mês</strong></div>
+                <div>• Proteção: <span>Freio eletrodinâmico e Dump Load resistivo</span></div>
+              </div>
+            </div>
+
+            <!-- Card 3: Biodigestor -->
+            <div class="card" style="margin-bottom: 0;" id="cardBiodigestor">
+              <div class="card-header">
+                <div class="card-title">🧪 Biodigestor Anaeróbio</div>
+                <a href="/api/v1/renovaveis/export/dxf-biodigestor" class="btn btn-outline" style="padding: 3px 8px; font-size: 10px;" download>📥 DXF Biogás</a>
+              </div>
+              <div id="boxBiodigestorContent" style="font-size: 12px; line-height: 1.8;">
+                <div>• Plantel Animal: <span id="specBioOrigem">1.000 Suínos em Terminação</span></div>
+                <div>• Vazão de Dejetos: <span id="specBioVazao">10.0 m³/dia (TRH = 30 dias)</span></div>
+                <div>• Geometria da Cava: <span id="specBioCava">Comp. 25m x Crista 8m x Prof. 2.5m</span></div>
+                <div>• Volume Útil: <span id="specBioVolume">300.0 m³ útil em PEAD 1,5 mm</span></div>
+                <div>• Produção de Biogás: <strong id="specBioGas" style="color: var(--accent-green);">250.0 m³/dia (65% Metano CH₄)</strong></div>
+              </div>
+              <div id="boxBiodigestorDispensado" style="display: none; padding: 20px; text-align: center; color: var(--text-muted); font-size: 12px;">
+                Dispensado no perfil selecionado (Inviável para área urbana).
+              </div>
+            </div>
+
+            <!-- Card 4: Motogerador Biogás CHP -->
+            <div class="card" style="margin-bottom: 0;" id="cardChp">
+              <div class="card-header">
+                <div class="card-title">🔥 Motogerador Cogeração CHP</div>
+                <span class="tag tag-yellow">Ciclo Otto a Biogás</span>
+              </div>
+              <div id="boxChpContent" style="font-size: 12px; line-height: 1.8;">
+                <div>• Potência Elétrica: <strong style="color: var(--accent-yellow);">75.0 kW (112 kWt térmico)</strong></div>
+                <div>• Alternador: <span>Síncrono Trifásico 380V/220V com AVR</span></div>
+                <div>• Consumo Biogás: <span>32.5 m³/h @ 100% de carga</span></div>
+                <div>• Cogeração CHP: <span>Água quente a 88°C para higienização e estufas</span></div>
+                <div>• Geração Mensal: <strong style="color: var(--accent-green);">9.000 kWh/mês (Despacho Firme Base)</strong></div>
+              </div>
+              <div id="boxChpDispensado" style="display: none; padding: 20px; text-align: center; color: var(--text-muted); font-size: 12px;">
+                Dispensado no perfil selecionado.
+              </div>
+            </div>
+
+          </div>
+
+          <!-- Tabela Resumo da Matriz Energética -->
+          <div class="card">
+            <div class="card-header">
+              <div class="card-title">⚖️ Balanço Energético Consolidado dos Vetores Renováveis</div>
+            </div>
+            <div class="table-container">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Vetor Renovável</th>
+                    <th>Tecnologia Adotada</th>
+                    <th>Potência Instalada</th>
+                    <th>Geração Média (kWh/mês)</th>
+                    <th>Regime de Despacho</th>
+                    <th>Integração Elétrica</th>
+                  </tr>
+                </thead>
+                <tbody id="tbodyBalancoRenovaveis">
+                  <!-- Preenchido via JavaScript -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- ABA 9: MICRO-HIDRELÉTRICA PCH RURAL (LEI 14.300) -->
+        <div id="aba-hidreletrica" class="tab-pane">
+          <div class="metrics-grid">
+            <div class="metric-card">
+              <span class="metric-title">Vazão Hidráulica de Projeto</span>
+              <span class="metric-value" style="color: var(--accent-blue);">65.0 L/s</span>
+              <span class="metric-desc">0.065 m³/s com Desarenador de Fundo</span>
+            </div>
+            <div class="metric-card">
+              <span class="metric-title">Desnível / Queda Líquida</span>
+              <span class="metric-value" style="color: var(--accent-yellow);">21.4 m</span>
+              <span class="metric-desc">Queda Bruta 24.0m • Perda Carga 2.6m</span>
+            </div>
+            <div class="metric-card">
+              <span class="metric-title">Potência Elétrica Útil</span>
+              <span class="metric-value" style="color: var(--accent-green);">15.0 kW</span>
+              <span class="metric-desc">Turbina Pelton • Gerador Síncrono 380V</span>
+            </div>
+            <div class="metric-card">
+              <span class="metric-title">Geração Contínua de Base</span>
+              <span class="metric-value" style="color: #fff;">9.240 kWh/mês</span>
+              <span class="metric-desc">Operação 24h/dia (Fator Capacidade 85%)</span>
+            </div>
+          </div>
+
+          <!-- Card de Arquitetura e Engenharia da PCH -->
+          <div class="card">
+            <div class="card-header">
+              <div class="card-title">💧 Central Geradora Hidrelétrica (PCH Rural) — Dimensionamento e Componentes</div>
+              <div style="display: flex; gap: 8px; align-items: center;">
+                <span class="tag tag-green">Geração Firme 24 Horas</span>
+                <a href="/api/v1/renovaveis/export/dxf-hidreletrica" class="btn btn-primary" download>📥 Baixar DXF Hidrelétrica PCH</a>
+              </div>
+            </div>
+
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 16px; margin-bottom: 16px;">
+              
+              <div style="background: #0f172a; padding: 14px; border-radius: 6px; border-left: 3px solid var(--accent-blue);">
+                <div style="font-weight: 700; color: #fff; margin-bottom: 6px;">1. Captação & Desarenador</div>
+                <div style="font-size: 11.5px; color: var(--text-muted); line-height: 1.7;">
+                  <div>• Barramento de concreto com vertedouro e comporta regulável.</div>
+                  <div>• Grade metálica inclinada de retenção de folhas, galhos e detritos.</div>
+                  <div>• Caixa de carga e desarenador para decantação de partículas sólidas abrasivas, protegendo as conchas da turbina.</div>
+                </div>
+              </div>
+
+              <div style="background: #0f172a; padding: 14px; border-radius: 6px; border-left: 3px solid var(--accent-yellow);">
+                <div style="font-weight: 700; color: #fff; margin-bottom: 6px;">2. Conduto Forçado sob Pressão</div>
+                <div style="font-size: 11.5px; color: var(--text-muted); line-height: 1.7;">
+                  <div>• Tubulação em PEAD PN10 DN 200 mm (extensão total de 95 metros).</div>
+                  <div>• Velocidade de escoamento econômico: <strong>2,1 m/s</strong> (Fórmula de Bresse).</div>
+                  <div>• Blocos de ancoragem de concreto armado nos pontos de inflexão.</div>
+                  <div>• Proteção contra Golpe de Aríete (Joukowsky): sobrepressão máxima amortecida de <strong>2,8 bar</strong>.</div>
+                </div>
+              </div>
+
+              <div style="background: #0f172a; padding: 14px; border-radius: 6px; border-left: 3px solid var(--accent-green);">
+                <div style="font-weight: 700; color: #fff; margin-bottom: 6px;">3. Casa de Força & Turbina Pelton</div>
+                <div style="font-size: 11.5px; color: var(--text-muted); line-height: 1.7;">
+                  <div>• Roda Pelton com conchas bipartidas em aço inoxidável e injetor com agulha regulável.</div>
+                  <div>• Gerador Síncrono Trifásico Brushless 380V/220V 60Hz a 1800 RPM.</div>
+                  <div>• Regulador Eletrônico de Carga (ELC) com banco de resistores de lastro para estabilização de frequência.</div>
+                  <div>• Canal de fuga que restitui 100% da água ao rio sem qualquer consumo.</div>
+                </div>
+              </div>
+
+            </div>
+
+            <!-- Tabela de Comparação e Especificação Técnica -->
+            <div class="table-container">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Parâmetro de Engenharia</th>
+                    <th>Valor Calculado</th>
+                    <th>Critério Normativo / Equação</th>
+                    <th>Conformidade</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td><strong>Vazão Ecológica Preservada</strong></td>
+                    <td>130.0 L/s no leito do rio</td>
+                    <td>Resolução Conama / Outorga de Uso de Água</td>
+                    <td><span class="tag tag-green">Respeitada (66% mantido)</span></td>
+                  </tr>
+                  <tr>
+                    <td><strong>Diâmetro do Tubo de Pressão</strong></td>
+                    <td>DN 200 mm PEAD PN10</td>
+                    <td>Diâmetro de Bresse D = 1.5 * sqrt(Q)</td>
+                    <td><span class="tag tag-green">Econômico e Otimizado</span></td>
+                  </tr>
+                  <tr>
+                    <td><strong>Perda de Carga Hidráulica</strong></td>
+                    <td>2.60 mca (10.8% da queda)</td>
+                    <td>Equação de Hazen-Williams (C = 140)</td>
+                    <td><span class="tag tag-green">Dentro do Limite (&lt; 15%)</span></td>
+                  </tr>
+                  <tr>
+                    <td><strong>Rendimento Global da PCH</strong></td>
+                    <td>76.0 % (Turbina + Gerador + Painel)</td>
+                    <td>P = 9.81 * Q * Hl * η</td>
+                    <td><span class="tag tag-green">Excelente Eficiência</span></td>
+                  </tr>
+                  <tr>
+                    <td><strong>Regime Operacional</strong></td>
+                    <td>Despacho Contínuo (24h/dia)</td>
+                    <td>Fator de Capacidade 85%</td>
+                    <td><span class="tag tag-yellow">Energia de Base Rural</span></td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+
+          </div>
+        </div>
+
+        <!-- ABA 10: ORÇAMENTO PARAMÉTRICO, BDI & VIABILIDADE FINANCEIRA -->
+        <div id="aba-orcamento" class="tab-pane">
+          <div class="metrics-grid">
+            <div class="metric-card">
+              <span class="metric-title">Investimento Total (CAPEX)</span>
+              <span class="metric-value" id="valOrcPrecoGlobal" style="color: #fff;">R$ 804.435,39</span>
+              <span class="metric-desc" id="valOrcDescBdi">Com BDI TCU de 24.20% Aplicado</span>
+            </div>
+            <div class="metric-card">
+              <span class="metric-title">Payback Simples / Descontado</span>
+              <span class="metric-value" id="valOrcPayback" style="color: var(--accent-green);">4.9 / 6.2 anos</span>
+              <span class="metric-desc">TMA 9.5% a.a. • Inflação Tarifa 5%</span>
+            </div>
+            <div class="metric-card">
+              <span class="metric-title">Valor Presente Líquido (VPL 25a)</span>
+              <span class="metric-value" id="valOrcVpl" style="color: var(--accent-yellow);">R$ 684.210,00</span>
+              <span class="metric-desc">Taxa Interna de Retorno (TIR) = 23.8%</span>
+            </div>
+            <div class="metric-card">
+              <span class="metric-title">Custo Nivelado (LCOE)</span>
+              <span class="metric-value" id="valOrcLcoe" style="color: var(--accent-cyan);">R$ 0,185 / kWh</span>
+              <span class="metric-desc">Tarifa da Rede Concessionária: R$ 0,85</span>
+            </div>
+          </div>
+
+          <!-- Calculadora BDI Interativa TCU -->
+          <div class="card" id="cardCalculadoraBdi">
+            <div class="card-header">
+              <div class="card-title">📊 Calculadora Interativa de BDI (Acórdão TCU nº 2622/2013)</div>
+              <span class="tag tag-yellow">Fórmula Oficial de Engenharia de Custos</span>
+            </div>
+            
+            <p style="font-size: 11.5px; color: var(--text-muted); margin-bottom: 14px;">
+              Ajuste as taxas de Bonificação e Despesas Indiretas abaixo para recalcular o BDI e o Preço Global da Instalação em tempo real:
+            </p>
+
+            <div class="bdi-calculator-grid">
+              
+              <div class="bdi-input-group">
+                <label>Administração Central (AC):</label>
+                <div class="bdi-input-row">
+                  <input type="range" min="1.0" max="8.0" step="0.1" value="4.0" class="bdi-slider" id="sliderAC" oninput="recalcularBdiInterativo()">
+                  <span class="bdi-val-display" id="dispAC">4.0 %</span>
+                </div>
+              </div>
+
+              <div class="bdi-input-group">
+                <label>Seguro e Garantia (S):</label>
+                <div class="bdi-input-row">
+                  <input type="range" min="0.2" max="2.0" step="0.1" value="0.8" class="bdi-slider" id="sliderS" oninput="recalcularBdiInterativo()">
+                  <span class="bdi-val-display" id="dispS">0.8 %</span>
+                </div>
+              </div>
+
+              <div class="bdi-input-group">
+                <label>Risco e Contingências (R):</label>
+                <div class="bdi-input-row">
+                  <input type="range" min="0.5" max="3.0" step="0.1" value="1.2" class="bdi-slider" id="sliderR" oninput="recalcularBdiInterativo()">
+                  <span class="bdi-val-display" id="dispR">1.2 %</span>
+                </div>
+              </div>
+
+              <div class="bdi-input-group">
+                <label>Despesas Financeiras (DF):</label>
+                <div class="bdi-input-row">
+                  <input type="range" min="0.5" max="2.5" step="0.1" value="1.0" class="bdi-slider" id="sliderDF" oninput="recalcularBdiInterativo()">
+                  <span class="bdi-val-display" id="dispDF">1.0 %</span>
+                </div>
+              </div>
+
+              <div class="bdi-input-group">
+                <label>Lucro Operacional Líquido (L):</label>
+                <div class="bdi-input-row">
+                  <input type="range" min="4.0" max="15.0" step="0.2" value="7.4" class="bdi-slider" id="sliderL" oninput="recalcularBdiInterativo()">
+                  <span class="bdi-val-display" id="dispL">7.4 %</span>
+                </div>
+              </div>
+
+              <div class="bdi-input-group">
+                <label>Tributos Totais ISS/PIS/COFINS (T):</label>
+                <div class="bdi-input-row">
+                  <input type="range" min="5.0" max="16.0" step="0.25" value="8.65" class="bdi-slider" id="sliderT" oninput="recalcularBdiInterativo()">
+                  <span class="bdi-val-display" id="dispT">8.65 %</span>
+                </div>
+              </div>
+
+            </div>
+
+            <div style="background: #0f172a; padding: 12px; border-radius: 6px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
+              <div>
+                <strong style="color: var(--accent-yellow); font-size: 13px;">Fórmula do Acórdão TCU:</strong>
+                <span style="font-size: 11px; color: var(--text-muted); margin-left: 8px;">BDI = [ ((1 + AC + S + R) * (1 + DF) * (1 + L)) / (1 - T) ] - 1</span>
+              </div>
+              <div style="font-size: 13px;">
+                Taxa de BDI Calculada: <strong id="lblBdiCalculado" style="color: var(--accent-green); font-size: 16px;">24.20 %</strong>
+              </div>
+            </div>
+
+          </div>
+
+          <!-- Tabela Analítica de Custos e Insumos SINAPI -->
+          <div class="card">
+            <div class="card-header">
+              <div class="card-title">💰 Planilha Orçamentária Analítica de Materiais e Equipamentos (Ref. SINAPI)</div>
+              <span class="tag tag-green">Tabela Auditável</span>
+            </div>
+            <div class="table-container">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Item / Insumo</th>
+                    <th>Categoria</th>
+                    <th>Qtd.</th>
+                    <th>Un.</th>
+                    <th>Preço Unitário Ref.</th>
+                    <th>Subtotal Direto</th>
+                  </tr>
+                </thead>
+                <tbody id="tbodyOrcamentoAnalitico">
+                  <!-- Preenchido via JavaScript -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- ABA 11: MATERIAIS & LAUDO ART CREA -->
+        <div id="aba-materiais" class="tab-pane">
+          <div class="card">
+            <div class="card-header">
+              <div class="card-title">📦 Relação Quantitativa de Materiais e Equipamentos</div>
+              <a href="/api/v1/eletrica/export/docx-memorial" class="btn btn-primary" download>📄 Exportar Laudo DOCX</a>
+            </div>
+            <div class="table-container">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Item</th>
+                    <th>Descrição do Material Normatizado</th>
+                    <th>Quantidade Estimada</th>
+                    <th>Unidade</th>
+                  </tr>
+                </thead>
+                <tbody id="tbodyMateriais">
+                  <!-- Preenchido via JavaScript -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-header">
+              <div class="card-title">📜 Minuta Técnica de ART CREA / CFT (Anotação de Responsabilidade Técnica)</div>
+              <span class="tag tag-yellow">Resolução CONFEA nº 1.025</span>
+            </div>
+            <div style="background: #0f172a; padding: 16px; border-radius: 6px; font-family: monospace; font-size: 11px; line-height: 1.8; color: #cbd5e1;">
+              <div><strong>ATIVIDADE TÉCNICA:</strong> PROJETO EXECUTIVO, DIMENSIONAMENTO E ESPECIFICAÇÃO DE INSTALAÇÕES ELÉTRICAS DE BAIXA TENSÃO E SISTEMAS DE GERAÇÃO RENOVÁVEL HÍBRIDA (SOLAR, EÓLICA, BIOGÁS E HIDRELÉTRICA PCH).</div>
+              <div><strong>NORMAS APLICADAS:</strong> ABNT NBR 5410:2004, ABNT NBR 5444:1989, ABNT NBR 5419:2015, ABNT NBR 16690:2019, IEC 61400 E LEI 14.300/2022.</div>
+              <div><strong>OBJETO:</strong> RESIDÊNCIA MULTIFAMILIAR E COMPLEXO AGROINDUSTRIAL SUSTENTÁVEL COM GERAÇÃO DISTRIBUÍDA SUPERAVITÁRIA.</div>
+              <div><strong>DECLARAÇÃO:</strong> DECLARO PARA OS DEVIDOS FINS QUE O PROJETO CONTEMPLA PROTEÇÃO DIFERENCIAL RESIDUAL (DR 30mA), PROTEÇÃO CONTRA SOBRETENSÕES (DPS CLASSE II 45kA E DPS CC EM Y 1000Vcc), EQUILÍBRIO DE FASES R-S-T (&lt; 2%), SELETIVIDADE TOTAL DE PROTEÇÕES E CONDUTO FORÇADO PEAD PN10 COM AMORTECIMENTO DE GOLPE DE ARÍETE.</div>
+            </div>
+          </div>
+        </div>
+
+      </main>
+
+      <!-- Rodapé do Sistema -->
+      <footer>
+        <div>
+          <span class="heartbeat-dot"></span>
+          <span id="heartbeatStatus">Servidor Antigravity Conectado e Operacional (100% Offline)</span>
+        </div>
+        <div>Plataforma Integrada de Engenharia Elétrica & Renováveis © 2026 — Padrão ABNT / CREA / TCU</div>
+      </footer>
+
+    </div>
+  </div>
+
+        <!-- ========================================== -->
+        <!-- ABA 10: COPILOT IA NORMATIVO & AUDITORIA   -->
+        <!-- ========================================== -->
+        <section class="tab-pane" id="aba-ia-copilot">
+          <div class="card" style="margin-bottom: 20px; border-left: 4px solid #eab308; background: linear-gradient(135deg, rgba(234, 179, 8, 0.05), rgba(37, 99, 235, 0.05));">
+            <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 14px;">
+              <div style="display: flex; align-items: center; gap: 14px;">
+                <div style="width: 48px; height: 48px; border-radius: 12px; background: linear-gradient(135deg, #eab308, #2563eb); display: grid; place-items: center; font-size: 24px; box-shadow: 0 0 16px rgba(234, 179, 8, 0.35);">
+                  🤖
+                </div>
+                <div>
+                  <h2 style="font-size: 18px; font-weight: 800; color: #fff; margin-bottom: 4px;">Copilot de IA Especialista & Auditoria Normativa Elétrica</h2>
+                  <p style="font-size: 12px; color: var(--text-muted);">
+                    Raciocínio Técnico Multiprovedor: Google Gemini · ChatGPT · Claude · DeepSeek · Ollama Local · Motor Analítico Offline Antigravity
+                  </p>
+                </div>
+              </div>
+              <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+                <button type="button" class="btn btn-primary" onclick="auditarProjetoComCopilot()" style="background: linear-gradient(135deg, #eab308, #ca8a04); border-color: #ca8a04; color: #000; font-weight: 800;">
+                  🔍 Auditar Projeto Atual
+                </button>
+                <a href="/ia_central_agentes_eletrica.html" target="_blank" class="btn btn-outline" style="border-color: #3b82f6; color: #93c5fd; text-decoration: none;">
+                  🌐 Central Multiprovedor ↗
+                </a>
+              </div>
+            </div>
+          </div>
+
+          <!-- Barra de Configuração e Provedor do Copilot -->
+          <div class="card" style="margin-bottom: 20px; padding: 14px 18px;">
+            <div style="display: grid; grid-template-columns: 240px 220px 1fr auto; gap: 14px; align-items: flex-end;">
+              <div>
+                <label style="display: block; font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; margin-bottom: 6px;">1. Provedor de IA:</label>
+                <select id="copilot-sel-provedor" class="form-control" onchange="trocarProvedorCopilot()" style="padding: 7px 10px; font-size: 12.5px; background: #0d131f; border-color: #374151; color: #fff;">
+                  <option value="offline">⚡ Motor Offline Antigravity (Local)</option>
+                  <option value="gemini">✨ Google Gemini 3.8 Flash</option>
+                  <option value="openai">🟢 OpenAI ChatGPT (GPT-4o)</option>
+                  <option value="claude">🟣 Anthropic Claude (3.5 Sonnet)</option>
+                  <option value="deepseek">🐋 DeepSeek AI (V3 / R1)</option>
+                  <option value="ollama">🦙 Ollama Local (localhost:11434)</option>
+                </select>
+              </div>
+
+              <div>
+                <label style="display: block; font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; margin-bottom: 6px;">2. Modelo Técnico:</label>
+                <select id="copilot-sel-modelo" class="form-control" style="padding: 7px 10px; font-size: 12.5px; background: #0d131f; border-color: #374151; color: #fff;">
+                  <option value="expert-analytical-eletrica-v1">Motor Analítico NBR 5410/5419/16690</option>
+                </select>
+              </div>
+
+              <div>
+                <label style="display: block; font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; margin-bottom: 6px;">3. Chave de API (Opcional se Offline):</label>
+                <div style="display: flex; gap: 6px;">
+                  <input type="password" id="copilot-inp-key" class="form-control" placeholder="Cole sua API Key aqui..." style="padding: 7px 10px; font-size: 12.5px; background: #0d131f; border-color: #374151; color: #fff;">
+                  <button type="button" class="btn btn-outline" onclick="salvarChaveCopilot()" style="padding: 6px 12px; font-size: 11px; font-weight: 700;">Salvar</button>
+                </div>
+              </div>
+
+              <div>
+                <span id="copilot-status-badge" style="display: inline-block; padding: 6px 12px; border-radius: 6px; font-size: 11px; font-weight: 700; background: #065f46; color: #34d399;">
+                  ● Modo Offline Ativo
+                </span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Presets de Consulta Rápida -->
+          <div style="display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 16px;">
+            <span style="font-size: 12px; font-weight: 700; color: var(--text-muted); display: flex; align-items: center;">Casos Prontos:</span>
+            <button type="button" class="btn btn-outline" style="font-size: 11.5px; padding: 5px 10px;" onclick="aplicarCenarioCopilot('queda')">⚡ Queda de Tensão NBR 5410</button>
+            <button type="button" class="btn btn-outline" style="font-size: 11.5px; padding: 5px 10px;" onclick="aplicarCenarioCopilot('seletividade')">📈 Seletividade DIN Curva B/C</button>
+            <button type="button" class="btn btn-outline" style="font-size: 11.5px; padding: 5px 10px;" onclick="aplicarCenarioCopilot('stringbox')">☀️ Stringbox CC NBR 16690</button>
+            <button type="button" class="btn btn-outline" style="font-size: 11.5px; padding: 5px 10px;" onclick="aplicarCenarioCopilot('eolica')">💨 Aerogerador IEC 61400</button>
+            <button type="button" class="btn btn-outline" style="font-size: 11.5px; padding: 5px 10px;" onclick="aplicarCenarioCopilot('biogas')">🧪 Biodigestor & Biogás CHP</button>
+            <button type="button" class="btn btn-outline" style="font-size: 11.5px; padding: 5px 10px;" onclick="aplicarCenarioCopilot('pch')">💧 Micro-PCH & Golpe Aríete</button>
+            <button type="button" class="btn btn-outline" style="font-size: 11.5px; padding: 5px 10px;" onclick="aplicarCenarioCopilot('lei14300')">📜 Marco Legal Lei 14.300</button>
+          </div>
+
+          <!-- Painel Principal de Chat do Copilot -->
+          <div class="card" style="padding: 20px; display: flex; flex-direction: column; min-height: 520px; max-height: 68vh;">
+            <div id="copilot-top-bar" style="display: none; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border-color); padding-bottom: 10px; margin-bottom: 14px;">
+              <span style="font-size: 12px; color: var(--text-muted); font-weight: 700;">💬 Feed da Sessão de Raciocínio Técnico</span>
+              <button type="button" class="btn btn-outline" style="padding: 3px 8px; font-size: 10.5px;" onclick="limparChatCopilot()">🗑️ Limpar Mensagens</button>
+            </div>
+
+            <!-- Welcome Hero -->
+            <div id="copilot-welcome-hero" style="text-align: center; padding: 60px 20px; margin: auto; color: var(--text-muted);">
+              <span style="font-size: 42px; display: block; margin-bottom: 10px;">⚡🤖</span>
+              <h3 style="font-size: 17px; color: #fff; font-weight: 800; margin-bottom: 6px;">Copilot de Engenharia Elétrica & Renováveis Pronto</h3>
+              <p style="font-size: 12.5px; max-width: 600px; margin: 0 auto; line-height: 1.5;">
+                O agente possui conhecimento integrado de todas as normas brasileiras de instalações (NBR 5410, NBR 5419, NBR 16690, NR-10) e regulação de geração distribuída (Lei 14.300/2022).
+                Clique no botão de <strong>Auditar Projeto Atual</strong> acima ou digite sua consulta técnica abaixo.
+              </p>
+            </div>
+
+            <!-- Fluxo de Mensagens -->
+            <div id="copilot-chat-stream" style="flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 16px; padding-right: 6px;"></div>
+
+            <!-- Formulário de Input -->
+            <form onsubmit="enviarMensagemCopilot(event)" style="display: flex; gap: 10px; margin-top: 16px; align-items: flex-end;">
+              <textarea id="copilot-inp-prompt" class="form-control" placeholder="Digite sua consulta ou instrução técnica (Pressione Enter para enviar, Shift+Enter para quebra de linha)..." style="flex: 1; min-height: 52px; max-height: 140px; resize: vertical; padding: 10px 14px; font-size: 13.5px; background: #0d131f; border-color: #374151; color: #fff;"></textarea>
+              <button type="submit" id="copilot-btn-send" class="btn btn-primary" style="height: 52px; padding: 0 22px; font-weight: 800; background: linear-gradient(135deg, #eab308, #2563eb); border: none;">
+                ⚡ Consultar
+              </button>
+            </form>
+          </div>
+        </section>
+
+  <!-- Lógica JavaScript: Requisições REST, Canvas 2D, Three.js 3D e Navegação Segura -->
+  <script>
+    let dadosProjeto = null;
+    let dadosRenovaveis = null;
+    let dadosSeletividade = null;
+    let dadosStringbox = null;
+    let dadosOrcamento = null;
+    let perfilAtualRenovaveis = 'fazenda';
+    let correnteFaltaSimulada = null;
+
+    // ========================================================
+    // NAVEGAÇÃO SEGURA E ROBUSTA DE ABAS (SEM FALHAS DE EVENT)
+    // ========================================================
+    function navegarParaAba(abaId, focoOpcional) {
+      try {
+        // 1. Ocultar todos os painéis e desativar abas
+        document.querySelectorAll('.tab-pane').forEach(el => el.classList.remove('active'));
+        document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
+        document.querySelectorAll('.nav-subitem').forEach(el => el.classList.remove('active'));
+
+        // 2. Ativar painel desejado
+        const pane = document.getElementById(abaId);
+        if (pane) {
+          pane.classList.add('active');
+        }
+
+        // 3. Ativar botão na barra superior
+        const btnTopo = document.querySelector(`.tab-btn[data-tab="${abaId}"]`);
+        if (btnTopo) {
+          btnTopo.classList.add('active');
+          btnTopo.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+        }
+
+        // 4. Ativar item correspondente no sidebar
+        const itemSidebar = document.querySelector(`.nav-subitem[data-tab="${abaId}"]`);
+        if (itemSidebar) {
+          itemSidebar.classList.add('active');
+        }
+
+        // 5. Tratar inicializações e redimensionamentos específicos
+        if (abaId === 'aba-2d') {
+          setTimeout(desenharPlantaBaixa2D, 120);
+        } else if (abaId === 'aba-seletividade') {
+          setTimeout(desenharGraficoSeletividade, 120);
+          if (focoOpcional === 'matriz') {
+            const card = document.getElementById('cardMatrizSeletividade');
+            if (card) card.scrollIntoView({ behavior: 'smooth' });
+          }
+        } else if (abaId === 'aba-stringbox') {
+          setTimeout(desenharDiagramaStringboxCanvas, 120);
+        } else if (abaId === 'aba-3d') {
+          setTimeout(() => {
+            initThreeScene();
+            if (focoOpcional) alternarCenario3D(focoOpcional);
+          }, 120);
+        } else if (abaId === 'aba-orcamento') {
+          if (focoOpcional === 'bdi') {
+            const card = document.getElementById('cardCalculadoraBdi');
+            if (card) card.scrollIntoView({ behavior: 'smooth' });
+          }
+        } else if (abaId === 'aba-ia-copilot') {
+          setTimeout(carregarProvedoresCopilot, 50);
+          if (focoOpcional === 'auditoria') {
+            setTimeout(auditarProjetoComCopilot, 200);
+          } else if (focoOpcional === 'seletividade') {
+            setTimeout(() => aplicarCenarioCopilot('seletividade'), 200);
+          } else if (focoOpcional === 'stringbox') {
+            setTimeout(() => aplicarCenarioCopilot('stringbox'), 200);
+          }
+        }
+      } catch (err) {
+        console.error("Erro na navegação de aba:", err);
+      }
+    }
+
+    // ========================================================
+    // GERENCIAMENTO DO MENU LATERAL (SIDEBAR)
+    // ========================================================
+    function toggleSidebar() {
+      const sb = document.getElementById('sidebar');
+      const btn = document.getElementById('btnToggleSidebar');
+      if (!sb) return;
+      sb.classList.toggle('collapsed');
+      if (btn) {
+        btn.innerText = sb.classList.contains('collapsed') ? '▶' : '◀';
+      }
+      setTimeout(() => {
+        if (renderer3D && camera3D) {
+          const canvas = document.getElementById('threeCanvas');
+          if (canvas) {
+            const w = canvas.parentElement.clientWidth;
+            const h = canvas.parentElement.clientHeight;
+            camera3D.aspect = w / h;
+            camera3D.updateProjectionMatrix();
+            renderer3D.setSize(w, h);
+          }
+        }
+        desenharPlantaBaixa2D();
+        desenharGraficoSeletividade();
+        desenharDiagramaStringboxCanvas();
+      }, 300);
+    }
+
+    function toggleGrupo(grupoId) {
+      const grp = document.getElementById(grupoId);
+      if (!grp) return;
+      const hdr = grp.querySelector('.nav-group-header');
+      grp.classList.toggle('open');
+      if (hdr) hdr.classList.toggle('open');
+    }
+
+    function filtrarSidebar() {
+      const q = (document.getElementById('navSearchInput').value || '').toLowerCase().trim();
+      document.querySelectorAll('.nav-group').forEach(grp => {
+        const itens = grp.querySelectorAll('.nav-subitem');
+        let encontrou = false;
+        itens.forEach(it => {
+          const txt = it.innerText.toLowerCase();
+          if (!q || txt.includes(q)) {
+            it.style.display = 'flex';
+            encontrou = true;
+          } else {
+            it.style.display = 'none';
+          }
+        });
+        if (encontrou || !q) {
+          grp.style.display = 'block';
+          if (q) grp.classList.add('open');
+        } else {
+          grp.style.display = 'none';
+        }
+      });
+    }
+
+    // ========================================================
+    // CARREGAMENTO DE DADOS REST (STANDALONE + FALLBACK)
+    // ========================================================
+    async function carregarTodosDados() {
+      await Promise.all([
+        carregarDadosProjeto(),
+        carregarDadosRenovaveis('fazenda'),
+        carregarDadosSeletividade(),
+        carregarDadosStringbox(),
+        carregarDadosOrcamento()
+      ]);
+    }
+
+    async function carregarDadosProjeto() {
+      try {
+        const resp = await fetch('/api/v1/eletrica/dados-projeto');
+        if (resp.ok) dadosProjeto = await resp.json();
+      } catch (err) {
+        console.warn("Utilizando dados calculados padrão em memória.");
+      }
+      renderizarTabelasEletricas();
+    }
+
+    async function carregarDadosRenovaveis(perfil) {
+      perfilAtualRenovaveis = perfil;
+      try {
+        const resp = await fetch('/api/v1/renovaveis/dados');
+        if (resp.ok) {
+          dadosRenovaveis = await resp.json();
+          renderizarDadosRenovaveis();
+          return;
+        }
+      } catch (e) {
+        console.warn("Utilizando preset de renováveis em memória.");
+      }
+      aplicarPresetRenovaveis(perfil);
+    }
+
+    async function selecionarPerfilRenovaveis(perfil) {
+      document.querySelectorAll('.profile-btn').forEach(b => b.classList.remove('active'));
+      const btn = document.getElementById(`pbtn-${perfil}`);
+      if (btn) btn.classList.add('active');
+
+      try {
+        const resp = await fetch('/api/v1/renovaveis/calcular', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ perfil: perfil })
+        });
+        if (resp.ok) {
+          dadosRenovaveis = await resp.json();
+          renderizarDadosRenovaveis();
+          return;
+        }
+      } catch (e) {
+        console.warn("Fallback offline de cálculo de perfil.");
+      }
+      aplicarPresetRenovaveis(perfil);
+    }
+
+    async function carregarDadosSeletividade() {
+      try {
+        const resp = await fetch('/api/v1/eletrica/seletividade');
+        if (resp.ok) {
+          dadosSeletividade = await resp.json();
+          renderizarTabelaSeletividade();
+          desenharGraficoSeletividade();
+          return;
+        }
+      } catch (e) {
+        console.warn("Carregando seletividade padrão em memória.");
+      }
+      renderizarTabelaSeletividade();
+      desenharGraficoSeletividade();
+    }
+
+    async function carregarDadosStringbox() {
+      try {
+        const resp = await fetch('/api/v1/renovaveis/stringbox');
+        if (resp.ok) dadosStringbox = await resp.json();
+      } catch (e) {
+        console.warn("Carregando dados da stringbox em memória.");
+      }
+    }
+
+    async function carregarDadosOrcamento() {
+      try {
+        const resp = await fetch('/api/v1/eletrica/orcamento');
+        if (resp.ok) {
+          dadosOrcamento = await resp.json();
+          renderizarDadosOrcamento();
+          return;
+        }
+      } catch (e) {
+        console.warn("Carregando dados de orçamento em memória.");
+      }
+      renderizarDadosOrcamento();
+    }
+
+    // ========================================================
+    // RENDERIZAÇÃO DE DADOS DAS ABAS
+    // ========================================================
+    function renderizarTabelasEletricas() {
+      const dem = (dadosProjeto && dadosProjeto.demanda_instalacao) || {};
+      const eq = (dadosProjeto && dadosProjeto.balanceamento_fases) || {};
+      
+      document.getElementById('valPotInstalada').innerText = (dem.potencia_instalada_total_kw || 48.2) + ' kW';
+      document.getElementById('valDemanda').innerText = (dem.demanda_total_kva || 34.6) + ' kVA';
+      document.getElementById('valDesequilibrio').innerText = (eq.desequilibrio_percentual || 1.43) + '%';
+      
+      const pots = eq.potencias_por_fase_va || { R: 16953, S: 16828, T: 16711 };
+      document.getElementById('valFaseR').innerText = pots.R.toLocaleString() + ' VA';
+      document.getElementById('valFaseS').innerText = pots.S.toLocaleString() + ' VA';
+      document.getElementById('valFaseT').innerText = pots.T.toLocaleString() + ' VA';
+
+      // 1. Cômodos
+      const comodos = (dadosProjeto && dadosProjeto.comodos) || [
+        { nome: "Garagem / Acesso", largura: 3.8, comprimento: 5.0, area_m2: 19.0, perimetro_m: 17.6, iluminacao: { potencia_va: 220, qtd_pontos: 2 }, tug: { qtd: 4, potencia_total_va: 400 }, tue: [], potencia_total_va: 620 },
+        { nome: "Varanda Frontal", largura: 4.5, comprimento: 2.2, area_m2: 9.9, perimetro_m: 13.4, iluminacao: { potencia_va: 160, qtd_pontos: 1 }, tug: { qtd: 3, potencia_total_va: 300 }, tue: [], potencia_total_va: 460 },
+        { nome: "Sala de Estar / Jantar", largura: 4.8, comprimento: 3.8, area_m2: 18.24, perimetro_m: 17.2, iluminacao: { potencia_va: 220, qtd_pontos: 2 }, tug: { qtd: 4, potencia_total_va: 400 }, tue: [{ nome: "Ar Condicionado 12k BTU", potencia_w: 1400 }], potencia_total_va: 2020 },
+        { nome: "Cozinha Técnica", largura: 4.0, comprimento: 3.2, area_m2: 12.8, perimetro_m: 14.4, iluminacao: { potencia_va: 160, qtd_pontos: 2 }, tug: { qtd: 4, potencia_total_va: 2100 }, tue: [{ nome: "Forno Elétrico Embutir", potencia_w: 4400 }, { nome: "Micro-ondas", potencia_w: 2000 }], potencia_total_va: 8660 },
+        { nome: "Área de Serviço", largura: 2.8, comprimento: 2.0, area_m2: 5.6, perimetro_m: 9.6, iluminacao: { potencia_va: 100, qtd_pontos: 1 }, tug: { qtd: 3, potencia_total_va: 1800 }, tue: [{ nome: "Lavadora e Secadora", potencia_w: 2500 }], potencia_total_va: 4400 },
+        { nome: "Circulação / Hall", largura: 3.0, comprimento: 1.2, area_m2: 3.6, perimetro_m: 8.4, iluminacao: { potencia_va: 100, qtd_pontos: 1 }, tug: { qtd: 2, potencia_total_va: 200 }, tue: [], potencia_total_va: 300 },
+        { nome: "BWC Social", largura: 1.6, comprimento: 2.4, area_m2: 3.84, perimetro_m: 8.0, iluminacao: { potencia_va: 100, qtd_pontos: 1 }, tug: { qtd: 1, potencia_total_va: 600 }, tue: [{ nome: "Chuveiro Eletrônico", potencia_w: 7500 }], potencia_total_va: 8200 },
+        { nome: "Dormitório 1", largura: 3.2, comprimento: 3.0, area_m2: 9.6, perimetro_m: 12.4, iluminacao: { potencia_va: 160, qtd_pontos: 1 }, tug: { qtd: 3, potencia_total_va: 300 }, tue: [{ nome: "Ar Condicionado 9k BTU", potencia_w: 1000 }], potencia_total_va: 1460 },
+        { nome: "Dormitório 2", largura: 3.2, comprimento: 2.8, area_m2: 8.96, perimetro_m: 12.0, iluminacao: { potencia_va: 100, qtd_pontos: 1 }, tug: { qtd: 3, potencia_total_va: 300 }, tue: [{ nome: "Ar Condicionado 9k BTU", potencia_w: 1000 }], potencia_total_va: 1400 },
+        { nome: "Suíte Master", largura: 3.8, comprimento: 3.8, area_m2: 14.44, perimetro_m: 15.2, iluminacao: { potencia_va: 220, qtd_pontos: 2 }, tug: { qtd: 4, potencia_total_va: 400 }, tue: [{ nome: "Ar Condicionado 12k BTU", potencia_w: 1400 }], potencia_total_va: 2020 },
+        { nome: "BWC Suíte", largura: 1.5, comprimento: 2.5, area_m2: 3.75, perimetro_m: 8.0, iluminacao: { potencia_va: 100, qtd_pontos: 1 }, tug: { qtd: 1, potencia_total_va: 600 }, tue: [{ nome: "Chuveiro Eletrônico Suíte", potencia_w: 7500 }], potencia_total_va: 8200 }
+      ];
+
+      const tbodyCom = document.getElementById('tbodyComodos');
+      if (tbodyCom) {
+        tbodyCom.innerHTML = '';
+        comodos.forEach(c => {
+          const tuesStr = (c.tue || []).map(t => `${t.nome} (${t.potencia_w}W)`).join(', ') || '<span style="color:#64748b">Nenhuma</span>';
+          const tr = document.createElement('tr');
+          tr.innerHTML = `
+            <td><strong>${c.nome}</strong></td>
+            <td>${c.largura} x ${c.comprimento} m</td>
+            <td>${c.area_m2} m²</td>
+            <td>${c.perimetro_m} m</td>
+            <td><span class="tag tag-yellow">${c.iluminacao.potencia_va} VA</span> (${c.iluminacao.qtd_pontos} pt)</td>
+            <td>${c.tug.qtd} tomadas (${c.tug.potencia_total_va} VA)</td>
+            <td>${tuesStr}</td>
+            <td><strong>${c.potencia_total_va} VA</strong></td>
+          `;
+          tbodyCom.appendChild(tr);
+        });
+      }
+
+      // 2. Circuitos QDC
+      const circuitos = (dadosProjeto && dadosProjeto.circuitos) || [
+        { numero: 1, descricao: "Iluminação Social e Garagem", tensao_v: 220, fases: ["R"], potencia_va: 860, potencia_w: 860, corrente_projeto_ib: 3.9, secao_condutor_mm2: 1.5, secao_neutro_mm2: 1.5, secao_pe_mm2: 1.5, disjuntor_in_a: 10, queda_tensao_percentual: 0.52, eletroduto_trecho_dn_mm: 20, dr_obrigatorio: false },
+        { numero: 2, descricao: "Iluminação Íntima e Dormitórios", tensao_v: 220, fases: ["S"], potencia_va: 780, potencia_w: 780, corrente_projeto_ib: 3.5, secao_condutor_mm2: 1.5, secao_neutro_mm2: 1.5, secao_pe_mm2: 1.5, disjuntor_in_a: 10, queda_tensao_percentual: 0.48, eletroduto_trecho_dn_mm: 20, dr_obrigatorio: false },
+        { numero: 3, descricao: "TUGs Salas e Circulação", tensao_v: 220, fases: ["T"], potencia_va: 600, potencia_w: 480, corrente_projeto_ib: 2.7, secao_condutor_mm2: 2.5, secao_neutro_mm2: 2.5, secao_pe_mm2: 2.5, disjuntor_in_a: 16, queda_tensao_percentual: 0.35, eletroduto_trecho_dn_mm: 20, dr_obrigatorio: true },
+        { numero: 4, descricao: "TUGs Cozinha Bancada 1", tensao_v: 220, fases: ["R"], potencia_va: 1200, potencia_w: 960, corrente_projeto_ib: 5.5, secao_condutor_mm2: 2.5, secao_neutro_mm2: 2.5, secao_pe_mm2: 2.5, disjuntor_in_a: 20, queda_tensao_percentual: 0.62, eletroduto_trecho_dn_mm: 25, dr_obrigatorio: true },
+        { numero: 5, descricao: "TUGs Cozinha Bancada 2", tensao_v: 220, fases: ["S"], potencia_va: 900, potencia_w: 720, corrente_projeto_ib: 4.1, secao_condutor_mm2: 2.5, secao_neutro_mm2: 2.5, secao_pe_mm2: 2.5, disjuntor_in_a: 16, queda_tensao_percentual: 0.45, eletroduto_trecho_dn_mm: 20, dr_obrigatorio: true },
+        { numero: 6, descricao: "TUGs Área de Serviço e Lavanderia", tensao_v: 220, fases: ["T"], potencia_va: 1800, potencia_w: 1440, corrente_projeto_ib: 8.2, secao_condutor_mm2: 2.5, secao_neutro_mm2: 2.5, secao_pe_mm2: 2.5, disjuntor_in_a: 20, queda_tensao_percentual: 0.78, eletroduto_trecho_dn_mm: 25, dr_obrigatorio: true },
+        { numero: 7, descricao: "TUE Chuveiro BWC Social", tensao_v: 220, fases: ["R"], potencia_va: 7500, potencia_w: 7500, corrente_projeto_ib: 34.1, secao_condutor_mm2: 6.0, secao_neutro_mm2: 6.0, secao_pe_mm2: 6.0, disjuntor_in_a: 40, queda_tensao_percentual: 1.85, eletroduto_trecho_dn_mm: 32, dr_obrigatorio: true },
+        { numero: 8, descricao: "TUE Chuveiro BWC Suíte Master", tensao_v: 220, fases: ["S"], potencia_va: 7500, potencia_w: 7500, corrente_projeto_ib: 34.1, secao_condutor_mm2: 6.0, secao_neutro_mm2: 6.0, secao_pe_mm2: 6.0, disjuntor_in_a: 40, queda_tensao_percentual: 1.92, eletroduto_trecho_dn_mm: 32, dr_obrigatorio: true },
+        { numero: 9, descricao: "TUE Forno Elétrico Cozinha", tensao_v: 220, fases: ["T"], potencia_va: 4400, potencia_w: 4400, corrente_projeto_ib: 20.0, secao_condutor_mm2: 4.0, secao_neutro_mm2: 4.0, secao_pe_mm2: 4.0, disjuntor_in_a: 25, queda_tensao_percentual: 1.15, eletroduto_trecho_dn_mm: 25, dr_obrigatorio: true },
+        { numero: 10, descricao: "TUE Lavadora e Secadora", tensao_v: 220, fases: ["R"], potencia_va: 2500, potencia_w: 2500, corrente_projeto_ib: 11.4, secao_condutor_mm2: 2.5, secao_neutro_mm2: 2.5, secao_pe_mm2: 2.5, disjuntor_in_a: 16, queda_tensao_percentual: 0.92, eletroduto_trecho_dn_mm: 25, dr_obrigatorio: true },
+        { numero: 11, descricao: "TUE Ar Condicionado Suíte 12k", tensao_v: 220, fases: ["S"], potencia_va: 1400, potencia_w: 1400, corrente_projeto_ib: 6.4, secao_condutor_mm2: 2.5, secao_neutro_mm2: 2.5, secao_pe_mm2: 2.5, disjuntor_in_a: 16, queda_tensao_percentual: 0.58, eletroduto_trecho_dn_mm: 20, dr_obrigatorio: false },
+        { numero: 12, descricao: "TUE Ar Condicionado Sala 12k", tensao_v: 220, fases: ["T"], potencia_va: 1400, potencia_w: 1400, corrente_projeto_ib: 6.4, secao_condutor_mm2: 2.5, secao_neutro_mm2: 2.5, secao_pe_mm2: 2.5, disjuntor_in_a: 16, queda_tensao_percentual: 0.55, eletroduto_trecho_dn_mm: 20, dr_obrigatorio: false }
+      ];
+
+      const tbodyCirc = document.getElementById('tbodyCircuitos');
+      if (tbodyCirc) {
+        tbodyCirc.innerHTML = '';
+        circuitos.forEach(circ => {
+          const tr = document.createElement('tr');
+          tr.innerHTML = `
+            <td><strong>#${circ.numero}</strong></td>
+            <td>${circ.descricao}</td>
+            <td>${circ.tensao_v}V</td>
+            <td><span class="tag tag-${circ.fases[0] === 'R' ? 'red' : circ.fases[0] === 'S' ? 'yellow' : 'blue'}">${circ.fases.join(',')}</span></td>
+            <td>${circ.potencia_va}</td>
+            <td>${circ.potencia_w}</td>
+            <td>${circ.corrente_projeto_ib} A</td>
+            <td><strong># ${circ.secao_condutor_mm2} mm²</strong></td>
+            <td># ${circ.secao_neutro_mm2 || '-'} mm²</td>
+            <td># ${circ.secao_pe_mm2} mm²</td>
+            <td><span class="tag tag-yellow">${circ.disjuntor_in_a}A DIN</span></td>
+            <td>${circ.queda_tensao_percentual}%</td>
+            <td>DN ${circ.eletroduto_trecho_dn_mm} mm</td>
+            <td>${circ.dr_obrigatorio ? '<span class="tag tag-green">DR 30mA</span>' : '<span style="color:#64748b">Disp.</span>'}</td>
+          `;
+          tbodyCirc.appendChild(tr);
+        });
+      }
+
+      // 3. Materiais
+      const materiais = (dadosProjeto && dadosProjeto.lista_materiais) || [
+        { item: "Cabo de Cobre Flexível 750V 1,5 mm² Antichama (Fase/Neutro/Retorno)", quantidade: "145.0", unidade: "metros" },
+        { item: "Cabo de Cobre Flexível 750V 2,5 mm² Antichama (Fases/Neutro/Terra)", quantidade: "380.0", unidade: "metros" },
+        { item: "Cabo de Cobre Flexível 750V 4,0 mm² Antichama (Forno Elétrico)", quantidade: "45.0", unidade: "metros" },
+        { item: "Cabo de Cobre Flexível 750V 6,0 mm² Antichama (Chuveiros)", quantidade: "70.0", unidade: "metros" },
+        { item: "Cabo de Cobre Flexível 1kV 25,0 mm² Alimentador Geral Trifásico", quantidade: "35.0", unidade: "metros" },
+        { item: "Eletroduto Corrugado Flexível Reforçado Amarelo/Laranja DN 20 mm (3/4 pol.)", quantidade: "110.0", unidade: "metros" },
+        { item: "Eletroduto Corrugado Flexível Reforçado Amarelo/Laranja DN 25 mm (1 pol.)", quantidade: "65.0", unidade: "metros" },
+        { item: "Eletroduto Corrugado Flexível Reforçado Laranja DN 32 mm (1.1/4 pol.)", quantidade: "28.0", unidade: "metros" },
+        { item: "Disjuntor Termomagnético DIN Curva C Monopolar 10A", quantidade: "6", unidade: "peças" },
+        { item: "Disjuntor Termomagnético DIN Curva C Monopolar 16A", quantidade: "7", unidade: "peças" },
+        { item: "Disjuntor Termomagnético DIN Curva C Monopolar 20A", quantidade: "2", unidade: "peças" },
+        { item: "Disjuntor Termomagnético DIN Curva C Monopolar 25A", quantidade: "1", unidade: "peças" },
+        { item: "Disjuntor Termomagnético DIN Curva C Monopolar 40A", quantidade: "2", unidade: "peças" },
+        { item: "Disjuntor Termomagnético Geral DIN Curva C Tripolar 125A", quantidade: "1", unidade: "peça" },
+        { item: "Interruptor Diferencial Residual (IDR) Tetrapolar 40A / 30mA", quantidade: "2", unidade: "peças" },
+        { item: "Dispositivo de Proteção contra Surtos (DPS) Classe II 45kA / 275V", quantidade: "4", unidade: "peças" },
+        { item: "Quadro de Distribuição de Embutir QDC 24/36 Módulos DIN com Barramentos", quantidade: "1", unidade: "peça" },
+        { item: "Haste de Aterramento Aço Cobreado 5/8 pol. x 2,40m com Caixa de Inspeção", quantidade: "3", unidade: "peças" }
+      ];
+
+      const tbodyMat = document.getElementById('tbodyMateriais');
+      if (tbodyMat) {
+        tbodyMat.innerHTML = '';
+        materiais.forEach((m, idx) => {
+          const tr = document.createElement('tr');
+          tr.innerHTML = `
+            <td>${idx + 1}</td>
+            <td>${m.item}</td>
+            <td><strong>${m.quantidade}</strong></td>
+            <td>${m.unidade}</td>
+          `;
+          tbodyMat.appendChild(tr);
+        });
+      }
+    }
+
+    function renderizarTabelaSeletividade() {
+      const tbody = document.getElementById('tbodySeletividade');
+      if (!tbody) return;
+      tbody.innerHTML = '';
+
+      const matriz = (dadosSeletividade && dadosSeletividade.matriz_seletividade) || [
+        { circuito_num: 1, descricao: "Iluminação Social e Garagem", disjuntor_in_a: 10, curva: "B", razao_geral: 12.5, grau_seletividade: "TOTAL", limite_seletividade_a: 625, parecer: "Totalmente seletivo (Razão 12.5x > 1.6x). Sem desarme do geral." },
+        { circuito_num: 3, descricao: "TUGs Salas e Circulação", disjuntor_in_a: 16, curva: "C", razao_geral: 7.81, grau_seletividade: "TOTAL", limite_seletividade_a: 625, parecer: "Totalmente seletivo (Razão 7.81x > 1.6x). Protegido com DR 30mA." },
+        { circuito_num: 4, descricao: "TUGs Cozinha Bancada 1", disjuntor_in_a: 20, curva: "C", razao_geral: 6.25, grau_seletividade: "TOTAL", limite_seletividade_a: 625, parecer: "Totalmente seletivo. Suporta picos de motores eletrodomésticos." },
+        { circuito_num: 7, descricao: "TUE Chuveiro BWC Social", disjuntor_in_a: 40, curva: "C", razao_geral: 3.12, grau_seletividade: "TOTAL", limite_seletividade_a: 625, parecer: "Totalmente seletivo (Razão 3.12x > 1.6x). Desarme pontual." },
+        { circuito_num: 8, descricao: "TUE Chuveiro Suíte Master", disjuntor_in_a: 40, curva: "C", razao_geral: 3.12, grau_seletividade: "TOTAL", limite_seletividade_a: 625, parecer: "Totalmente seletivo. Sem interrupção da alimentação geral." }
+      ];
+
+      matriz.forEach(item => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td><strong>#${item.circuito_num}</strong></td>
+          <td>${item.descricao}</td>
+          <td><span class="tag tag-yellow">${item.disjuntor_in_a}A (${item.curva})</span></td>
+          <td><span class="tag tag-red">125A (C)</span></td>
+          <td><strong>${item.razao_geral} x</strong></td>
+          <td>${item.limite_seletividade_a} A</td>
+          <td><span class="tag tag-green">${item.grau_seletividade}</span></td>
+          <td>${item.parecer}</td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    function renderizarDadosOrcamento() {
+      if (!dadosOrcamento) return;
+      const res = dadosOrcamento.resumo_financeiro || {};
+      const viab = dadosOrcamento.viabilidade_economica || {};
+
+      document.getElementById('valOrcPrecoGlobal').innerText = 'R$ ' + (res.preco_global_venda_r || 804435.39).toLocaleString('pt-BR', {minimumFractionDigits: 2});
+      document.getElementById('valOrcDescBdi').innerText = `Com BDI TCU de ${res.taxa_bdi_aplicada_pct || 24.20}% Aplicado`;
+      document.getElementById('valOrcPayback').innerText = `${viab.payback_simples_anos || 4.9} / ${viab.payback_descontado_anos || 6.2} anos`;
+      document.getElementById('valOrcVpl').innerText = 'R$ ' + (viab.vpl_25_anos_r || 684210.00).toLocaleString('pt-BR', {minimumFractionDigits: 2});
+      document.getElementById('valOrcLcoe').innerText = 'R$ ' + (viab.lcoe_energia_r_kwh || 0.185).toLocaleString('pt-BR', {minimumFractionDigits: 3}) + ' / kWh';
+
+      const tbody = document.getElementById('tbodyOrcamentoAnalitico');
+      if (tbody && dadosOrcamento.itens_analiticos) {
+        tbody.innerHTML = '';
+        dadosOrcamento.itens_analiticos.forEach(it => {
+          const tr = document.createElement('tr');
+          tr.innerHTML = `
+            <td><strong>${it.item}</strong></td>
+            <td><span class="tag tag-blue">${it.categoria}</span></td>
+            <td>${it.quantidade}</td>
+            <td>${it.unidade}</td>
+            <td>R$ ${it.preco_unitario_r.toLocaleString('pt-BR', {minimumFractionDigits: 2})}</td>
+            <td><strong>R$ ${it.subtotal_r.toLocaleString('pt-BR', {minimumFractionDigits: 2})}</strong></td>
+          `;
+          tbody.appendChild(tr);
+        });
+      }
+    }
+
+    function recalcularBdiInterativo() {
+      const ac = parseFloat(document.getElementById('sliderAC').value) / 100.0;
+      const s = parseFloat(document.getElementById('sliderS').value) / 100.0;
+      const r = parseFloat(document.getElementById('sliderR').value) / 100.0;
+      const df = parseFloat(document.getElementById('sliderDF').value) / 100.0;
+      const l = parseFloat(document.getElementById('sliderL').value) / 100.0;
+      const t = parseFloat(document.getElementById('sliderT').value) / 100.0;
+
+      document.getElementById('dispAC').innerText = (ac * 100).toFixed(1) + ' %';
+      document.getElementById('dispS').innerText = (s * 100).toFixed(1) + ' %';
+      document.getElementById('dispR').innerText = (r * 100).toFixed(1) + ' %';
+      document.getElementById('dispDF').innerText = (df * 100).toFixed(1) + ' %';
+      document.getElementById('dispL').innerText = (l * 100).toFixed(1) + ' %';
+      document.getElementById('dispT').innerText = (t * 100).toFixed(2) + ' %';
+
+      // Fórmula TCU: [ (1 + AC + S + R) * (1 + DF) * (1 + L) / (1 - T) ] - 1
+      const num = (1.0 + ac + s + r) * (1.0 + df) * (1.0 + l);
+      const den = 1.0 - t;
+      const bdiCalc = ((num / den) - 1.0) * 100.0;
+      
+      document.getElementById('lblBdiCalculado').innerText = bdiCalc.toFixed(2) + ' %';
+      
+      const custoDiretoBase = (dadosOrcamento && dadosOrcamento.resumo_financeiro && dadosOrcamento.resumo_financeiro.custo_direto_total_r) || 647862.50;
+      const precoNovo = custoDiretoBase * (1.0 + bdiCalc / 100.0);
+      document.getElementById('valOrcPrecoGlobal').innerText = 'R$ ' + precoNovo.toLocaleString('pt-BR', {minimumFractionDigits: 2});
+      document.getElementById('valOrcDescBdi').innerText = `Com BDI recalculado de ${bdiCalc.toFixed(2)}%`;
+    }
+
+    function renderizarDadosRenovaveis() {
+      if (!dadosRenovaveis) return;
+      const res = dadosRenovaveis;
+      document.getElementById('valRenGeracaoMensal').innerText = (res.geracao_total_mensal_kwh || 14850).toLocaleString() + ' kWh/mês';
+      document.getElementById('valRenGeracaoAnual').innerText = (res.geracao_total_anual_kwh || 178200).toLocaleString() + ' kWh/ano acumulados';
+      document.getElementById('valRenAutossuficiencia').innerText = (res.taxa_autossuficiencia_pct || 174.7).toFixed(1) + ' %';
+      document.getElementById('valRenStatus').innerText = res.status_operacional || 'Operação Otimizada';
+
+      const eco = res.economia_financeira || {};
+      document.getElementById('valRenEconomiaAnual').innerText = 'R$ ' + (eco.economia_anual_projetada_r || 117199).toLocaleString('pt-BR', {minimumFractionDigits: 2});
+      document.getElementById('valRenEconomiaMensal').innerText = 'R$ ' + (eco.economia_mensal_estimada_r || 7225).toLocaleString('pt-BR', {minimumFractionDigits: 2}) + ' / mês em tarifa evitada';
+
+      const esg = res.impacto_ambiental_esg || {};
+      document.getElementById('valRenCO2').innerText = (esg.co2_equivalente_evitado_ano_ton || 369.8).toFixed(1) + ' t CO₂e / ano';
+      document.getElementById('valRenArvores').innerText = 'Equivalente a ' + (esg.equivalente_arvores_plantadas || 2662).toLocaleString() + ' árvores preservadas';
+
+      const f = res.fontes_integradas || {};
+      if (f.solar) {
+        document.getElementById('specSolarPico').innerText = f.solar.potencia_pico_kwp + ' kWp';
+        document.getElementById('specSolarGeracao').innerText = (f.solar.geracao_estimada_kwh_mes || 0).toLocaleString() + ' kWh';
+        const mod = f.solar.modulos || {};
+        document.getElementById('specSolarModulos').innerText = `${mod.quantidade_modulos} un x ${mod.potencia_unitaria_wp}W ${mod.tecnologia || ''}`;
+        const str = f.solar.strings || {};
+        document.getElementById('specSolarStrings').innerText = `${str.quantidade_strings_paralelo || 10} strings x ${str.modulos_por_string_serie || 23} módulos`;
+        document.getElementById('specSolarTensao').innerText = `${str.tensao_voc_max_arranjo_v || 1136} Vcc (MPPT: 500-850V)`;
+        const inv = f.solar.inversor || {};
+        document.getElementById('specSolarInversor').innerText = `${inv.potencia_nominal_kw} kW ${inv.tipo_conexao || 'Trifásico'} (Eficiência ${inv.eficiencia_pct || 98.6}%)`;
+      }
+
+      if (f.eolica) {
+        document.getElementById('specEolicaModelo').innerText = f.eolica.modelo_aerogerador || 'HAWT Tripá';
+        document.getElementById('specEolicaPotencia').innerText = `${f.eolica.potencia_nominal_kw} kW @ ${f.eolica.velocidade_vento_considerada_ms || 10.5} m/s`;
+        document.getElementById('specEolicaGeracao').innerText = (f.eolica.geracao_mensal_kwh || 0).toLocaleString() + ' kWh';
+        const mec = f.eolica.especificacoes_mecanicas || {};
+        document.getElementById('specEolicaDiametro').innerText = `${mec.diametro_rotor_m || 9.2} metros`;
+        document.getElementById('specEolicaTorre').innerText = `${mec.altura_torre_m || 24} metros estaiada`;
+      }
+
+      if (f.biodigestor) {
+        document.getElementById('boxBiodigestorContent').style.display = 'block';
+        document.getElementById('boxBiodigestorDispensado').style.display = 'none';
+        const bio = f.biodigestor;
+        document.getElementById('specBioOrigem').innerText = `${bio.plantel_animais} ${bio.tipo_criacao || 'animais'}`;
+        const bal = bio.balanco_hidraulico || {};
+        document.getElementById('specBioVazao').innerText = `${bal.vazao_dejetos_diaria_m3_dia} m³/dia (TRH = ${bal.tempo_retencao_hidraulica_dias} dias)`;
+        const cav = bio.dimensoes_cava_trapezoidal || {};
+        document.getElementById('specBioCava').innerText = `Comp. ${cav.comprimento_m}m x Crista ${cav.largura_topo_m}m x Prof. ${cav.profundidade_m}m`;
+        document.getElementById('specBioVolume').innerText = `${cav.volume_util_m3} m³ útil`;
+        const pot = bio.potencial_energetico_biogas || {};
+        document.getElementById('specBioGas').innerText = `${pot.producao_biogas_m3_dia} m³/dia (${pot.percentual_metano_ch4_pct}% CH₄)`;
+      } else {
+        document.getElementById('boxBiodigestorContent').style.display = 'none';
+        document.getElementById('boxBiodigestorDispensado').style.display = 'block';
+      }
+
+      atualizarTabelaBalanco([
+        { vetor: "☀️ Solar Fotovoltaica", tech: "Usina de Solo Monoposte 18°", pot: "150.0 kWp", ger: "19.500", reg: "Diurno Intermitente", int: "Inversor 125kW Trifásico 380V" },
+        { vetor: "💨 Eólica de Médio Porte", tech: "Aerogerador Tripá Torre 24m", pot: "20.0 kW", ger: "3.850", reg: "Ventos Rurais Contínuos", int: "Inversor Grid-Tie com Dump Load" },
+        { vetor: "🧪 Biodigestor Anaeróbio", tech: "Cava Trapezoidal Geomembrana PEAD", pot: "250 m³/dia", ger: "Biogás", reg: "Digestão Mesofílica Contínua", int: "Filtro H₂S, Purgadores e Flare" },
+        { vetor: "🔥 Motogerador a Biogás CHP", tech: "Motor Ciclo Otto Cogeração", pot: "75.0 kW (112kWt)", ger: "9.000", reg: "Despacho Firme / Base", int: "Sincronismo Paralelo com a Rede" },
+        { vetor: "💧 Micro-Hidrelétrica PCH", tech: "Turbina Pelton com Conduto PEAD", pot: "15.0 kW", ger: "9.240", reg: "Despacho 24h Base Contínua", int: "Regulador ELC e Gerador Síncrono" }
+      ]);
+    }
+
+    function aplicarPresetRenovaveis(perfil) {
+      if (perfil === 'residencial') {
+        document.getElementById('valRenGeracaoMensal').innerText = '1.420 kWh/mês';
+        document.getElementById('valRenGeracaoAnual').innerText = '17.040 kWh/ano acumulados';
+        document.getElementById('valRenAutossuficiencia').innerText = '100.0 %';
+        document.getElementById('valRenStatus').innerText = 'Equilíbrio Pleno com a Concessionária';
+        document.getElementById('valRenEconomiaAnual').innerText = 'R$ 14.484 / ano';
+        document.getElementById('valRenEconomiaMensal').innerText = 'R$ 1.207 / mês em tarifa evitada';
+        document.getElementById('valRenCO2').innerText = '35.4 t CO₂e / ano';
+        document.getElementById('valRenArvores').innerText = 'Equivalente a 255 árvores preservadas';
+
+        document.getElementById('specSolarPico').innerText = '8.8 kWp';
+        document.getElementById('specSolarModulos').innerText = '16 un x 550W Monocristalino Half-Cell';
+        document.getElementById('specSolarStrings').innerText = '2 strings x 8 módulos em série';
+        document.getElementById('specSolarTensao').innerText = '396 Vcc (Faixa MPPT: 160-500V)';
+        document.getElementById('specSolarInversor').innerText = '8.0 kW Monofásico/Bifásico (Eficiência 97.8%)';
+        document.getElementById('specSolarEstrutura').innerText = 'Telhado Cerâmico / Metálico inclinado';
+        document.getElementById('specSolarGeracao').innerText = '1.144 kWh/mês';
+
+        document.getElementById('specEolicaModelo').innerText = 'VAWT Eixo Vertical Darrieus/Savonius';
+        document.getElementById('specEolicaPotencia').innerText = '2.0 kW @ 9.0 m/s (Baixo ruído)';
+        document.getElementById('specEolicaDiametro').innerText = '2.4 m diâmetro x 3.0 m altura';
+        document.getElementById('specEolicaTorre').innerText = '6.0 metros autoportante de cobertura';
+        document.getElementById('specEolicaGeracao').innerText = '276 kWh/mês';
+
+        document.getElementById('boxBiodigestorContent').style.display = 'none';
+        document.getElementById('boxBiodigestorDispensado').style.display = 'block';
+        document.getElementById('boxChpContent').style.display = 'none';
+        document.getElementById('boxChpDispensado').style.display = 'block';
+
+        atualizarTabelaBalanco([
+          { vetor: "☀️ Solar Fotovoltaica", tech: "Módulos Mono-PERC de Telhado", pot: "8.8 kWp", ger: "1.144", reg: "Diurno Intermitente", int: "Inversor On-Grid Stringbox CC" },
+          { vetor: "💨 Microeólica Urbana", tech: "Aerogerador Vertical VAWT", pot: "2.0 kW", ger: "276", reg: "Contínuo (Dia e Noite)", int: "Retificador AC/DC e Inversor Grid-Tie" }
+        ]);
+      } else if (perfil === 'predial') {
+        document.getElementById('valRenGeracaoMensal').innerText = '6.850 kWh/mês';
+        document.getElementById('valRenGeracaoAnual').innerText = '82.200 kWh/ano acumulados';
+        document.getElementById('valRenAutossuficiencia').innerText = '122.5 %';
+        document.getElementById('valRenStatus').innerText = 'Geração Compartilhada (EMUC Lei 14.300)';
+        document.getElementById('valRenEconomiaAnual').innerText = 'R$ 69.870 / ano';
+        document.getElementById('valRenEconomiaMensal').innerText = 'R$ 5.822 / mês em créditos';
+        document.getElementById('valRenCO2').innerText = '170.9 t CO₂e / ano';
+        document.getElementById('valRenArvores').innerText = 'Equivalente a 1.230 árvores preservadas';
+
+        document.getElementById('specSolarPico').innerText = '49.5 kWp';
+        document.getElementById('specSolarModulos').innerText = '90 un x 550W Monocristalino N-Type';
+        document.getElementById('specSolarStrings').innerText = '5 strings x 18 módulos em série';
+        document.getElementById('specSolarTensao').innerText = '891 Vcc (Faixa MPPT: 350-800V)';
+        document.getElementById('specSolarInversor').innerText = '40.0 kW Trifásico 380V (Eficiência 98.4%)';
+        document.getElementById('specSolarEstrutura').innerText = 'Laje plana de cobertura com lastro 15° Norte';
+        document.getElementById('specSolarGeracao').innerText = '6.435 kWh/mês';
+
+        document.getElementById('specEolicaModelo').innerText = 'VAWT Helicoide de Baixo Ruído Acústico';
+        document.getElementById('specEolicaPotencia').innerText = '3.0 kW @ 9.5 m/s';
+        document.getElementById('specEolicaDiametro').innerText = '3.0 m diâmetro x 4.2 m altura';
+        document.getElementById('specEolicaTorre').innerText = '8.0 m mastro de topo predial';
+        document.getElementById('specEolicaGeracao').innerText = '415 kWh/mês';
+
+        document.getElementById('boxBiodigestorContent').style.display = 'none';
+        document.getElementById('boxBiodigestorDispensado').style.display = 'block';
+        document.getElementById('boxChpContent').style.display = 'none';
+        document.getElementById('boxChpDispensado').style.display = 'block';
+
+        atualizarTabelaBalanco([
+          { vetor: "☀️ Solar Fotovoltaica", tech: "Arranjo Cobertura Predial Lastrada", pot: "49.5 kWp", ger: "6.435", reg: "Diurno Intermitente", int: "Inversor Central Trifásico 380V" },
+          { vetor: "💨 Eólica de Topo", tech: "Aerogerador Vertical Silencioso", pot: "3.0 kW", ger: "415", reg: "Ventos de Altitude", int: "Acoplamento CC com Inversor Híbrido" }
+        ]);
+      } else {
+        renderizarDadosRenovaveis();
+      }
+    }
+
+    function atualizarTabelaBalanco(itens) {
+      const tbody = document.getElementById('tbodyBalancoRenovaveis');
+      if (!tbody) return;
+      tbody.innerHTML = '';
+      itens.forEach(it => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td><strong>${it.vetor}</strong></td>
+          <td>${it.tech}</td>
+          <td><span class="tag tag-yellow">${it.pot}</span></td>
+          <td><strong>${it.ger}</strong></td>
+          <td>${it.reg}</td>
+          <td><span class="tag tag-blue">${it.int}</span></td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    // ========================================================
+    // RENDERIZADOR 2D CAD (PLANTA BAIXA RESIDENCIAL CANVAS)
+    // ========================================================
+    function desenharPlantaBaixa2D() {
+      const canvas = document.getElementById('cadCanvas');
+      if (!canvas) return;
+      const ctx = canvas.getContext('2d');
+      const w = canvas.parentElement.clientWidth;
+      const h = canvas.parentElement.clientHeight;
+      canvas.width = w;
+      canvas.height = h;
+
+      // Fundo escuro CAD
+      ctx.fillStyle = '#050811';
+      ctx.fillRect(0, 0, w, h);
+
+      // Grade milimetrada de fundo
+      ctx.strokeStyle = '#111827';
+      ctx.lineWidth = 1;
+      for (let x = 0; x < w; x += 40) {
+        ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, h); ctx.stroke();
+      }
+      for (let y = 0; y < h; y += 40) {
+        ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(w, y); ctx.stroke();
+      }
+
+      // Escala e centro
+      const escala = Math.min(w / 16, h / 12) * 0.85;
+      const ox = w * 0.32;
+      const oy = h * 0.65;
+
+      function toScreen(x, y) {
+        return { x: ox + x * escala, y: oy - y * escala };
+      }
+
+      // Cômodos Arquitetônicos
+      const layout = [
+        { id: "garagem", x: -4.0, y: 0.0, w: 3.8, h: 5.0, nome: "GARAGEM" },
+        { id: "varanda", x: 0.0, y: -2.4, w: 4.5, h: 2.2, nome: "VARANDA" },
+        { id: "sala", x: 0.0, y: 0.0, w: 4.8, h: 3.8, nome: "SALA ESTAR" },
+        { id: "cozinha", x: 5.0, y: 0.0, w: 4.0, h: 3.2, nome: "COZINHA" },
+        { id: "servico", x: 5.0, y: 3.4, w: 2.8, h: 2.0, nome: "ÁREA SERV." },
+        { id: "hall", x: 0.0, y: 4.0, w: 3.0, h: 1.2, nome: "CIRCULAÇÃO" },
+        { id: "bwc_soc", x: 3.2, y: 4.0, w: 1.6, h: 2.4, nome: "BWC" },
+        { id: "dorm1", x: 0.0, y: 5.4, w: 3.2, h: 3.0, nome: "QUARTO 1" },
+        { id: "dorm2", x: 3.4, y: 5.6, w: 3.2, h: 2.8, nome: "QUARTO 2" },
+        { id: "suite", x: 6.8, y: 4.6, w: 3.8, h: 3.8, nome: "SUÍTE" }
+      ];
+
+      // Desenhar Paredes
+      ctx.strokeStyle = '#e2e8f0';
+      ctx.lineWidth = 3;
+      layout.forEach(c => {
+        const p1 = toScreen(c.x, c.y);
+        const p2 = toScreen(c.x + c.w, c.y + c.h);
+        ctx.strokeRect(p1.x, p2.y, p2.x - p1.x, p1.y - p2.y);
+
+        ctx.fillStyle = '#64748b';
+        ctx.font = '11px sans-serif';
+        ctx.textAlign = 'center';
+        const pc = toScreen(c.x + c.w / 2, c.y + c.h / 2);
+        ctx.fillText(c.nome, pc.x, pc.y + 16);
+      });
+
+      // Posição do QDC (Parede da Circulação)
+      const qdcPos = toScreen(3.0, 3.6);
+      ctx.fillStyle = '#d946ef';
+      ctx.fillRect(qdcPos.x - 14, qdcPos.y - 8, 28, 16);
+      ctx.fillStyle = '#fff';
+      ctx.font = 'bold 9px sans-serif';
+      ctx.fillText('QDC', qdcPos.x, qdcPos.y + 3);
+
+      // Pontos de Luz e Eletrodutos
+      layout.forEach((c, idx) => {
+        const pl = toScreen(c.x + c.w / 2, c.y + c.h / 2);
+
+        // Linha de Eletroduto até o QDC
+        ctx.strokeStyle = '#38bdf8';
+        ctx.lineWidth = 1.8;
+        ctx.beginPath();
+        ctx.moveTo(pl.x, pl.y);
+        ctx.lineTo(qdcPos.x, qdcPos.y);
+        ctx.stroke();
+
+        // Traços NBR 5444
+        const mx = (pl.x + qdcPos.x) / 2;
+        const my = (pl.y + qdcPos.y) / 2;
+        ctx.strokeStyle = '#ffffff';
+        ctx.lineWidth = 1.5;
+        ctx.beginPath(); ctx.moveTo(mx, my - 6); ctx.lineTo(mx, my + 6); ctx.stroke();
+        ctx.beginPath(); ctx.moveTo(mx + 6, my - 6); ctx.lineTo(mx + 6, my + 6); ctx.lineTo(mx + 2, my - 6); ctx.stroke();
+        ctx.beginPath(); ctx.moveTo(mx - 6, my - 6); ctx.lineTo(mx - 6, my + 6); ctx.moveTo(mx - 9, my - 6); ctx.lineTo(mx - 3, my - 6); ctx.stroke();
+
+        // Ponto de Luz no Teto
+        ctx.strokeStyle = '#f59e0b';
+        ctx.lineWidth = 2;
+        ctx.fillStyle = '#1e293b';
+        ctx.beginPath();
+        ctx.arc(pl.x, pl.y, 14, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.stroke();
+
+        ctx.beginPath();
+        ctx.moveTo(pl.x - 14, pl.y);
+        ctx.lineTo(pl.x + 14, pl.y);
+        ctx.stroke();
+
+        ctx.fillStyle = '#f8fafc';
+        ctx.font = 'bold 9px sans-serif';
+        ctx.fillText(`C${idx < 5 ? 1 : 2}`, pl.x, pl.y - 3);
+        ctx.font = '8px sans-serif';
+        ctx.fillText('100', pl.x, pl.y + 9);
+      });
+    }
+
+    // ========================================================
+    // RENDERIZADOR 2D CANVAS: GRÁFICO LOG-LOG DE SELETIVIDADE
+    // ========================================================
+    function desenharGraficoSeletividade() {
+      const canvas = document.getElementById('seletividadeCanvas');
+      if (!canvas) return;
+      const ctx = canvas.getContext('2d');
+      const w = canvas.parentElement.clientWidth;
+      const h = canvas.parentElement.clientHeight;
+      canvas.width = w;
+      canvas.height = h;
+
+      ctx.fillStyle = '#050811';
+      ctx.fillRect(0, 0, w, h);
+
+      const margemEsq = 65, margemDir = 30, margemSup = 30, margemInf = 50;
+      const gw = w - margemEsq - margemDir;
+      const gh = h - margemSup - margemInf;
+
+      const logImin = Math.log10(1.0), logImax = Math.log10(10000.0);
+      const logTmin = Math.log10(0.01), logTmax = Math.log10(1000.0);
+
+      function coordLog(iVal, tVal) {
+        const u = (Math.log10(Math.max(1.0, iVal)) - logImin) / (logImax - logImin);
+        const v = (Math.log10(Math.max(0.01, tVal)) - logTmin) / (logTmax - logTmin);
+        return { x: margemEsq + u * gw, y: (margemSup + gh) - v * gh };
+      }
+
+      // Grade Logarítmica
+      ctx.strokeStyle = '#1e293b';
+      ctx.lineWidth = 1;
+      const decadasT = [0.01, 0.1, 1, 10, 100, 1000];
+      decadasT.forEach(t => {
+        const p = coordLog(1.0, t);
+        ctx.beginPath(); ctx.moveTo(margemEsq, p.y); ctx.lineTo(margemEsq + gw, p.y); ctx.stroke();
+        ctx.fillStyle = '#64748b';
+        ctx.font = '10px monospace';
+        ctx.textAlign = 'right';
+        ctx.fillText(t >= 1 ? `${t}s` : `${t}s`, margemEsq - 8, p.y + 3);
+      });
+
+      const decadasI = [1, 10, 100, 1000, 10000];
+      decadasI.forEach(i => {
+        const p = coordLog(i, 0.01);
+        ctx.beginPath(); ctx.moveTo(p.x, margemSup); ctx.lineTo(p.x, margemSup + gh); ctx.stroke();
+        ctx.fillStyle = '#64748b';
+        ctx.font = '10px monospace';
+        ctx.textAlign = 'center';
+        ctx.fillText(`${i}A`, p.x, margemSup + gh + 18);
+      });
+
+      // Bordas principais
+      ctx.strokeStyle = '#334155';
+      ctx.lineWidth = 1.5;
+      ctx.strokeRect(margemEsq, margemSup, gw, gh);
+
+      // Função auxiliar para plotar curva
+      function plotarCurva(pontos, cor) {
+        if (!pontos || pontos.length < 2) return;
+        ctx.strokeStyle = cor;
+        ctx.lineWidth = 2.2;
+        ctx.beginPath();
+        pontos.forEach((pt, idx) => {
+          const p = coordLog(pt.corrente_a, pt.tempo_max_s);
+          if (idx === 0) ctx.moveTo(p.x, p.y); else ctx.lineTo(p.x, p.y);
+        });
+        ctx.stroke();
+      }
+
+      const curvas = (dadosSeletividade && dadosSeletividade.curvas_plotagem_log_log) || {};
+      plotarCurva(curvas.geral_125a_c, '#ef4444');
+      plotarCurva(curvas.chuveiro_40a_c, '#f59e0b');
+      plotarCurva(curvas.tomadas_20a_c, '#10b981');
+      plotarCurva(curvas.iluminacao_10a_b, '#06b6d4');
+
+      // Se houver corrente de falta simulada, traça linha vertical amarela tracejada
+      if (correnteFaltaSimulada) {
+        const pf = coordLog(correnteFaltaSimulada, 0.01);
+        ctx.strokeStyle = '#facc15';
+        ctx.lineWidth = 2;
+        ctx.setLineDash([5, 5]);
+        ctx.beginPath(); ctx.moveTo(pf.x, margemSup); ctx.lineTo(pf.x, margemSup + gh); ctx.stroke();
+        ctx.setLineDash([]);
+
+        ctx.fillStyle = '#facc15';
+        ctx.font = 'bold 11px sans-serif';
+        ctx.textAlign = 'center';
+        ctx.fillText(`⚡ Falta Simulada: ${correnteFaltaSimulada}A`, pf.x, margemSup - 10);
+      }
+    }
+
+    function simularFaltaSeletividade(correnteA) {
+      correnteFaltaSimulada = correnteA;
+      desenharGraficoSeletividade();
+    }
+
+    // ========================================================
+    // RENDERIZADOR 2D CANVAS: STRINGBOX SOLAR CC
+    // ========================================================
+    function desenharDiagramaStringboxCanvas() {
+      const canvas = document.getElementById('stringboxCanvas');
+      if (!canvas) return;
+      const ctx = canvas.getContext('2d');
+      const w = canvas.parentElement.clientWidth;
+      const h = canvas.parentElement.clientHeight;
+      canvas.width = w;
+      canvas.height = h;
+
+      ctx.fillStyle = '#050811';
+      ctx.fillRect(0, 0, w, h);
+
+      // Caixa da Stringbox IP65
+      const bx = w * 0.22, by = h * 0.12, bw = w * 0.52, bh = h * 0.76;
+      ctx.strokeStyle = '#475569';
+      ctx.lineWidth = 2.5;
+      ctx.strokeRect(bx, by, bw, bh);
+
+      ctx.fillStyle = '#f8fafc';
+      ctx.font = 'bold 13px sans-serif';
+      ctx.textAlign = 'center';
+      ctx.fillText('STRINGBOX SOLAR CC (IP65)', bx + bw / 2, by - 12);
+
+      // Módulos Fotovoltaicos à Esquerda
+      ctx.fillStyle = '#1e293b';
+      ctx.strokeStyle = '#f59e0b';
+      ctx.lineWidth = 2;
+      ctx.fillRect(40, by + 40, 70, 90); ctx.strokeRect(40, by + 40, 70, 90);
+      ctx.fillRect(40, by + bh - 130, 70, 90); ctx.strokeRect(40, by + bh - 130, 70, 90);
+
+      ctx.fillStyle = '#fff';
+      ctx.font = 'bold 10px sans-serif';
+      ctx.fillText('STRING 1', 75, by + 85);
+      ctx.fillText('STRING 2', 75, by + bh - 85);
+
+      // Condutores CC (+) e (-) entrando na Stringbox
+      const y1p = by + 65, y1n = by + 105;
+      const y2p = by + bh - 105, y2n = by + bh - 65;
+
+      ctx.strokeStyle = '#ef4444'; ctx.lineWidth = 2.5;
+      ctx.beginPath(); ctx.moveTo(110, y1p); ctx.lineTo(bx + 80, y1p); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(110, y2p); ctx.lineTo(bx + 80, y2p); ctx.stroke();
+
+      ctx.strokeStyle = '#64748b'; ctx.lineWidth = 2.5;
+      ctx.beginPath(); ctx.moveTo(110, y1n); ctx.lineTo(bx + 80, y1n); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(110, y2n); ctx.lineTo(bx + 80, y2n); ctx.stroke();
+
+      // Porta Fusíveis gPV
+      const fWidth = 45, fHeight = 26;
+      [y1p, y1n, y2p, y2n].forEach((fy, idx) => {
+        ctx.fillStyle = '#0f172a';
+        ctx.strokeStyle = '#06b6d4';
+        ctx.lineWidth = 1.5;
+        ctx.fillRect(bx + 80, fy - fHeight / 2, fWidth, fHeight);
+        ctx.strokeRect(bx + 80, fy - fHeight / 2, fWidth, fHeight);
+
+        ctx.fillStyle = idx % 2 === 0 ? '#ef4444' : '#94a3b8';
+        ctx.font = '9px monospace';
+        ctx.textAlign = 'center';
+        ctx.fillText('gPV 20A', bx + 80 + fWidth / 2, fy + 3);
+      });
+
+      // DPS em Y
+      const dpsX = bx + bw * 0.48, dpsY = by + bh - 160;
+      ctx.fillStyle = '#0f172a';
+      ctx.strokeStyle = '#38bdf8';
+      ctx.lineWidth = 2;
+      ctx.fillRect(dpsX, dpsY, 90, 80);
+      ctx.strokeRect(dpsX, dpsY, 90, 80);
+      ctx.fillStyle = '#38bdf8';
+      ctx.font = 'bold 10px sans-serif';
+      ctx.fillText('DPS CC (Y)', dpsX + 45, dpsY + 28);
+      ctx.font = '9px sans-serif';
+      ctx.fillText('1000V / 40kA', dpsX + 45, dpsY + 46);
+
+      // Chave Seccionadora CC Rotativa
+      const secX = bx + bw * 0.72, secY = by + 85;
+      ctx.fillStyle = '#0f172a';
+      ctx.strokeStyle = '#f59e0b';
+      ctx.lineWidth = 2;
+      ctx.fillRect(secX, secY, 70, 70);
+      ctx.strokeRect(secX, secY, 70, 70);
+      ctx.fillStyle = '#f59e0b';
+      ctx.font = 'bold 10px sans-serif';
+      ctx.fillText('CHAVE CC', secX + 35, secY + 30);
+      ctx.font = '9px sans-serif';
+      ctx.fillText('63A DC-PV2', secX + 35, secY + 48);
+
+      // Barramento de Aterramento BEP
+      const bepY = by + bh - 30;
+      ctx.strokeStyle = '#10b981';
+      ctx.lineWidth = 4;
+      ctx.beginPath(); ctx.moveTo(bx + 20, bepY); ctx.lineTo(bx + bw - 20, bepY); ctx.stroke();
+      ctx.fillStyle = '#10b981';
+      ctx.font = 'bold 9px sans-serif';
+      ctx.fillText('BARRAMENTO BEP (ATERRAMENTO PE 16 mm²)', bx + bw / 2, bepY - 8);
+
+      // Conexão DPS ao BEP
+      ctx.lineWidth = 2;
+      ctx.beginPath(); ctx.moveTo(dpsX + 45, dpsY + 80); ctx.lineTo(dpsX + 45, bepY); ctx.stroke();
+
+      // Saída para Inversor Solar
+      const invX = w - 100, invY = by + 60;
+      ctx.fillStyle = '#1e293b';
+      ctx.strokeStyle = '#e2e8f0';
+      ctx.lineWidth = 2;
+      ctx.fillRect(invX, invY, 75, 120);
+      ctx.strokeRect(invX, invY, 75, 120);
+      ctx.fillStyle = '#fff';
+      ctx.font = 'bold 10px sans-serif';
+      ctx.fillText('INVERSOR', invX + 37, invY + 55);
+      ctx.fillText('GRID-TIE', invX + 37, invY + 70);
+
+      // Linhas da Chave ao Inversor
+      ctx.strokeStyle = '#ef4444'; ctx.lineWidth = 2.5;
+      ctx.beginPath(); ctx.moveTo(secX + 70, secY + 25); ctx.lineTo(invX, secY + 25); ctx.stroke();
+      ctx.strokeStyle = '#64748b'; ctx.lineWidth = 2.5;
+      ctx.beginPath(); ctx.moveTo(secX + 70, secY + 45); ctx.lineTo(invX, secY + 45); ctx.stroke();
+    }
+
+    // ========================================================
+    // RENDERIZADOR 3D WEBGL (THREE.JS)
+    // ========================================================
+    let scene3D, camera3D, renderer3D, controls3D;
+    let cenarioResidencialGroup = new THREE.Group();
+    let cenarioAgroGroup = new THREE.Group();
+    let paredesGroup = new THREE.Group();
+    let tubulacoesGroup = new THREE.Group();
+    let aparelhosGroup = new THREE.Group();
+    let bladesMesh = null;
+    let flareLight = null;
+    let turbinaPeltonMesh = null;
+
+    function initThreeScene() {
+      const canvas = document.getElementById('threeCanvas');
+      if (!canvas || renderer3D) return;
+
+      const w = canvas.parentElement.clientWidth;
+      const h = canvas.parentElement.clientHeight;
+
+      scene3D = new THREE.Scene();
+      scene3D.background = new THREE.Color(0x060913);
+
+      camera3D = new THREE.PerspectiveCamera(45, w / h, 0.1, 1000);
+      camera3D.position.set(24, 25, 32);
+
+      renderer3D = new THREE.WebGLRenderer({ canvas: canvas, antialias: true });
+      renderer3D.setSize(w, h);
+      renderer3D.shadowMap.enabled = true;
+
+      controls3D = new THREE.OrbitControls(camera3D, renderer3D.domElement);
+      controls3D.enableDamping = true;
+      controls3D.dampingFactor = 0.05;
+      controls3D.target.set(5, 2, 5);
+
+      const ambLight = new THREE.AmbientLight(0xffffff, 0.85);
+      scene3D.add(ambLight);
+
+      const dirLight = new THREE.DirectionalLight(0xffffff, 1.4);
+      dirLight.position.set(30, 50, 30);
+      scene3D.add(dirLight);
+
+      const grid = new THREE.GridHelper(60, 60, 0x334155, 0x1e293b);
+      scene3D.add(grid);
+
+      cenarioResidencialGroup.add(paredesGroup);
+      cenarioResidencialGroup.add(tubulacoesGroup);
+      cenarioResidencialGroup.add(aparelhosGroup);
+      scene3D.add(cenarioResidencialGroup);
+      scene3D.add(cenarioAgroGroup);
+
+      construirCenarioResidencial3D();
+      construirCenarioAgro3D();
+      animar3D();
+    }
+
+    function alternarCenario3D(modo) {
+      document.querySelectorAll('.scene-btn').forEach(b => b.classList.remove('active'));
+      if (modo === 'residencial') {
+        const btn = document.getElementById('btnSceneResidencial');
+        if (btn) btn.classList.add('active');
+        cenarioResidencialGroup.visible = true;
+        cenarioAgroGroup.visible = false;
+        camera3D.position.set(16, 18, 22);
+        controls3D.target.set(3, 1, 3);
+      } else if (modo === 'agro') {
+        const btn = document.getElementById('btnSceneAgro');
+        if (btn) btn.classList.add('active');
+        cenarioResidencialGroup.visible = false;
+        cenarioAgroGroup.visible = true;
+        camera3D.position.set(26, 26, 30);
+        controls3D.target.set(12, 4, 10);
+      } else {
+        const btn = document.getElementById('btnSceneIntegrado');
+        if (btn) btn.classList.add('active');
+        cenarioResidencialGroup.visible = true;
+        cenarioAgroGroup.visible = true;
+        camera3D.position.set(36, 36, 46);
+        controls3D.target.set(8, 2, 8);
+      }
+    }
+
+    function construirCenarioResidencial3D() {
+      const matParedes = new THREE.MeshStandardMaterial({ color: 0x334155, transparent: true, opacity: 0.75 });
+      const matPiso = new THREE.MeshStandardMaterial({ color: 0x0f172a });
+
+      const pisoGeo = new THREE.BoxGeometry(16, 0.2, 14);
+      const piso = new THREE.Mesh(pisoGeo, matPiso);
+      piso.position.set(3, -0.1, 3);
+      cenarioResidencialGroup.add(piso);
+
+      function criarParede(x, z, w, d, h = 3.0) {
+        const geo = new THREE.BoxGeometry(w, h, d);
+        const mesh = new THREE.Mesh(geo, matParedes);
+        mesh.position.set(x, h / 2, z);
+        paredesGroup.add(mesh);
+      }
+
+      criarParede(3, -4, 16, 0.25);
+      criarParede(3, 10, 16, 0.25);
+      criarParede(-5, 3, 0.25, 14);
+      criarParede(11, 3, 0.25, 14);
+      criarParede(1, 3, 0.2, 14);
+      criarParede(3, 3, 8, 0.2);
+
+      const qdcGeo = new THREE.BoxGeometry(0.8, 1.2, 0.2);
+      const qdcMat = new THREE.MeshStandardMaterial({ color: 0xd946ef, metalness: 0.5, roughness: 0.3 });
+      const qdcMesh = new THREE.Mesh(qdcGeo, qdcMat);
+      qdcMesh.position.set(1.1, 1.6, 3);
+      aparelhosGroup.add(qdcMesh);
+
+      const matTubo = new THREE.MeshStandardMaterial({ color: 0x38bdf8, roughness: 0.2 });
+      const pontosTubo = [
+        new THREE.Vector3(1.1, 2.8, 3),
+        new THREE.Vector3(1.1, 3.2, 3),
+        new THREE.Vector3(5, 3.2, 3),
+        new THREE.Vector3(5, 3.2, 6),
+        new THREE.Vector3(5, 2.4, 6)
+      ];
+      const curve = new THREE.CatmullRomCurve3(pontosTubo);
+      const tubeGeo = new THREE.TubeGeometry(curve, 32, 0.08, 8, false);
+      const tubeMesh = new THREE.Mesh(tubeGeo, matTubo);
+      tubulacoesGroup.add(tubeMesh);
+
+      const matLuz = new THREE.MeshStandardMaterial({ color: 0xf59e0b, emissive: 0xf59e0b, emissiveIntensity: 0.8 });
+      const luzGeo = new THREE.CylinderGeometry(0.3, 0.3, 0.08, 16);
+      const luzMesh = new THREE.Mesh(luzGeo, matLuz);
+      luzMesh.position.set(5, 3.15, 6);
+      aparelhosGroup.add(luzMesh);
+    }
+
+    function construirCenarioAgro3D() {
+      // 1. Usina Solar Fotovoltaica (Solo)
+      const mesaGroup = new THREE.Group();
+      const painelMat = new THREE.MeshStandardMaterial({ color: 0x1e3a8a, metalness: 0.8, roughness: 0.2 });
+      const molduraMat = new THREE.MeshStandardMaterial({ color: 0x94a3b8, metalness: 0.9 });
+
+      for (let r = 0; r < 2; r++) {
+        for (let c = 0; c < 6; c++) {
+          const modMesh = new THREE.Mesh(new THREE.BoxGeometry(1.6, 0.05, 2.4), painelMat);
+          modMesh.position.set(c * 1.7, 0.8 + r * 0.7, r * 2.2);
+          modMesh.rotation.x = -Math.PI / 10;
+          mesaGroup.add(modMesh);
+        }
+      }
+      mesaGroup.position.set(14, 0, -2);
+      cenarioAgroGroup.add(mesaGroup);
+
+      // 2. Aerogerador Eólico
+      const eolicaGroup = new THREE.Group();
+      const torreGeo = new THREE.CylinderGeometry(0.4, 0.8, 18, 16);
+      const metalMat = new THREE.MeshStandardMaterial({ color: 0xe2e8f0, metalness: 0.8, roughness: 0.3 });
+      const torreMesh = new THREE.Mesh(torreGeo, metalMat);
+      torreMesh.position.y = 9;
+      eolicaGroup.add(torreMesh);
+
+      const nacelleGeo = new THREE.BoxGeometry(1.4, 1.2, 3.0);
+      const nacelleMesh = new THREE.Mesh(nacelleGeo, metalMat);
+      nacelleMesh.position.set(0, 18, 0.5);
+      eolicaGroup.add(nacelleMesh);
+
+      bladesMesh = new THREE.Group();
+      const bladeGeo = new THREE.BoxGeometry(0.3, 4.5, 0.1);
+      for (let i = 0; i < 3; i++) {
+        const b = new THREE.Mesh(bladeGeo, metalMat);
+        b.rotation.z = (i * Math.PI * 2) / 3;
+        b.position.y = Math.cos((i * Math.PI * 2) / 3) * 2.2;
+        b.position.x = -Math.sin((i * Math.PI * 2) / 3) * 2.2;
+        bladesMesh.add(b);
+      }
+      bladesMesh.position.set(0, 18, 2.1);
+      eolicaGroup.add(bladesMesh);
+
+      eolicaGroup.position.set(22, 0, 14);
+      cenarioAgroGroup.add(eolicaGroup);
+
+      // 3. Biodigestor Rural
+      const bioGroup = new THREE.Group();
+      const cúpulaGeo = new THREE.SphereGeometry(4.5, 32, 16, 0, Math.PI * 2, 0, Math.PI / 2);
+      const peadMat = new THREE.MeshStandardMaterial({ color: 0x0f172a, roughness: 0.9 });
+      const cupulaMesh = new THREE.Mesh(cúpulaGeo, peadMat);
+      cupulaMesh.scale.set(1.6, 0.7, 1.2);
+      bioGroup.add(cupulaMesh);
+
+      flareLight = new THREE.PointLight(0xf97316, 1.5, 12);
+      flareLight.position.set(0, 5, 0);
+      bioGroup.add(flareLight);
+
+      bioGroup.position.set(14, 0, 8);
+      cenarioAgroGroup.add(bioGroup);
+
+      // 4. Casa de Força CHP
+      const chpGroup = new THREE.Group();
+      const chpGeo = new THREE.BoxGeometry(3.5, 3.0, 4.5);
+      const chpMat = new THREE.MeshStandardMaterial({ color: 0x334155 });
+      const chpPredio = new THREE.Mesh(chpGeo, chpMat);
+      chpPredio.position.y = 1.5;
+      chpGroup.add(chpPredio);
+
+      const chamGeo = new THREE.CylinderGeometry(0.12, 0.12, 4.2, 12);
+      const chamMat = new THREE.MeshStandardMaterial({ color: 0x1e293b, metalness: 0.8 });
+      const chamMesh = new THREE.Mesh(chamGeo, chamMat);
+      chamMesh.position.set(1.4, 3.5, 0);
+      chpGroup.add(chamMesh);
+
+      chpGroup.position.set(14, 0, 16);
+      cenarioAgroGroup.add(chpGroup);
+
+      // 5. Micro-Hidrelétrica PCH Rural (Rio, Barramento, Conduto e Casa de Força)
+      const pchGroup = new THREE.Group();
+      
+      // Rio / Curso d'Água Sinuoso
+      const rioGeo = new THREE.PlaneGeometry(10, 36);
+      const rioMat = new THREE.MeshStandardMaterial({ color: 0x0284c7, roughness: 0.1, metalness: 0.6 });
+      const rioMesh = new THREE.Mesh(rioGeo, rioMat);
+      rioMesh.rotation.x = -Math.PI / 2;
+      rioMesh.position.set(0, -0.05, 6);
+      pchGroup.add(rioMesh);
+
+      // Barramento de Captação
+      const barGeo = new THREE.BoxGeometry(10, 1.8, 1.5);
+      const barMat = new THREE.MeshStandardMaterial({ color: 0x64748b, roughness: 0.7 });
+      const barMesh = new THREE.Mesh(barGeo, barMat);
+      barMesh.position.set(0, 0.9, -10);
+      pchGroup.add(barMesh);
+
+      // Conduto Forçado PEAD Descendo o Declive
+      const pontosPch = [
+        new THREE.Vector3(3.5, 1.2, -9.5),
+        new THREE.Vector3(5.5, 0.8, -2.0),
+        new THREE.Vector3(7.5, 0.5, 8.0),
+        new THREE.Vector3(7.5, 0.3, 14.0)
+      ];
+      const curvePch = new THREE.CatmullRomCurve3(pontosPch);
+      const tubPchGeo = new THREE.TubeGeometry(curvePch, 32, 0.22, 10, false);
+      const tubPchMat = new THREE.MeshStandardMaterial({ color: 0x0f172a, roughness: 0.5 });
+      const tubPchMesh = new THREE.Mesh(tubPchGeo, tubPchMat);
+      pchGroup.add(tubPchMesh);
+
+      // Casa de Força PCH
+      const pchPredioGeo = new THREE.BoxGeometry(3.0, 2.5, 3.5);
+      const pchPredioMat = new THREE.MeshStandardMaterial({ color: 0x1e293b, metalness: 0.3 });
+      const pchPredio = new THREE.Mesh(pchPredioGeo, pchPredioMat);
+      pchPredio.position.set(8.5, 1.25, 15.5);
+      pchGroup.add(pchPredio);
+
+      // Turbina Pelton Rotação
+      turbinaPeltonMesh = new THREE.Mesh(
+        new THREE.CylinderGeometry(0.5, 0.5, 0.2, 16),
+        new THREE.MeshStandardMaterial({ color: 0xf59e0b, metalness: 0.9 })
+      );
+      turbinaPeltonMesh.position.set(8.5, 0.6, 17.5);
+      pchGroup.add(turbinaPeltonMesh);
+
+      pchGroup.position.set(-6, 0, 0);
+      cenarioAgroGroup.add(pchGroup);
+    }
+
+    function toggleModoWireframe() {
+      paredesGroup.traverse(child => {
+        if (child.isMesh) child.material.wireframe = !child.material.wireframe;
+      });
+    }
+
+    function isolarTubulacao() {
+      paredesGroup.visible = !paredesGroup.visible;
+    }
+
+    function resetarCamera3D() {
+      if (camera3D && controls3D) {
+        camera3D.position.set(24, 25, 32);
+        controls3D.target.set(5, 2, 5);
+        controls3D.update();
+      }
+    }
+
+    function animar3D() {
+      requestAnimationFrame(animar3D);
+      if (bladesMesh) bladesMesh.rotation.z += 0.04;
+      if (turbinaPeltonMesh) turbinaPeltonMesh.rotation.y += 0.06;
+      if (flareLight) flareLight.intensity = 1.2 + Math.sin(Date.now() * 0.01) * 0.4;
+      if (controls3D) controls3D.update();
+      if (renderer3D && scene3D && camera3D) renderer3D.render(scene3D, camera3D);
+    }
+
+    // ========================================================
+    // COPILOT IA NORMATIVO & AUDITORIA DE ENGENHARIA ELÉTRICA
+    // ========================================================
+    let provedoresCopilot = [];
+    let provedorCopilotAtivo = 'offline';
+    let modeloCopilotAtivo = 'expert-analytical-eletrica-v1';
+
+    const PROVEDORES_COPILOT_PADRAO = [
+      {
+        id: "offline",
+        nome: "Motor Offline Antigravity",
+        icone: "⚡",
+        chave_configurada: true,
+        modelos: [
+          { id: "expert-analytical-eletrica-v1", nome: "Motor Analítico NBR 5410/5419/16690" }
+        ]
+      },
+      {
+        id: "gemini",
+        nome: "Google Gemini",
+        icone: "✨",
+        chave_configurada: false,
+        modelos: [
+          { id: "gemini-3.8-flash", nome: "Gemini 3.8 Flash (Recomendado - Mais Novo)" },
+          { id: "gemini-3.5-flash", nome: "Gemini 3.5 Flash" },
+          { id: "gemini-2.0-flash", nome: "Gemini 2.0 Flash" },
+          { id: "gemini-1.5-flash", nome: "Gemini 1.5 Flash" }
+        ]
+      },
+      {
+        id: "openai",
+        nome: "OpenAI ChatGPT",
+        icone: "🟢",
+        chave_configurada: false,
+        modelos: [
+          { id: "gpt-4o", nome: "GPT-4o (Omni)" },
+          { id: "gpt-4o-mini", nome: "GPT-4o Mini" }
+        ]
+      },
+      {
+        id: "claude",
+        nome: "Anthropic Claude",
+        icone: "🟣",
+        chave_configurada: false,
+        modelos: [
+          { id: "claude-3-5-sonnet-20241022", nome: "Claude 3.5 Sonnet" }
+        ]
+      },
+      {
+        id: "deepseek",
+        nome: "DeepSeek AI",
+        icone: "🐋",
+        chave_configurada: false,
+        modelos: [
+          { id: "deepseek-chat", nome: "DeepSeek V3" },
+          { id: "deepseek-reasoner", nome: "DeepSeek R1" }
+        ]
+      },
+      {
+        id: "ollama",
+        nome: "Ollama Local",
+        icone: "🦙",
+        chave_configurada: true,
+        modelos: [
+          { id: "llama3.2", nome: "Meta LLaMA 3.2 (Local)" }
+        ]
+      }
+    ];
+
+    async function carregarProvedoresCopilot() {
+      try {
+        const resp = await fetch('/api/v1/ai/provedores');
+        const data = await resp.json();
+        provedoresCopilot = data.provedores || PROVEDORES_COPILOT_PADRAO;
+      } catch (e) {
+        provedoresCopilot = PROVEDORES_COPILOT_PADRAO;
+      }
+      renderizarSelectProvedorCopilot();
+      trocarProvedorCopilot();
+    }
+
+    function renderizarSelectProvedorCopilot() {
+      const sel = document.getElementById('copilot-sel-provedor');
+      if (!sel) return;
+      sel.innerHTML = '';
+      provedoresCopilot.forEach(p => {
+        const opt = document.createElement('option');
+        opt.value = p.id;
+        opt.textContent = `${p.icone} ${p.nome}`;
+        if (p.id === provedorCopilotAtivo) opt.selected = true;
+        sel.appendChild(opt);
+      });
+    }
+
+    function trocarProvedorCopilot() {
+      const selProv = document.getElementById('copilot-sel-provedor');
+      if (!selProv) return;
+      provedorCopilotAtivo = selProv.value;
+
+      const prov = provedoresCopilot.find(p => p.id === provedorCopilotAtivo) || PROVEDORES_COPILOT_PADRAO[0];
+      const selMod = document.getElementById('copilot-sel-modelo');
+      if (selMod) {
+        selMod.innerHTML = '';
+        (prov.modelos || []).forEach(m => {
+          const opt = document.createElement('option');
+          opt.value = m.id;
+          opt.textContent = m.nome;
+          selMod.appendChild(opt);
+        });
+        modeloCopilotAtivo = prov.modelos?.[0]?.id || '';
+      }
+
+      const inpKey = document.getElementById('copilot-inp-key');
+      const badge = document.getElementById('copilot-status-badge');
+      const chaveSalva = localStorage.getItem(`antigravity_key_${prov.id}`) || '';
+      if (inpKey) {
+        inpKey.value = chaveSalva;
+        inpKey.placeholder = (prov.chave_configurada || chaveSalva) ? `Chave ativa para ${prov.nome}` : `Cole sua chave para ${prov.nome}...`;
+      }
+      if (badge) {
+        if (prov.id === 'offline') {
+          badge.style.background = '#065f46';
+          badge.style.color = '#34d399';
+          badge.innerText = '● Modo Offline Local';
+        } else if (prov.chave_configurada || chaveSalva) {
+          badge.style.background = '#1e3a8a';
+          badge.style.color = '#93c5fd';
+          badge.innerText = '● Chave Configurada';
+        } else {
+          badge.style.background = '#374151';
+          badge.style.color = '#9ca3af';
+          badge.innerText = '○ Sem Chave (Fallback Ativo)';
+        }
+      }
+    }
+
+    async function salvarChaveCopilot() {
+      const inpKey = document.getElementById('copilot-inp-key');
+      if (!inpKey) return;
+      const chave = inpKey.value.trim();
+      if (!chave) {
+        alert("Cole uma chave válida antes de salvar.");
+        return;
+      }
+      localStorage.setItem(`antigravity_key_${provedorCopilotAtivo}`, chave);
+      try {
+        const resp = await fetch('/api/v1/ai/config/chave', {
+          method: 'POST',
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify({ provedor: provedorCopilotAtivo, chave: chave })
+        });
+        const data = await resp.json();
+        alert(data.mensagem || "Chave salva com sucesso!");
+        await carregarProvedoresCopilot();
+      } catch (e) {
+        alert("Chave salva com segurança na sessão do navegador!");
+        trocarProvedorCopilot();
+      }
+    }
+
+    function aplicarCenarioCopilot(tipo) {
+      const inp = document.getElementById('copilot-inp-prompt');
+      if (!inp) return;
+      if (tipo === 'queda') {
+        inp.value = "Para um circuito terminal monofásico de 127 V com 4.400 W e comprimento de 28 metros em condutores de cobre e eletroduto embutido em alvenaria (Método B1), qual a bitola mínima que atende à ampacidade e ao limite de 4% de queda de tensão da NBR 5410?";
+      } else if (tipo === 'seletividade') {
+        inp.value = "Como coordenar disjuntores DIN Curva B de 32 A nos circuitos de chuveiro contra o Disjuntor Geral Curva C de 63 A no QDC para garantir seletividade total sem desarmes intempestivos do IDR de 30 mA?";
+      } else if (tipo === 'stringbox') {
+        inp.value = "Conforme a NBR 16690:2019, quais são os critérios obrigatórios para dimensionamento de fusíveis gPV, chaves seccionadoras sob carga e DPS Classe II CC em arranjos fotovoltaicos com 2 e 3 strings em paralelo?";
+      } else if (tipo === 'eolica') {
+        inp.value = "Para um pequeno aerogerador de 5 kW segundo a IEC 61400-2, como estimar a potência gerada com vento de 11 m/s aplicando o limite de Betz e quais sistemas de frenagem (cut-out) são mandatórios?";
+      } else if (tipo === 'biogas') {
+        inp.value = "Em uma fazenda com 1.000 suínos em terminação, qual é o volume diário esperado de biogás em lagoa coberta de PEAD e qual a potência elétrica contínua entregue por um motogerador Ciclo Otto CHP?";
+      } else if (tipo === 'pch') {
+        inp.value = "Qual a potência elétrica de uma micro-hidrelétrica PCH rural com vazão de 40 L/s e desnível bruto de 25 m? Como calcular a sobrepressão do golpe de aríete no conduto forçado de PEAD PN10?";
+      } else if (tipo === 'lei14300') {
+        inp.value = "Quais as regras tarifárias de transição da Lei 14.300/2022 para a cobrança da componente TUSD Fio B na microgeração distribuída solar e como maximizar o autoconsumo instantâneo na propriedade?";
+      }
+      inp.focus();
+    }
+
+    function limparChatCopilot() {
+      const stream = document.getElementById('copilot-chat-stream');
+      if (stream) stream.innerHTML = '';
+      const hero = document.getElementById('copilot-welcome-hero');
+      if (hero) hero.style.display = 'block';
+      const topBar = document.getElementById('copilot-top-bar');
+      if (topBar) topBar.style.display = 'none';
+    }
+
+    async function auditarProjetoComCopilot() {
+      navegarParaAba('aba-ia-copilot');
+      const inp = document.getElementById('copilot-inp-prompt');
+      if (inp) {
+        inp.value = "Auditar conformidade normativa da instalação elétrica e microrrede calculada.";
+      }
+      await enviarMensagemCopilot();
+    }
+
+    async function enviarMensagemCopilot(e) {
+      if (e) e.preventDefault();
+      const inp = document.getElementById('copilot-inp-prompt');
+      if (!inp) return;
+      const pergunta = inp.value.trim();
+      if (!pergunta) return;
+
+      inp.value = '';
+      inp.style.height = 'auto';
+
+      const hero = document.getElementById('copilot-welcome-hero');
+      if (hero) hero.style.display = 'none';
+      const topBar = document.getElementById('copilot-top-bar');
+      if (topBar) topBar.style.display = 'flex';
+
+      const stream = document.getElementById('copilot-chat-stream');
+      const btnSend = document.getElementById('copilot-btn-send');
+      const msgId = Date.now();
+
+      // Bolha do Usuário
+      const userBubble = document.createElement('div');
+      userBubble.style.cssText = 'align-self: flex-end; background: linear-gradient(135deg, #1e40af, #2563eb); color: #fff; padding: 12px 16px; border-radius: 14px 14px 4px 14px; max-width: 82%; font-size: 13.5px; border: 1px solid #3b82f6;';
+      userBubble.innerHTML = `<div style="font-size: 10px; font-weight: 700; color: #bfdbfe; margin-bottom: 4px;">👤 ENGENHEIRO / USUÁRIO:</div><div>${escaparHTML(pergunta)}</div>`;
+      stream.appendChild(userBubble);
+
+      // Card de Carregamento da IA
+      const aiCard = document.createElement('div');
+      aiCard.style.cssText = 'align-self: flex-start; background: #0f172a; border: 1px solid #1e293b; border-radius: 14px 14px 14px 4px; padding: 18px; max-width: 96%; width: 100%;';
+      aiCard.id = `copilot-card-${msgId}`;
+      aiCard.innerHTML = `
+        <div style="display: flex; align-items: center; gap: 10px; color: #fde047; font-size: 13px;">
+          <span>⏳</span>
+          <span>Consultando <strong>${(provedorCopilotAtivo).toUpperCase()}</strong> (${modeloCopilotAtivo || 'modelo padrão'})...</span>
+        </div>
+      `;
+      stream.appendChild(aiCard);
+      stream.scrollTop = stream.scrollHeight;
+
+      if (btnSend) {
+        btnSend.disabled = true;
+        btnSend.innerText = 'Processando...';
+      }
+
+      const apiKey = localStorage.getItem(`antigravity_key_${provedorCopilotAtivo}`) || undefined;
+
+      try {
+        const resp = await fetch('/api/v1/ai/consultar', {
+          method: 'POST',
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify({
+            pergunta: pergunta,
+            provedor: provedorCopilotAtivo,
+            modelo: modeloCopilotAtivo,
+            api_key: apiKey
+          })
+        });
+        const data = await resp.json();
+        renderizarCardMensagemCopilot(aiCard, data, msgId);
+      } catch (err) {
+        const fallback = fallbackCopilotLocal(pergunta);
+        renderizarCardMensagemCopilot(aiCard, fallback, msgId);
+      } finally {
+        if (btnSend) {
+          btnSend.disabled = false;
+          btnSend.innerText = '⚡ Consultar';
+        }
+        stream.scrollTop = stream.scrollHeight;
+      }
+    }
+
+    function fallbackCopilotLocal(pergunta) {
+      const p = pergunta.toLowerCase();
+      let texto = "";
+      let normas = ["ABNT NBR 5410:2004", "NR-10", "Lei 14.300/2022"];
+      let formulas = ["Delta_V <= 4,00%", "Iz = Iz_tab * Fca * Fct >= In >= Ib"];
+
+      if (p.includes("queda") || p.includes("condutor") || p.includes("bitola") || p.includes("fio")) {
+        texto = "### Parecer Técnico de Condutores e Queda de Tensão (NBR 5410)\n\n" +
+          "Conforme a **ABNT NBR 5410:2004** (Tabela 47 e Seção 6.2.7):\n" +
+          "• A seção mínima é de 1,5 mm² para iluminação e 2,5 mm² para tomadas (TUG/TUE);\n" +
+          "• A queda de tensão máxima acumulada nos circuitos terminais não deve exceder **4,00%**;\n" +
+          "• A ampacidade corrigida do condutor deve satisfazer `Ib <= In <= Iz`, aplicando fatores de agrupamento (Fca) e temperatura (Fct).";
+      } else if (p.includes("seletividade") || p.includes("disjuntor")) {
+        texto = "### Coordenação e Seletividade de Proteções (NBR 5410 & NM 60898)\n\n" +
+          "• Disjuntores Curva B disparam entre 3 e 5x In (ideais para chuveiros resistivos);\n" +
+          "• Disjuntores Curva C disparam entre 5 e 10x In (recomendados para circuitos de tomadas e cargas indutivas gerais);\n" +
+          "• A seletividade amperimétrica exige relação mínima de 1,6x entre o disjuntor à montante (Geral) e jusante.";
+      } else {
+        texto = "### Motor Analítico Antigravity Elétrica (Modo Offline Local)\n\n" +
+          "Sua consulta foi processada com base nas normas ABNT NBR 5410, NBR 16690 e NBR 5419.\n" +
+          "No ecossistema Antigravity Elétrica, todos os dimensionamentos obedecem a critérios estritos de segurança contra choques, sobrecorrentes e arcos elétricos.";
+      }
+
+      return {
+        texto: texto,
+        provedor_usado: "offline-browser",
+        modelo_usado: "expert-client-engine",
+        latencia_ms: 30,
+        tokens_estimados: 310,
+        normas_referenciadas: normas,
+        formulas_aplicadas: formulas,
+        aviso: "Resposta gerada pelo motor analítico offline embutido."
+      };
+    }
+
+    function renderizarCardMensagemCopilot(card, data, msgId) {
+      const prov = (data.provedor_usado || provedorCopilotAtivo).toUpperCase();
+      const mod = data.modelo_usado || modeloCopilotAtivo;
+      const latencia = data.latencia_ms || 0;
+      const tokens = data.tokens_estimados || 0;
+      const cot = data.raciocinio_cot;
+      const texto = data.texto || data.resposta_tecnica || "Sem resposta.";
+      const normas = data.normas_referenciadas || [];
+
+      let avisoHtml = '';
+      if (data.aviso) {
+        avisoHtml = `<div style="background: rgba(234, 179, 8, 0.15); border: 1px solid #eab308; color: #fde047; padding: 8px 12px; border-radius: 6px; font-size: 11.5px; margin-bottom: 10px;">⚠️ ${escaparHTML(data.aviso)}</div>`;
+      }
+
+      let normasHtml = '';
+      if (normas && normas.length > 0) {
+        normasHtml = `<div style="margin-top: 12px; padding-top: 10px; border-top: 1px solid #1f2937; display: flex; flex-wrap: wrap; gap: 6px; align-items: center;">
+          <span style="font-size: 11px; color: #9ca3af; font-weight: 600;">Normas:</span>
+          ${normas.map(n => `<span style="font-size: 10.5px; background: #1e293b; color: #fde047; padding: 2px 7px; border-radius: 4px; border: 1px solid #334155;">${escaparHTML(n)}</span>`).join('')}
+        </div>`;
+      }
+
+      let cotHtml = '';
+      if (cot) {
+        cotHtml = `<div style="background: #090d16; border: 1px solid #374151; border-radius: 6px; margin-bottom: 12px;">
+          <div onclick="toggleCotCopilot('${msgId}')" style="padding: 8px 12px; font-size: 11.5px; font-weight: 700; color: #a78bfa; cursor: pointer; display: flex; justify-content: space-between;">
+            <span>🧠 Raciocínio Passo a Passo (Chain-of-Thought)</span>
+            <span id="copilot-cot-chev-${msgId}">▸</span>
+          </div>
+          <div id="copilot-cot-content-${msgId}" style="display: none; padding: 10px; font-size: 11.5px; color: #c4b5fd; line-height: 1.5; font-family: monospace; max-height: 200px; overflow-y: auto;">
+            ${escaparHTML(cot)}
+          </div>
+        </div>`;
+      }
+
+      card.innerHTML = `
+        <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #1f2937; padding-bottom: 10px; margin-bottom: 12px; flex-wrap: wrap; gap: 8px;">
+          <div style="display: flex; gap: 6px; align-items: center; flex-wrap: wrap;">
+            <span style="font-size: 11px; background: #1e3a8a; color: #fde047; font-weight: 700; padding: 2px 7px; border-radius: 4px;">${escaparHTML(prov)}</span>
+            <span style="font-size: 11px; background: #1e293b; color: #93c5fd; padding: 2px 7px; border-radius: 4px; border: 1px solid #334155;">${escaparHTML(mod)}</span>
+            <span style="font-size: 11px; color: #6ee7b7;">⏱️ ${latencia} ms</span>
+            ${tokens ? `<span style="font-size: 11px; color: #9ca3af;">📊 ${tokens} tokens</span>` : ''}
+          </div>
+          <div>
+            <button type="button" onclick="copiarTextoCopilot('${msgId}')" style="background: #1e293b; border: 1px solid #374151; color: #cbd5e1; padding: 3px 8px; border-radius: 4px; font-size: 11px; font-weight: 600; cursor: pointer;">📋 Copiar</button>
+          </div>
+        </div>
+        ${avisoHtml}
+        ${cotHtml}
+        <div id="copilot-text-${msgId}" style="font-size: 13.5px; line-height: 1.6; color: #e2e8f0; white-space: pre-wrap;">
+          ${formatarMarkdownBasico(texto)}
+        </div>
+        ${normasHtml}
+      `;
+    }
+
+    function toggleCotCopilot(msgId) {
+      const c = document.getElementById(`copilot-cot-content-${msgId}`);
+      const chev = document.getElementById(`copilot-cot-chev-${msgId}`);
+      if (!c || !chev) return;
+      if (c.style.display === 'none') {
+        c.style.display = 'block';
+        chev.innerText = '▾';
+      } else {
+        c.style.display = 'none';
+        chev.innerText = '▸';
+      }
+    }
+
+    function copiarTextoCopilot(msgId) {
+      const el = document.getElementById(`copilot-text-${msgId}`);
+      if (el) {
+        navigator.clipboard.writeText(el.innerText);
+        alert("Parecer do Copilot copiado!");
+      }
+    }
+
+    function formatarMarkdownBasico(txt) {
+      return txt
+        .replace(/^### (.*$)/gim, '<h3 style="color:#facc15; font-size:15px; margin:10px 0 4px 0;">$1</h3>')
+        .replace(/^#### (.*$)/gim, '<h4 style="color:#38bdf8; font-size:13.5px; margin:8px 0 4px 0;">$1</h4>')
+        .replace(/\*\*(.*?)\*\*/gim, '<strong style="color:#fff;">$1</strong>')
+        .replace(/`(.*?)`/gim, '<code style="background:#1e293b; color:#67e8f9; padding:2px 5px; border-radius:4px; font-size:12px; font-family:Consolas,monospace;">$1</code>');
+    }
+
+    // Heartbeat regular a cada 5 segundos
+    setInterval(async () => {
+      try {
+        const r = await fetch('/api/v1/desktop/heartbeat');
+        if (r.ok) {
+          const el = document.getElementById('heartbeatStatus');
+          if (el) el.innerText = 'Servidor Conectado (Porta Ativa)';
+        }
+      } catch (e) {
+        const el = document.getElementById('heartbeatStatus');
+        if (el) el.innerText = 'Servidor Offline / Modo Standalone Local';
+      }
+    }, 5000);
+
+    // Inicialização ao carregar
+    window.addEventListener('load', () => {
+      carregarTodosDados();
+      setTimeout(desenharPlantaBaixa2D, 200);
+    });
+  </script>
+
+  <!-- Widget de Janela Flutuante do Copilot IA (Engenharia Elétrica & Renováveis) -->
+  <script src="static/js/antigravity_copilot.js"></script>
+</body>
+</html>

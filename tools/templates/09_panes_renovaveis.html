@@ -1,0 +1,141 @@
+        <!-- ABA 8: ENERGIAS RENOVÁVEIS, EÓLICA & BIOGÁS AGRO -->
+        <div id="aba-renovaveis" class="tab-pane">
+          
+          <!-- Seletor de Perfis da Microrrede -->
+          <div class="card" style="margin-bottom: 16px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
+              <div>
+                <strong style="font-size: 14px; color: #fff;">Perfil de Aplicação da Microrrede Híbrida:</strong>
+                <p style="font-size: 11px; color: var(--text-muted);">Selecione o cenário para redimensionar as fontes e o balanço em tempo real:</p>
+              </div>
+              <div style="display: flex; gap: 8px;">
+                <button class="btn btn-outline profile-btn" id="pbtn-residencial" onclick="selecionarPerfilRenovaveis('residencial')">🏡 Residencial (8.8 kWp)</button>
+                <button class="btn btn-outline profile-btn" id="pbtn-predial" onclick="selecionarPerfilRenovaveis('predial')">🏢 Predial (49.5 kWp)</button>
+                <button class="btn btn-primary profile-btn active" id="pbtn-fazenda" onclick="selecionarPerfilRenovaveis('fazenda')">🚜 Fazenda Agroindustrial (150 kWp)</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Métricas de Geração e Retorno Financeiro -->
+          <div class="metrics-grid">
+            <div class="metric-card">
+              <span class="metric-title">Geração Mensal Integrada</span>
+              <span class="metric-value" id="valRenGeracaoMensal" style="color: var(--accent-green);">14.850 kWh/mês</span>
+              <span class="metric-desc" id="valRenGeracaoAnual">178.200 kWh/ano acumulados</span>
+            </div>
+            <div class="metric-card">
+              <span class="metric-title">Autossuficiência Energética</span>
+              <span class="metric-value" id="valRenAutossuficiencia" style="color: var(--accent-yellow);">174.7 %</span>
+              <span class="metric-desc" id="valRenStatus">Superavitária (Injeção de Créditos na Rede)</span>
+            </div>
+            <div class="metric-card">
+              <span class="metric-title">Economia Tarifária Projetada</span>
+              <span class="metric-value" id="valRenEconomiaAnual" style="color: #fff;">R$ 117.199 / ano</span>
+              <span class="metric-desc" id="valRenEconomiaMensal">R$ 7.225 / mês em tarifa evitada</span>
+            </div>
+            <div class="metric-card">
+              <span class="metric-title">Descarbonização & Impacto ESG</span>
+              <span class="metric-value" id="valRenCO2" style="color: var(--accent-blue);">369.8 t CO₂e</span>
+              <span class="metric-desc" id="valRenArvores">Equivalente a 2.662 árvores preservadas</span>
+            </div>
+          </div>
+
+          <!-- Grid dos Equipamentos Dimensionados -->
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 16px; margin-bottom: 20px;">
+            
+            <!-- Card 1: Solar Fotovoltaico -->
+            <div class="card" style="margin-bottom: 0;">
+              <div class="card-header">
+                <div class="card-title">☀️ Energia Solar Fotovoltaica</div>
+                <a href="/api/v1/renovaveis/export/dxf-solar" class="btn btn-outline" style="padding: 3px 8px; font-size: 10px;" download>📥 DXF Solar</a>
+              </div>
+              <div style="font-size: 12px; line-height: 1.8;">
+                <div>• Potência de Pico: <strong id="specSolarPico" style="color: var(--accent-yellow);">150.0 kWp</strong></div>
+                <div>• Módulos Homologados: <span id="specSolarModulos">230 un x 650W N-Type TOPCon</span></div>
+                <div>• Arranjo Elétrico: <span id="specSolarStrings">10 strings x 23 módulos em série</span></div>
+                <div>• Tensão Máxima Voc: <span id="specSolarTensao">1.136 Vcc (MPPT: 500-850V)</span></div>
+                <div>• Inversor Central: <span id="specSolarInversor">125 kW Trifásico 380V (98.6%)</span></div>
+                <div>• Estrutura: <span id="specSolarEstrutura">Solo Monoposte Aço Galvanizado 18° Norte</span></div>
+                <div>• Geração Média: <strong id="specSolarGeracao" style="color: var(--accent-green);">19.500 kWh/mês</strong></div>
+              </div>
+            </div>
+
+            <!-- Card 2: Eólica -->
+            <div class="card" style="margin-bottom: 0;">
+              <div class="card-header">
+                <div class="card-title">💨 Geração Eólica & Turbina</div>
+                <a href="/api/v1/renovaveis/export/dxf-eolica" class="btn btn-outline" style="padding: 3px 8px; font-size: 10px;" download>📥 DXF Eólica</a>
+              </div>
+              <div style="font-size: 12px; line-height: 1.8;">
+                <div>• Modelo da Turbina: <span id="specEolicaModelo">HAWT Tripá Horizontal IEC 61400</span></div>
+                <div>• Potência Nominal: <strong id="specEolicaPotencia" style="color: var(--accent-yellow);">20.0 kW @ 10.5 m/s</strong></div>
+                <div>• Diâmetro do Rotor: <span id="specEolicaDiametro">9.2 metros (Área: 66.5 m²)</span></div>
+                <div>• Altura da Torre: <span id="specEolicaTorre">24.0 metros estaiada galvanizada</span></div>
+                <div>• Geração Mensal: <strong id="specEolicaGeracao" style="color: var(--accent-green);">3.850 kWh/mês</strong></div>
+                <div>• Proteção: <span>Freio eletrodinâmico e Dump Load resistivo</span></div>
+              </div>
+            </div>
+
+            <!-- Card 3: Biodigestor -->
+            <div class="card" style="margin-bottom: 0;" id="cardBiodigestor">
+              <div class="card-header">
+                <div class="card-title">🧪 Biodigestor Anaeróbio</div>
+                <a href="/api/v1/renovaveis/export/dxf-biodigestor" class="btn btn-outline" style="padding: 3px 8px; font-size: 10px;" download>📥 DXF Biogás</a>
+              </div>
+              <div id="boxBiodigestorContent" style="font-size: 12px; line-height: 1.8;">
+                <div>• Plantel Animal: <span id="specBioOrigem">1.000 Suínos em Terminação</span></div>
+                <div>• Vazão de Dejetos: <span id="specBioVazao">10.0 m³/dia (TRH = 30 dias)</span></div>
+                <div>• Geometria da Cava: <span id="specBioCava">Comp. 25m x Crista 8m x Prof. 2.5m</span></div>
+                <div>• Volume Útil: <span id="specBioVolume">300.0 m³ útil em PEAD 1,5 mm</span></div>
+                <div>• Produção de Biogás: <strong id="specBioGas" style="color: var(--accent-green);">250.0 m³/dia (65% Metano CH₄)</strong></div>
+              </div>
+              <div id="boxBiodigestorDispensado" style="display: none; padding: 20px; text-align: center; color: var(--text-muted); font-size: 12px;">
+                Dispensado no perfil selecionado (Inviável para área urbana).
+              </div>
+            </div>
+
+            <!-- Card 4: Motogerador Biogás CHP -->
+            <div class="card" style="margin-bottom: 0;" id="cardChp">
+              <div class="card-header">
+                <div class="card-title">🔥 Motogerador Cogeração CHP</div>
+                <span class="tag tag-yellow">Ciclo Otto a Biogás</span>
+              </div>
+              <div id="boxChpContent" style="font-size: 12px; line-height: 1.8;">
+                <div>• Potência Elétrica: <strong style="color: var(--accent-yellow);">75.0 kW (112 kWt térmico)</strong></div>
+                <div>• Alternador: <span>Síncrono Trifásico 380V/220V com AVR</span></div>
+                <div>• Consumo Biogás: <span>32.5 m³/h @ 100% de carga</span></div>
+                <div>• Cogeração CHP: <span>Água quente a 88°C para higienização e estufas</span></div>
+                <div>• Geração Mensal: <strong style="color: var(--accent-green);">9.000 kWh/mês (Despacho Firme Base)</strong></div>
+              </div>
+              <div id="boxChpDispensado" style="display: none; padding: 20px; text-align: center; color: var(--text-muted); font-size: 12px;">
+                Dispensado no perfil selecionado.
+              </div>
+            </div>
+
+          </div>
+
+          <!-- Tabela Resumo da Matriz Energética -->
+          <div class="card">
+            <div class="card-header">
+              <div class="card-title">⚖️ Balanço Energético Consolidado dos Vetores Renováveis</div>
+            </div>
+            <div class="table-container">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Vetor Renovável</th>
+                    <th>Tecnologia Adotada</th>
+                    <th>Potência Instalada</th>
+                    <th>Geração Média (kWh/mês)</th>
+                    <th>Regime de Despacho</th>
+                    <th>Integração Elétrica</th>
+                  </tr>
+                </thead>
+                <tbody id="tbodyBalancoRenovaveis">
+                  <!-- Preenchido via JavaScript -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+        </div>

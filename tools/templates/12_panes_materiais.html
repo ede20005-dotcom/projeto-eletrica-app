@@ -1,0 +1,51 @@
+        <!-- ABA 11: MATERIAIS & LAUDO ART CREA -->
+        <div id="aba-materiais" class="tab-pane">
+          <div class="card">
+            <div class="card-header">
+              <div class="card-title">📦 Relação Quantitativa de Materiais e Equipamentos</div>
+              <a href="/api/v1/eletrica/export/docx-memorial" class="btn btn-primary" download>📄 Exportar Laudo DOCX</a>
+            </div>
+            <div class="table-container">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Item</th>
+                    <th>Descrição do Material Normatizado</th>
+                    <th>Quantidade Estimada</th>
+                    <th>Unidade</th>
+                  </tr>
+                </thead>
+                <tbody id="tbodyMateriais">
+                  <!-- Preenchido via JavaScript -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-header">
+              <div class="card-title">📜 Minuta Técnica de ART CREA / CFT (Anotação de Responsabilidade Técnica)</div>
+              <span class="tag tag-yellow">Resolução CONFEA nº 1.025</span>
+            </div>
+            <div style="background: #0f172a; padding: 16px; border-radius: 6px; font-family: monospace; font-size: 11px; line-height: 1.8; color: #cbd5e1;">
+              <div><strong>ATIVIDADE TÉCNICA:</strong> PROJETO EXECUTIVO, DIMENSIONAMENTO E ESPECIFICAÇÃO DE INSTALAÇÕES ELÉTRICAS DE BAIXA TENSÃO E SISTEMAS DE GERAÇÃO RENOVÁVEL HÍBRIDA (SOLAR, EÓLICA, BIOGÁS E HIDRELÉTRICA PCH).</div>
+              <div><strong>NORMAS APLICADAS:</strong> ABNT NBR 5410:2004, ABNT NBR 5444:1989, ABNT NBR 5419:2015, ABNT NBR 16690:2019, IEC 61400 E LEI 14.300/2022.</div>
+              <div><strong>OBJETO:</strong> RESIDÊNCIA MULTIFAMILIAR E COMPLEXO AGROINDUSTRIAL SUSTENTÁVEL COM GERAÇÃO DISTRIBUÍDA SUPERAVITÁRIA.</div>
+              <div><strong>DECLARAÇÃO:</strong> DECLARO PARA OS DEVIDOS FINS QUE O PROJETO CONTEMPLA PROTEÇÃO DIFERENCIAL RESIDUAL (DR 30mA), PROTEÇÃO CONTRA SOBRETENSÕES (DPS CLASSE II 45kA E DPS CC EM Y 1000Vcc), EQUILÍBRIO DE FASES R-S-T (&lt; 2%), SELETIVIDADE TOTAL DE PROTEÇÕES E CONDUTO FORÇADO PEAD PN10 COM AMORTECIMENTO DE GOLPE DE ARÍETE.</div>
+            </div>
+          </div>
+        </div>
+
+      </main>
+
+      <!-- Rodapé do Sistema -->
+      <footer>
+        <div>
+          <span class="heartbeat-dot"></span>
+          <span id="heartbeatStatus">Servidor Antigravity Conectado e Operacional (100% Offline)</span>
+        </div>
+        <div>Plataforma Integrada de Engenharia Elétrica & Renováveis © 2026 — Padrão ABNT / CREA / TCU</div>
+      </footer>
+
+    </div>
+  </div>

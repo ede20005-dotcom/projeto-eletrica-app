@@ -1,0 +1,62 @@
+        <!-- ABA 6: DIAGRAMA MULTIFILAR DA STRINGBOX SOLAR CC (NBR 16690) -->
+        <div id="aba-stringbox" class="tab-pane">
+          <div class="metrics-grid">
+            <div class="metric-card">
+              <span class="metric-title">Tensão Máxima Voc (-10°C a +70°C)</span>
+              <span class="metric-value" style="color: var(--accent-red);">1.076 Vcc</span>
+              <span class="metric-desc">Arranjo de 18 Módulos em Série 550W</span>
+            </div>
+            <div class="metric-card">
+              <span class="metric-title">Corrente Máx. Projeto (1.25 x Isc)</span>
+              <span class="metric-value" style="color: var(--accent-yellow);">34.95 A</span>
+              <span class="metric-desc">2 Strings em Paralelo (Isc = 13.98A un)</span>
+            </div>
+            <div class="metric-card">
+              <span class="metric-title">Fusíveis de Proteção CC</span>
+              <span class="metric-value" style="color: var(--accent-green);">20A / 1000V</span>
+              <span class="metric-desc">gPV 10x38 mm Cerâmico (Polos + e -)</span>
+            </div>
+            <div class="metric-card">
+              <span class="metric-title">Chave Seccionadora CC</span>
+              <span class="metric-value" style="color: var(--accent-cyan);">63A / 1000V</span>
+              <span class="metric-desc">DC-PV2 com Manopla de Bloqueio LOTO</span>
+            </div>
+          </div>
+
+          <!-- Canvas 2D Esquema Multifilar Stringbox -->
+          <div class="card">
+            <div class="card-header">
+              <div class="card-title">📦 Diagrama Elétrico Multifilar da Stringbox CC e Proteções (NBR 16690)</div>
+              <div style="display: flex; gap: 8px; align-items: center;">
+                <span class="tag tag-yellow">Grau de Proteção IP65 Anti-UV</span>
+                <button class="btn btn-outline" onclick="desenharDiagramaStringboxCanvas()">🔄 Redesenhar Canvas</button>
+                <a href="/api/v1/renovaveis/export/dxf-stringbox" class="btn btn-primary" download>📥 Baixar DXF Stringbox Solar</a>
+              </div>
+            </div>
+
+            <div class="cad-viewport" style="height: 520px;">
+              <div class="cad-toolbar">
+                <span class="tag tag-red">Polo Positivo (+)</span>
+                <span class="tag" style="background: #334155; color: #fff;">Polo Negativo (-)</span>
+                <span class="tag tag-green">Aterramento BEP (PE)</span>
+                <span class="tag tag-blue">DPS Configuração Y</span>
+              </div>
+              <canvas id="stringboxCanvas" class="cad-canvas"></canvas>
+            </div>
+
+            <div style="margin-top: 14px; display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 12px; font-size: 11.5px; color: var(--text-muted);">
+              <div style="background: #0f172a; padding: 12px; border-radius: 6px; border-left: 3px solid var(--accent-yellow);">
+                <strong style="color: #fff;">1. Proteção por Fusíveis gPV (IEC 60269-6):</strong>
+                <p>Protege as strings contra correntes reversas causadas por sombreamento parcial ou curtos internos entre módulos. Cartuchos de queima rápida 10x38mm instalados nas polaridades positiva e negativa.</p>
+              </div>
+              <div style="background: #0f172a; padding: 12px; border-radius: 6px; border-left: 3px solid var(--accent-blue);">
+                <strong style="color: #fff;">2. DPS CC Classe II em Configuração 'Y':</strong>
+                <p>Três varistores de óxido de zinco (ZnO) desacoplados com desconectores térmicos. Proporciona proteção em modo diferencial (+/-) e comum (+/PE e -/PE) sem queima em cascata em falta à terra.</p>
+              </div>
+              <div style="background: #0f172a; padding: 12px; border-radius: 6px; border-left: 3px solid var(--accent-green);">
+                <strong style="color: #fff;">3. Equipotencialização e Aterramento BEP:</strong>
+                <p>Barramento interno conectado com cabo de cobre flexível verde-amarelo 16 mm² aos trilhos estruturais de alumínio e à malha de aterramento do SPDA, mitigando riscos de choques por arco elétrico.</p>
+              </div>
+            </div>
+          </div>
+        </div>

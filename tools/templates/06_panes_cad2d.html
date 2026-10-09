@@ -1,0 +1,37 @@
+        <!-- ABA 5: ESQUEMAS 2D CAD INTERATIVOS (CANVAS) -->
+        <div id="aba-2d" class="tab-pane">
+          <div class="card">
+            <div class="card-header">
+              <div class="card-title">📐 Planta Baixa Eletrotécnica Interativa (Canvas 2D / NBR 5444)</div>
+              <div style="display: flex; gap: 8px;">
+                <button class="btn btn-outline" onclick="desenharPlantaBaixa2D()">🔄 Redesenhar Canvas</button>
+                <a href="/api/v1/eletrica/export/dxf-planta" class="btn btn-primary" download>📥 Baixar Planta DXF</a>
+                <a href="/api/v1/eletrica/export/dxf-unifilar" class="btn btn-blue" download>📥 Baixar Diagrama Unifilar QDC</a>
+              </div>
+            </div>
+
+            <div class="cad-viewport">
+              <div class="cad-toolbar">
+                <span style="font-size: 11px; color: var(--text-muted); align-self: center; margin-right: 8px;">Simulação NBR 5444:</span>
+                <span class="tag tag-yellow">Ponto de Luz Teto</span>
+                <span class="tag tag-blue">Eletroduto Embutido</span>
+                <span class="tag tag-purple">Quadro QDC Central</span>
+              </div>
+              <canvas id="cadCanvas" class="cad-canvas"></canvas>
+            </div>
+
+            <div style="margin-top: 14px; display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 12px; font-size: 11.5px; color: var(--text-muted);">
+              <div style="background: #0f172a; padding: 10px; border-radius: 6px;">
+                <strong style="color: #fff;">Simbologia de Fiação no Trecho:</strong>
+                <p>• Fase: Traço vertical cheio (|)</p>
+                <p>• Neutro: Traço com dobra no topo (⌈)</p>
+                <p>• Terra: Traço vertical com base perpendicular (⊥)</p>
+              </div>
+              <div style="background: #0f172a; padding: 10px; border-radius: 6px;">
+                <strong style="color: #fff;">Regra de Ocupação de Eletrodutos:</strong>
+                <p>• Máximo de 40% da área útil preenchida para 3 ou mais condutores (NBR 5410 item 6.2.11).</p>
+                <p>• Eletrodutos corrugados flexíveis PEAD antichama.</p>
+              </div>
+            </div>
+          </div>
+        </div>

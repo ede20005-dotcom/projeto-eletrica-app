@@ -1,0 +1,195 @@
+    <!-- SIDEBAR (MENU LATERAL HIERÁRQUICO) -->
+    <aside id="sidebar">
+      <div class="sidebar-header">
+        <div class="sidebar-brand">
+          <div class="sidebar-logo">⚡</div>
+          <div class="sidebar-title">
+            <strong>Antigravity Elétrica</strong>
+            <small>Plataforma Normativa</small>
+          </div>
+        </div>
+        <button class="btn-toggle-sidebar" id="btnToggleSidebar" title="Recolher / Expandir Menu" onclick="toggleSidebar()">◀</button>
+      </div>
+
+      <div class="sidebar-search-box">
+        <input type="text" id="navSearchInput" class="sidebar-search-input" placeholder="🔍 Filtrar módulos ou normas..." onkeyup="filtrarSidebar()">
+      </div>
+
+      <nav class="sidebar-nav" id="sidebarNav">
+        
+        <!-- GRUPO 1: BAIXA TENSÃO NBR 5410 -->
+        <div class="nav-group open" id="grp-bt">
+          <div class="nav-group-header open" onclick="toggleGrupo('grp-bt')">
+            <div class="nav-group-title">
+              <span class="nav-group-icon">⚡</span>
+              <span>1. Baixa Tensão & NBR 5410</span>
+            </div>
+            <span class="nav-group-arrow">▶</span>
+          </div>
+          <div class="nav-subitems">
+            <a class="nav-subitem active" data-tab="aba-visao-geral" onclick="navegarParaAba('aba-visao-geral')">📋 Visão Geral & Demandas</a>
+            <a class="nav-subitem" data-tab="aba-cargas" onclick="navegarParaAba('aba-cargas')">🏠 Levantamento por Cômodo <span class="nav-subitem-badge">11</span></a>
+            <a class="nav-subitem" data-tab="aba-circuitos" onclick="navegarParaAba('aba-circuitos')">⚡ QDC & Fases Balanceadas <span class="nav-subitem-badge">18</span></a>
+            <a class="nav-subitem" onclick="navegarParaAba('aba-visao-geral', 'balanco')">⚖️ Distribuição Fases R-S-T</a>
+          </div>
+        </div>
+
+        <!-- GRUPO 2: COORDENAÇÃO & SELETIVIDADE -->
+        <div class="nav-group" id="grp-seletividade">
+          <div class="nav-group-header" onclick="toggleGrupo('grp-seletividade')">
+            <div class="nav-group-title">
+              <span class="nav-group-icon">📈</span>
+              <span>2. Coordenação & Seletividade</span>
+            </div>
+            <span class="nav-group-arrow">▶</span>
+          </div>
+          <div class="nav-subitems">
+            <a class="nav-subitem" data-tab="aba-seletividade" onclick="navegarParaAba('aba-seletividade')">📈 Gráfico Tempo x Corrente (Log-Log)</a>
+            <a class="nav-subitem" onclick="navegarParaAba('aba-seletividade', 'matriz')">⚖️ Matriz de Seletividade dos Circuitos</a>
+            <a class="nav-subitem" onclick="navegarParaAba('aba-seletividade', 'curvas')">🛡️ Curvas B, C e D Disjuntores DIN</a>
+            <a class="nav-subitem" href="/api/v1/eletrica/export/dxf-seletividade" download>📥 Baixar DXF Seletividade NBR 5410</a>
+          </div>
+        </div>
+
+        <!-- GRUPO 3: USINAS SOLARES & STRINGBOX -->
+        <div class="nav-group" id="grp-solar">
+          <div class="nav-group-header" onclick="toggleGrupo('grp-solar')">
+            <div class="nav-group-title">
+              <span class="nav-group-icon">☀️</span>
+              <span>3. Energia Solar & Stringbox</span>
+            </div>
+            <span class="nav-group-arrow">▶</span>
+          </div>
+          <div class="nav-subitems">
+            <a class="nav-subitem" data-tab="aba-renovaveis" onclick="navegarParaAba('aba-renovaveis', 'solar')">☀️ Usinas Fotovoltaicas On-Grid</a>
+            <a class="nav-subitem" data-tab="aba-stringbox" onclick="navegarParaAba('aba-stringbox')">📦 Diagrama Stringbox Solar CC</a>
+            <a class="nav-subitem" onclick="selecionarPerfilRenovaveis('residencial')">🏡 Modelo Residencial (8.8 kWp)</a>
+            <a class="nav-subitem" onclick="selecionarPerfilRenovaveis('predial')">🏢 Modelo Predial (49.5 kWp)</a>
+            <a class="nav-subitem" onclick="selecionarPerfilRenovaveis('fazenda')">🚜 Modelo Fazenda (150 kWp)</a>
+            <a class="nav-subitem" href="/api/v1/renovaveis/export/dxf-solar" download>📥 Baixar DXF Usina Solar</a>
+            <a class="nav-subitem" href="/api/v1/renovaveis/export/dxf-stringbox" download>📥 Baixar DXF Stringbox CC</a>
+          </div>
+        </div>
+
+        <!-- GRUPO 4: ENERGIA EÓLICA & AEROGERADORES -->
+        <div class="nav-group" id="grp-eolica">
+          <div class="nav-group-header" onclick="toggleGrupo('grp-eolica')">
+            <div class="nav-group-title">
+              <span class="nav-group-icon">💨</span>
+              <span>4. Geração Eólica & Turbinas</span>
+            </div>
+            <span class="nav-group-arrow">▶</span>
+          </div>
+          <div class="nav-subitems">
+            <a class="nav-subitem" data-tab="aba-renovaveis" onclick="navegarParaAba('aba-renovaveis', 'eolica')">💨 Aerogeradores HAWT / VAWT</a>
+            <a class="nav-subitem" onclick="navegarParaAba('aba-3d', 'agro')">🌐 Visualizar Turbina 3D</a>
+            <a class="nav-subitem" href="/api/v1/renovaveis/export/dxf-eolica" download>📥 Baixar DXF Eólica (IEC 61400)</a>
+          </div>
+        </div>
+
+        <!-- GRUPO 5: BIODIGESTOR & BIOGÁS AGRO -->
+        <div class="nav-group" id="grp-biogas">
+          <div class="nav-group-header" onclick="toggleGrupo('grp-biogas')">
+            <div class="nav-group-title">
+              <span class="nav-group-icon">🧪</span>
+              <span>5. Biodigestor & Biogás Agro</span>
+            </div>
+            <span class="nav-group-arrow">▶</span>
+          </div>
+          <div class="nav-subitems">
+            <a class="nav-subitem" data-tab="aba-renovaveis" onclick="navegarParaAba('aba-renovaveis', 'biodigestor')">🧪 Cava Trapezoidal PEAD</a>
+            <a class="nav-subitem" onclick="navegarParaAba('aba-renovaveis', 'chp')">🔥 Motogerador Ciclo Otto CHP</a>
+            <a class="nav-subitem" href="/api/v1/renovaveis/export/dxf-biodigestor" download>📥 Baixar DXF Biodigestor</a>
+          </div>
+        </div>
+
+        <!-- GRUPO 6: MICRO-HIDRELÉTRICA PCH RURAL -->
+        <div class="nav-group" id="grp-pch">
+          <div class="nav-group-header" onclick="toggleGrupo('grp-pch')">
+            <div class="nav-group-title">
+              <span class="nav-group-icon">💧</span>
+              <span>6. Micro-Hidrelétrica PCH Rural</span>
+            </div>
+            <span class="nav-group-arrow">▶</span>
+          </div>
+          <div class="nav-subitems">
+            <a class="nav-subitem" data-tab="aba-hidreletrica" onclick="navegarParaAba('aba-hidreletrica')">💧 Dimensionamento Queda & Vazão</a>
+            <a class="nav-subitem" onclick="navegarParaAba('aba-hidreletrica', 'conduto')">🌊 Conduto Forçado PEAD PN10 & Golpe</a>
+            <a class="nav-subitem" onclick="navegarParaAba('aba-hidreletrica', 'turbina')">⚙️ Turbinas Pelton & Francis</a>
+            <a class="nav-subitem" href="/api/v1/renovaveis/export/dxf-hidreletrica" download>📥 Baixar DXF Hidrelétrica PCH</a>
+          </div>
+        </div>
+
+        <!-- GRUPO 7: ESQUEMAS 2D CAD & DXF -->
+        <div class="nav-group" id="grp-cad">
+          <div class="nav-group-header" onclick="toggleGrupo('grp-cad')">
+            <div class="nav-group-title">
+              <span class="nav-group-icon">📐</span>
+              <span>7. Esquemas 2D CAD & DXF</span>
+            </div>
+            <span class="nav-group-arrow">▶</span>
+          </div>
+          <div class="nav-subitems">
+            <a class="nav-subitem" data-tab="aba-2d" onclick="navegarParaAba('aba-2d')">📐 Planta Baixa Unifilar Canvas</a>
+            <a class="nav-subitem" onclick="navegarParaAba('aba-stringbox')">📦 Esquema Stringbox Solar Canvas</a>
+            <a class="nav-subitem" onclick="navegarParaAba('aba-seletividade')">📈 Gráfico Seletividade Canvas</a>
+            <a class="nav-subitem" href="/api/v1/eletrica/export/dxf-planta" download>📥 DXF Planta NBR 5444</a>
+            <a class="nav-subitem" href="/api/v1/eletrica/export/dxf-unifilar" download>📥 DXF Diagrama Unifilar QDC</a>
+          </div>
+        </div>
+
+        <!-- GRUPO 8: MAQUETE 3D WEBGL (THREE.JS) -->
+        <div class="nav-group" id="grp-3d">
+          <div class="nav-group-header" onclick="toggleGrupo('grp-3d')">
+            <div class="nav-group-title">
+              <span class="nav-group-icon">🌐</span>
+              <span>8. Maquete 3D & Eletrodutos</span>
+            </div>
+            <span class="nav-group-arrow">▶</span>
+          </div>
+          <div class="nav-subitems">
+            <a class="nav-subitem" data-tab="aba-3d" onclick="navegarParaAba('aba-3d', 'residencial')">🏠 Cenário Residencial 3D</a>
+            <a class="nav-subitem" onclick="navegarParaAba('aba-3d', 'agro')">🚜 Cenário Agro & Renováveis</a>
+            <a class="nav-subitem" onclick="navegarParaAba('aba-3d', 'integrado')">🌐 Visão Integrada Global</a>
+          </div>
+        </div>
+
+        <!-- GRUPO 9: ORÇAMENTO, BDI & ART CREA -->
+        <div class="nav-group" id="grp-orcamento">
+          <div class="nav-group-header" onclick="toggleGrupo('grp-orcamento')">
+            <div class="nav-group-title">
+              <span class="nav-group-icon">💰</span>
+              <span>9. Orçamento BDI & ART CREA</span>
+            </div>
+            <span class="nav-group-arrow">▶</span>
+          </div>
+          <div class="nav-subitems">
+            <a class="nav-subitem" data-tab="aba-orcamento" onclick="navegarParaAba('aba-orcamento')">💰 Orçamento Paramétrico SINAPI</a>
+            <a class="nav-subitem" onclick="navegarParaAba('aba-orcamento', 'bdi')">📊 Calculadora BDI Interativa (TCU)</a>
+            <a class="nav-subitem" onclick="navegarParaAba('aba-orcamento', 'viabilidade')">📈 Análise Viabilidade (VPL / TIR)</a>
+            <a class="nav-subitem" data-tab="aba-materiais" onclick="navegarParaAba('aba-materiais')">📦 Lista de Materiais Quantitativa</a>
+            <a class="nav-subitem" onclick="navegarParaAba('aba-materiais')">📜 Minuta de ART CREA / CFT</a>
+            <a class="nav-subitem" href="/api/v1/eletrica/export/docx-memorial" download>📄 Exportar Laudo DOCX</a>
+          </div>
+        </div>
+
+        <!-- GRUPO 10: AGENTE IA & COPILOT NORMATIVO -->
+        <div class="nav-group" id="grp-ia">
+          <div class="nav-group-header" onclick="toggleGrupo('grp-ia')">
+            <div class="nav-group-title">
+              <span class="nav-group-icon">🤖</span>
+              <span>10. Agente IA & Copilot Normativo</span>
+            </div>
+            <span class="nav-group-arrow">▶</span>
+          </div>
+          <div class="nav-subitems">
+            <a class="nav-subitem" data-tab="aba-ia-copilot" onclick="navegarParaAba('aba-ia-copilot')">💬 Chat Copilot de Engenharia</a>
+            <a class="nav-subitem" onclick="navegarParaAba('aba-ia-copilot', 'auditoria')">🔍 Auditoria Normativa NBR 5410</a>
+            <a class="nav-subitem" onclick="navegarParaAba('aba-ia-copilot', 'seletividade')">📈 Análise de Seletividade & DR</a>
+            <a class="nav-subitem" onclick="navegarParaAba('aba-ia-copilot', 'stringbox')">☀️ Parecer Stringbox NBR 16690</a>
+            <a class="nav-subitem" href="/ia_central_agentes_eletrica.html" target="_blank">🌐 Central Multiprovedor (Nova Janela)</a>
+          </div>
+        </div>
+
+      </nav>
+    </aside>

@@ -1,0 +1,170 @@
+        <!-- ABA 1: VISÃO GERAL & NORMAS -->
+        <div id="aba-visao-geral" class="tab-pane active">
+          <div class="metrics-grid">
+            <div class="metric-card">
+              <span class="metric-title">Potência Total Instalada</span>
+              <span class="metric-value" id="valPotInstalada">48.2 kW</span>
+              <span class="metric-desc">Soma Cargas Iluminação + TUG + TUE</span>
+            </div>
+            <div class="metric-card">
+              <span class="metric-title">Demanda Máxima Provável</span>
+              <span class="metric-value" id="valDemanda">34.6 kVA</span>
+              <span class="metric-desc">Fatores de Demanda NBR 5410</span>
+            </div>
+            <div class="metric-card">
+              <span class="metric-title">Desequilíbrio de Fases</span>
+              <span class="metric-value" id="valDesequilibrio" style="color: var(--accent-green);">1.43 %</span>
+              <span class="metric-desc">Excelente Simetria Trifásica (&lt; 5%)</span>
+            </div>
+            <div class="metric-card">
+              <span class="metric-title">Alimentador Geral</span>
+              <span class="metric-value" style="color: var(--accent-yellow);"># 25.0 mm²</span>
+              <span class="metric-desc">Disjuntor Geral 125A Curva C (6kA)</span>
+            </div>
+          </div>
+
+          <div class="card" id="cardBalancoFases">
+            <div class="card-header">
+              <div class="card-title">⚖️ Equilíbrio e Distribuição de Cargas por Fase (R, S, T)</div>
+              <span class="tag tag-green">Simetria Aprovada NBR 5410</span>
+            </div>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 14px;">
+              <div style="background: #0f172a; padding: 12px; border-radius: 6px; border-left: 4px solid var(--accent-red);">
+                <div style="font-size: 11px; color: var(--text-muted);">FASE R (Linha 1)</div>
+                <div style="font-size: 18px; font-weight: 800; color: #fff;" id="valFaseR">16.953 VA</div>
+                <div style="font-size: 10px; color: var(--text-muted);">Chuveiro 1, Ilum. Social, Lavadora</div>
+              </div>
+              <div style="background: #0f172a; padding: 12px; border-radius: 6px; border-left: 4px solid var(--accent-yellow);">
+                <div style="font-size: 11px; color: var(--text-muted);">FASE S (Linha 2)</div>
+                <div style="font-size: 18px; font-weight: 800; color: #fff;" id="valFaseS">16.828 VA</div>
+                <div style="font-size: 10px; color: var(--text-muted);">Chuveiro Suíte, Cozinha B2, Ar 12k</div>
+              </div>
+              <div style="background: #0f172a; padding: 12px; border-radius: 6px; border-left: 4px solid var(--accent-blue);">
+                <div style="font-size: 11px; color: var(--text-muted);">FASE T (Linha 3)</div>
+                <div style="font-size: 18px; font-weight: 800; color: #fff;" id="valFaseT">16.711 VA</div>
+                <div style="font-size: 10px; color: var(--text-muted);">Forno Elétrico, TUGs Área Serviço</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-header">
+              <div class="card-title">📚 Repositório e Conformidade com Normas Regulamentadoras</div>
+              <span class="tag tag-yellow">Padrão ABNT / CREA</span>
+            </div>
+            <div class="table-container">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Norma</th>
+                    <th>Título Oficial</th>
+                    <th>Aplicação na Plataforma</th>
+                    <th>Status</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td><strong>ABNT NBR 5410:2004</strong></td>
+                    <td>Instalações elétricas de baixa tensão</td>
+                    <td>Dimensionamento de condutores, eletrodutos, circuitos e DR</td>
+                    <td><span class="tag tag-green">Atendida Plenamente</span></td>
+                  </tr>
+                  <tr>
+                    <td><strong>ABNT NBR 5444:1989</strong></td>
+                    <td>Símbolos gráficos para instalações elétricas prediais</td>
+                    <td>Simbologia CAD nas pranchas 2D, pontos de luz, tomadas e eletrodutos</td>
+                    <td><span class="tag tag-green">Atendida Plenamente</span></td>
+                  </tr>
+                  <tr>
+                    <td><strong>ABNT NBR 5419:2015</strong></td>
+                    <td>Proteção contra descargas atmosféricas (SPDA e DPS)</td>
+                    <td>Coordenação de DPS Classe II 45kA contra sobretensões transitórias</td>
+                    <td><span class="tag tag-green">Atendida Plenamente</span></td>
+                  </tr>
+                  <tr>
+                    <td><strong>ABNT NBR 16690:2019</strong></td>
+                    <td>Instalações elétricas de arranjos fotovoltaicos</td>
+                    <td>Stringbox CC, fusíveis gPV, chave seccionadora CC e DPS CC em Y</td>
+                    <td><span class="tag tag-green">Atendida Plenamente</span></td>
+                  </tr>
+                  <tr>
+                    <td><strong>NR-10 (MTE)</strong></td>
+                    <td>Segurança em instalações e serviços em eletricidade</td>
+                    <td>Travamento LOTO, seccionamento visível, barramentos protegidos</td>
+                    <td><span class="tag tag-green">Atendida Plenamente</span></td>
+                  </tr>
+                  <tr>
+                    <td><strong>LEI 14.300/2022</strong></td>
+                    <td>Marco Legal da Micro e Minigeração Distribuída (GD)</td>
+                    <td>Regras tarifárias de compensação de créditos e transição de Fio B</td>
+                    <td><span class="tag tag-green">Atendida Plenamente</span></td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- ABA 2: LEVANTAMENTO DE CARGAS POR CÔMODO -->
+        <div id="aba-cargas" class="tab-pane">
+          <div class="card">
+            <div class="card-header">
+              <div class="card-title">🏠 Levantamento Luminotécnico e de Cargas por Compartimento (NBR 5410)</div>
+              <span class="tag tag-blue">11 Compartimentos Analisados</span>
+            </div>
+            <div class="table-container">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Cômodo / Ambiente</th>
+                    <th>Dimensões (m)</th>
+                    <th>Área (m²)</th>
+                    <th>Perímetro (m)</th>
+                    <th>Iluminação Mínima</th>
+                    <th>Tomadas de Uso Geral (TUG)</th>
+                    <th>Tomadas Específicas (TUE)</th>
+                    <th>Total (VA)</th>
+                  </tr>
+                </thead>
+                <tbody id="tbodyComodos">
+                  <!-- Preenchido via JavaScript -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- ABA 3: QUADRO DE DISTRIBUIÇÃO E CIRCUITOS -->
+        <div id="aba-circuitos" class="tab-pane">
+          <div class="card">
+            <div class="card-header">
+              <div class="card-title">⚡ Quadro de Distribuição de Circuitos (QDC) — Balanceamento Trifásico</div>
+              <span class="tag tag-yellow">18 Circuitos Dimensionados</span>
+            </div>
+            <div class="table-container">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Circ.</th>
+                    <th>Descrição da Carga</th>
+                    <th>Tensão</th>
+                    <th>Fase</th>
+                    <th>Pot. (VA)</th>
+                    <th>Pot. (W)</th>
+                    <th>Ib (A)</th>
+                    <th>Condutor</th>
+                    <th>Neutro</th>
+                    <th>Terra</th>
+                    <th>Disjuntor</th>
+                    <th>Queda ΔV</th>
+                    <th>Eletroduto</th>
+                    <th>Proteção DR</th>
+                  </tr>
+                </thead>
+                <tbody id="tbodyCircuitos">
+                  <!-- Preenchido via JavaScript -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>

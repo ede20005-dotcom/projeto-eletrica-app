@@ -1,0 +1,978 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Central de Agentes de IA & Copilot Elétrico — Antigravity Engineering</title>
+  
+  <style>
+    :root {
+      --bg-dark: #090d16;
+      --card-bg: #111827;
+      --card-border: #1f2937;
+      --text-main: #f3f4f6;
+      --text-muted: #9ca3af;
+      --accent-blue: #3b82f6;
+      --accent-cyan: #06b6d4;
+      --accent-yellow: #eab308;
+      --accent-green: #10b981;
+      --accent-amber: #f59e0b;
+      --font-stack: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: var(--font-stack); }
+    body {
+      background-color: var(--bg-dark);
+      color: var(--text-main);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    header {
+      background: #0d131f;
+      border-bottom: 1px solid var(--card-border);
+      padding: 16px 28px;
+    }
+    .header-content {
+      max-width: 1400px;
+      margin: 0 auto;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+    .brand-title {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .brand-logo {
+      width: 42px;
+      height: 42px;
+      border-radius: 10px;
+      background: linear-gradient(135deg, #eab308, #2563eb);
+      display: grid;
+      place-items: center;
+      font-weight: 900;
+      font-size: 20px;
+      color: #fff;
+      box-shadow: 0 0 15px rgba(234, 179, 8, 0.4);
+    }
+    .brand-title h1 {
+      font-size: 18px;
+      font-weight: 800;
+      color: #fff;
+      letter-spacing: -0.3px;
+    }
+    .brand-title p {
+      font-size: 11.5px;
+      color: var(--text-muted);
+    }
+
+    main {
+      max-width: 1400px;
+      width: 100%;
+      margin: 20px auto 40px auto;
+      padding: 0 24px;
+      flex: 1;
+      display: grid;
+      grid-template-columns: 360px 1fr;
+      gap: 24px;
+    }
+    @media (max-width: 1024px) {
+      main { grid-template-columns: 1fr; }
+    }
+
+    /* Coluna Lateral */
+    .sidebar-panel {
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    .card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 12px;
+      padding: 18px;
+    }
+    .card-title {
+      font-size: 13px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.6px;
+      color: var(--accent-yellow);
+      margin-bottom: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .providers-grid {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .provider-btn {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 10px 12px;
+      border-radius: 8px;
+      background: #162032;
+      border: 1.5px solid #1f2937;
+      color: #e5e7eb;
+      cursor: pointer;
+      font-size: 13px;
+      font-weight: 600;
+      transition: all 0.15s ease;
+      text-align: left;
+    }
+    .provider-btn:hover {
+      background: #1e293b;
+      border-color: #3b82f6;
+    }
+    .provider-btn.active {
+      background: #1e3a8a;
+      border-color: #eab308;
+      color: #fff;
+      box-shadow: 0 0 12px rgba(234, 179, 8, 0.25);
+    }
+    .provider-info-left {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .provider-badge {
+      font-size: 9.5px;
+      font-weight: 800;
+      padding: 2px 6px;
+      border-radius: 10px;
+      text-transform: uppercase;
+    }
+    .badge-ready { background: #065f46; color: #34d399; }
+    .badge-unset { background: #374151; color: #9ca3af; }
+
+    .form-group {
+      margin-bottom: 14px;
+    }
+    .form-group label {
+      display: block;
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text-muted);
+      margin-bottom: 6px;
+    }
+    select, input[type="text"], input[type="password"] {
+      width: 100%;
+      background: #0d131f;
+      border: 1px solid #374151;
+      border-radius: 8px;
+      padding: 9px 12px;
+      color: #fff;
+      font-size: 13px;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+    select:focus, input:focus {
+      border-color: var(--accent-yellow);
+    }
+
+    .key-status-box {
+      font-size: 11.5px;
+      padding: 8px 10px;
+      border-radius: 6px;
+      margin-top: 8px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      background: #1f2937;
+      color: #d1d5db;
+    }
+
+    /* Coluna Central: Chat / Console de Engenharia */
+    .chat-panel {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      height: 100%;
+    }
+
+    .preset-chips {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+    .chip-btn {
+      background: #162032;
+      border: 1px solid #2d3748;
+      color: #cbd5e1;
+      padding: 6px 12px;
+      border-radius: 20px;
+      font-size: 11.5px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.15s;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .chip-btn:hover {
+      background: #2563eb;
+      color: #fff;
+      border-color: #eab308;
+    }
+
+    .response-area {
+      flex: 1;
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 12px;
+      padding: 24px;
+      min-height: 480px;
+      max-height: 65vh;
+      display: flex;
+      flex-direction: column;
+      overflow-y: auto;
+      scroll-behavior: smooth;
+    }
+    .chat-stream {
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+      width: 100%;
+    }
+    .chat-bubble-user {
+      align-self: flex-end;
+      background: linear-gradient(135deg, #1e40af, #2563eb);
+      color: #ffffff;
+      padding: 14px 18px;
+      border-radius: 16px 16px 4px 16px;
+      max-width: 82%;
+      box-shadow: 0 4px 14px rgba(37, 99, 235, 0.25);
+      border: 1px solid #3b82f6;
+    }
+    .chat-bubble-user .user-header {
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: #bfdbfe;
+      margin-bottom: 4px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .chat-bubble-user .user-text {
+      font-size: 14px;
+      line-height: 1.5;
+      white-space: pre-wrap;
+      word-break: break-word;
+    }
+    .chat-card-ai {
+      align-self: flex-start;
+      background: #0f172a;
+      border: 1px solid #1e293b;
+      border-radius: 16px 16px 16px 4px;
+      padding: 20px;
+      max-width: 96%;
+      width: 100%;
+      box-shadow: 0 4px 18px rgba(0, 0, 0, 0.35);
+    }
+    .ai-loading-bubble {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      color: #38bdf8;
+      font-size: 13.5px;
+      padding: 6px 0;
+    }
+    @keyframes spin {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+    }
+    .response-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid #1f2937;
+      padding-bottom: 12px;
+      margin-bottom: 16px;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+    .meta-tag {
+      font-size: 11.5px;
+      padding: 3px 8px;
+      border-radius: 6px;
+      background: #1e293b;
+      color: #93c5fd;
+      border: 1px solid #334155;
+    }
+
+    .response-body {
+      font-size: 14px;
+      line-height: 1.7;
+      color: #e2e8f0;
+      white-space: pre-wrap;
+    }
+    .response-body h3, .response-body h4 {
+      color: #facc15;
+      margin: 14px 0 6px 0;
+      font-weight: 700;
+    }
+    .response-body code {
+      background: #1e293b;
+      color: #67e8f9;
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-family: Consolas, monospace;
+      font-size: 13px;
+    }
+
+    .cot-accordion {
+      background: #090d16;
+      border: 1px solid #374151;
+      border-radius: 8px;
+      margin-bottom: 16px;
+      overflow: hidden;
+    }
+    .cot-header {
+      padding: 10px 14px;
+      background: #111827;
+      font-size: 12px;
+      font-weight: 700;
+      color: #a78bfa;
+      cursor: pointer;
+      display: flex;
+      justify-content: space-between;
+    }
+    .cot-content {
+      padding: 14px;
+      font-size: 12px;
+      color: #c4b5fd;
+      line-height: 1.6;
+      font-family: monospace;
+      max-height: 250px;
+      overflow-y: auto;
+      background: rgba(0,0,0,0.2);
+    }
+
+    .input-bar {
+      display: flex;
+      gap: 10px;
+      align-items: flex-end;
+    }
+    textarea {
+      flex: 1;
+      background: #111827;
+      border: 1.5px solid #374151;
+      border-radius: 10px;
+      padding: 12px 14px;
+      color: #fff;
+      font-size: 14px;
+      outline: none;
+      resize: vertical;
+      min-height: 60px;
+      max-height: 160px;
+      line-height: 1.5;
+    }
+    textarea:focus {
+      border-color: var(--accent-yellow);
+      box-shadow: 0 0 0 2px rgba(234, 179, 8, 0.2);
+    }
+    .btn-send {
+      background: linear-gradient(135deg, #eab308, #2563eb);
+      color: #fff;
+      border: none;
+      border-radius: 10px;
+      padding: 14px 24px;
+      font-size: 14px;
+      font-weight: 700;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      transition: all 0.2s;
+      height: 60px;
+    }
+    .btn-send:hover {
+      filter: brightness(1.15);
+      transform: translateY(-1px);
+    }
+    .btn-send:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+      transform: none;
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="header-content">
+    <div class="brand-title">
+      <div class="brand-logo">⚡</div>
+      <div>
+        <h1>Central de Agentes de IA & LLM Gateway — Engenharia Elétrica</h1>
+        <p>Motor Unificado de Inteligência Normativa: Gemini · ChatGPT · Claude · DeepSeek · Ollama Local · Offline Core</p>
+      </div>
+    </div>
+    <div style="display: flex; gap: 8px;">
+      <a href="/dossie_engenharia_eletrica_consolidado.html" style="text-decoration:none; color:#fde047; font-size:12px; font-weight:700; padding:6px 12px; border:1px solid #eab308; border-radius:6px;">
+        ⚡ Plataforma Consolidada
+      </a>
+      <a href="/api/v1/eletrica/export/docx-memorial" download style="text-decoration:none; color:#93c5fd; font-size:12px; font-weight:700; padding:6px 12px; border:1px solid #3b82f6; border-radius:6px;">
+        📄 Laudo DOCX
+      </a>
+    </div>
+  </div>
+</header>
+
+<main>
+  <!-- Coluna da Esquerda: Configuração de Provedor e Modelos -->
+  <div class="sidebar-panel">
+    <div class="card">
+      <div class="card-title">
+        <span>1. Provedor de IA</span>
+        <span id="badge-total-provs" style="font-size:10px; background:#1e293b; padding:2px 6px; border-radius:4px; color:#94a3b8;">6 disponíveis</span>
+      </div>
+      <div class="providers-grid" id="providers-container">
+        <div style="text-align:center; padding:12px; font-size:12px; color:#9ca3af;">Carregando provedores...</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">2. Modelo Selecionado</div>
+      <div class="form-group">
+        <label for="sel-model">Modelo do Provedor:</label>
+        <select id="sel-model" onchange="atualizarDescricaoModelo()">
+        </select>
+        <div id="model-desc-box" style="font-size:11px; color:#9ca3af; margin-top:6px; line-height:1.4;"></div>
+      </div>
+
+      <div class="form-group" style="margin-top:14px;">
+        <label for="inp-api-key">Chave de API (BYOK - Opcional se já salva):</label>
+        <div style="display:flex; gap:6px;">
+          <input type="password" id="inp-api-key" placeholder="Cole sua chave aqui...">
+          <button type="button" onclick="salvarChaveAtual()" style="background:#2563eb; color:#fff; border:none; padding:0 12px; border-radius:6px; font-weight:700; font-size:11px; cursor:pointer;">Salvar</button>
+        </div>
+        <div class="key-status-box" id="key-status-indicator">
+          <span>ℹ️</span> <span id="key-status-text">Verificando status da chave...</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">3. Ações Rápidas de Auditoria</div>
+      <div style="display:flex; flex-direction:column; gap:8px;">
+        <button type="button" onclick="executarAuditoriaProjeto()" style="background:#162032; border:1px solid #eab308; color:#fde047; padding:9px 12px; border-radius:8px; font-size:12px; font-weight:700; cursor:pointer; text-align:left;">
+          🔍 Auditar Conformidade Geral (NBR 5410/5419)
+        </button>
+        <button type="button" onclick="aplicarCenario('seletividade')" style="background:#162032; border:1px solid #374151; color:#e2e8f0; padding:8px 12px; border-radius:8px; font-size:12px; cursor:pointer; text-align:left;">
+          ⚖️ Verificar Curvas e Seletividade DIN
+        </button>
+        <button type="button" onclick="aplicarCenario('stringbox')" style="background:#162032; border:1px solid #374151; color:#e2e8f0; padding:8px 12px; border-radius:8px; font-size:12px; cursor:pointer; text-align:left;">
+          ☀️ Avaliar Segurança Stringbox Solar CC
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Coluna da Direita: Console e Chat do Agente -->
+  <div class="chat-panel">
+    <!-- Chips com Cenários Pré-prontos -->
+    <div class="preset-chips">
+      <span style="font-size:11.5px; font-weight:700; color:#94a3b8; display:flex; align-items:center;">Casos de Teste:</span>
+      <button class="chip-btn" onclick="aplicarCenario('queda')">⚡ Queda de Tensão NBR 5410</button>
+      <button class="chip-btn" onclick="aplicarCenario('seletividade')">📈 Seletividade DIN & IDR</button>
+      <button class="chip-btn" onclick="aplicarCenario('stringbox')">☀️ Stringbox CC NBR 16690</button>
+      <button class="chip-btn" onclick="aplicarCenario('eolica')">💨 Aerogerador IEC 61400</button>
+      <button class="chip-btn" onclick="aplicarCenario('biogas')">🧪 Biodigestor & Biogás CHP</button>
+      <button class="chip-btn" onclick="aplicarCenario('pch')">💧 Micro-PCH & Golpe Aríete</button>
+      <button class="chip-btn" onclick="aplicarCenario('lei14300')">📜 Marco Legal Lei 14.300</button>
+    </div>
+
+    <!-- Área de Resposta / Feed Conversacional -->
+    <div class="response-area" id="response-box">
+      <div id="chat-top-bar" style="display: none; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--card-border); padding-bottom: 10px; margin-bottom: 16px;">
+        <span style="font-size: 11.5px; color: var(--text-muted); font-weight: 600;" id="chat-count-label">💬 Conversa com o Copilot Elétrico</span>
+        <button type="button" onclick="limparHistoricoChat()" style="background:#1e293b; border:1px solid #374151; color:#cbd5e1; padding:4px 10px; border-radius:6px; font-size:11px; font-weight:600; cursor:pointer;">🗑️ Limpar conversa</button>
+      </div>
+
+      <div id="welcome-hero" style="text-align:center; padding:70px 20px; color:#6b7280; margin: auto;">
+        <span style="font-size:46px; display:block; margin-bottom:12px;">⚡🤖</span>
+        <h2 style="font-size:18px; color:#e5e7eb; font-weight:800; margin-bottom:6px;">Agente Especialista de Engenharia Elétrica & Renováveis</h2>
+        <p style="font-size:13px; max-width:580px; margin:0 auto; line-height:1.5; color: #9ca3af;">
+          Selecione qualquer provedor à esquerda (Google Gemini, OpenAI, Claude, DeepSeek, Ollama ou Motor Offline), clique em um caso de teste acima ou digite sua consulta técnica normativa.
+        </p>
+      </div>
+
+      <div class="chat-stream" id="chat-stream"></div>
+    </div>
+
+    <!-- Input e Botão de Envio -->
+    <form class="input-bar" onsubmit="enviarConsulta(event)">
+      <textarea id="inp-prompt" placeholder="Digite sua dúvida ou instrução técnica (Pressione Enter para enviar, Shift+Enter para nova linha)..."></textarea>
+      <button type="submit" class="btn-send" id="btn-submit">
+        <span>⚡</span> <span>Consultar IA</span>
+      </button>
+    </form>
+  </div>
+</main>
+
+<script>
+  let provedoresData = [];
+  let provedorAtivo = "offline";
+  let modeloAtivo = "";
+
+  // Provedores padrão caso servidor offline
+  const PROVEDORES_PADRAO = [
+    {
+      id: "offline",
+      nome: "Motor Offline Antigravity",
+      icone: "⚡",
+      empresa: "Antigravity Core",
+      chave_configurada: true,
+      modelos: [
+        { id: "expert-analytical-eletrica-v1", nome: "Motor Analítico NBR 5410/5419/16690", descricao: "Motor determinístico embutido de regras de engenharia.", recomendado_para: "Uso offline completo." }
+      ]
+    },
+    {
+      id: "gemini",
+      nome: "Google Gemini",
+      icone: "✨",
+      empresa: "Google",
+      chave_configurada: false,
+      modelos: [
+        { id: "gemini-3.8-flash", nome: "Gemini 3.8 Flash (Recomendado - Mais Novo)", descricao: "Alta velocidade, raciocínio avançado multimodal e janela de 1M tokens.", recomendado_para: "Copiloto elétrico geral." },
+        { id: "gemini-3.5-flash", nome: "Gemini 3.5 Flash", descricao: "Alta estabilidade e conferência de tabelas.", recomendado_para: "Análise de projetos e normas." },
+        { id: "gemini-2.0-flash", nome: "Gemini 2.0 Flash", descricao: "Estabilidade e rapidez.", recomendado_para: "Conferência de normas." },
+        { id: "gemini-1.5-flash", nome: "Gemini 1.5 Flash", descricao: "Versão leve de alta disponibilidade.", recomendado_para: "Validações diretas." }
+      ]
+    },
+    {
+      id: "openai",
+      nome: "OpenAI ChatGPT",
+      icone: "🟢",
+      empresa: "OpenAI",
+      chave_configurada: false,
+      modelos: [
+        { id: "gpt-4o", nome: "GPT-4o (Omni)", descricao: "Modelo multimodal topo de linha com alto rigor matemático.", recomendado_para: "Auditoria de projetos." },
+        { id: "gpt-4o-mini", nome: "GPT-4o Mini", descricao: "Rápido e econômico.", recomendado_para: "Perguntas pontuais." }
+      ]
+    },
+    {
+      id: "claude",
+      nome: "Anthropic Claude",
+      icone: "🟣",
+      empresa: "Anthropic",
+      chave_configurada: false,
+      modelos: [
+        { id: "claude-3-5-sonnet-20241022", nome: "Claude 3.5 Sonnet", descricao: "Excelente redação técnica.", recomendado_para: "Laudos e memoriais." }
+      ]
+    },
+    {
+      id: "deepseek",
+      nome: "DeepSeek AI",
+      icone: "🐋",
+      empresa: "DeepSeek",
+      chave_configurada: false,
+      modelos: [
+        { id: "deepseek-chat", nome: "DeepSeek V3", descricao: "Ótimo custo-benefício.", recomendado_para: "Cálculos normativos." },
+        { id: "deepseek-reasoner", nome: "DeepSeek R1", descricao: "Raciocínio Chain-of-Thought profundo.", recomendado_para: "Deduções complexas." }
+      ]
+    },
+    {
+      id: "ollama",
+      nome: "Ollama Local",
+      icone: "🦙",
+      empresa: "Localhost:11434",
+      chave_configurada: true,
+      modelos: [
+        { id: "llama3.2", nome: "Meta LLaMA 3.2 (Local)", descricao: "Modelo local na máquina sem internet.", recomendado_para: "Privacidade absoluta." }
+      ]
+    }
+  ];
+
+  async function carregarProvedores() {
+    try {
+      const resp = await fetch('/api/v1/ai/provedores');
+      const data = await resp.json();
+      provedoresData = data.provedores || PROVEDORES_PADRAO;
+    } catch (e) {
+      console.warn("Servidor offline ou modo estático, usando catálogo padrão:", e);
+      provedoresData = PROVEDORES_PADRAO;
+    }
+    renderizarProvedores();
+    selecionarProvedor("offline");
+  }
+
+  function renderizarProvedores() {
+    const container = document.getElementById('providers-container');
+    container.innerHTML = "";
+
+    provedoresData.forEach(p => {
+      const btn = document.createElement('button');
+      btn.type = "button";
+      btn.className = `provider-btn ${p.id === provedorAtivo ? 'active' : ''}`;
+      btn.onclick = () => selecionarProvedor(p.id);
+
+      const statusBadge = p.chave_configurada 
+        ? `<span class="provider-badge badge-ready">Ativo</span>`
+        : (p.id === 'offline' ? `<span class="provider-badge badge-ready">Local</span>` : `<span class="provider-badge badge-unset">Sem Chave</span>`);
+
+      btn.innerHTML = `
+        <div class="provider-info-left">
+          <span style="font-size:18px;">${p.icone}</span>
+          <div>
+            <div>${p.nome}</div>
+            <div style="font-size:10px; color:#9ca3af;">${p.empresa}</div>
+          </div>
+        </div>
+        ${statusBadge}
+      `;
+      container.appendChild(btn);
+    });
+  }
+
+  function selecionarProvedor(provId) {
+    provedorAtivo = provId;
+    document.querySelectorAll('.provider-btn').forEach(b => b.classList.remove('active'));
+    renderizarProvedores();
+
+    const prov = provedoresData.find(p => p.id === provId);
+    if (!prov) return;
+
+    const selModel = document.getElementById('sel-model');
+    selModel.innerHTML = "";
+    (prov.modelos || []).forEach(m => {
+      const opt = document.createElement('option');
+      opt.value = m.id;
+      opt.textContent = `${m.nome} (${m.contexto_max})`;
+      selModel.appendChild(opt);
+    });
+
+    modeloAtivo = prov.modelos?.[0]?.id || "";
+    atualizarDescricaoModelo();
+
+    const inpKey = document.getElementById('inp-api-key');
+    if (inpKey) {
+      const salvoLocal = localStorage.getItem(`antigravity_key_${prov.id}`) || "";
+      inpKey.value = salvoLocal;
+      if (prov.chave_configurada || salvoLocal) {
+        inpKey.placeholder = `Chave ativa para ${prov.nome} (Cole para substituir)`;
+      } else {
+        inpKey.placeholder = `Cole sua chave de API para ${prov.nome}...`;
+      }
+    }
+
+    const statusText = document.getElementById('key-status-text');
+    if (prov.chave_configurada || prov.id === 'offline') {
+      statusText.innerText = `Chave configurada e ativa para ${prov.nome}.`;
+      statusText.parentElement.style.color = '#34d399';
+    } else {
+      statusText.innerText = `Sem chave configurada. O sistema usará o Motor Offline de contingência.`;
+      statusText.parentElement.style.color = '#f59e0b';
+    }
+  }
+
+  function atualizarDescricaoModelo() {
+    const selModel = document.getElementById('sel-model');
+    modeloAtivo = selModel.value;
+    const prov = provedoresData.find(p => p.id === provedorAtivo);
+    const mod = prov?.modelos?.find(m => m.id === modeloAtivo);
+    const descBox = document.getElementById('model-desc-box');
+    if (mod) {
+      descBox.innerHTML = `<strong>Descrição:</strong> ${mod.descricao}<br><strong>Recomendado para:</strong> ${mod.recomendado_para}`;
+    } else {
+      descBox.innerHTML = "";
+    }
+  }
+
+  async function salvarChaveAtual() {
+    const inpKey = document.getElementById('inp-api-key');
+    const chave = inpKey.value.trim();
+    if (!chave) {
+      alert("Por favor, cole uma chave de API válida antes de salvar.");
+      return;
+    }
+    localStorage.setItem(`antigravity_key_${provedorAtivo}`, chave);
+    try {
+      const resp = await fetch('/api/v1/ai/config/chave', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({ provedor: provedorAtivo, chave: chave })
+      });
+      const data = await resp.json();
+      if (resp.ok) {
+        alert(data.mensagem || "Chave salva com sucesso!");
+        await carregarProvedores();
+      } else {
+        alert("Chave salva localmente no navegador! (" + data.mensagem + ")");
+      }
+    } catch (e) {
+      alert("Chave salva com segurança na sessão local do navegador!");
+    }
+  }
+
+  function aplicarCenario(tipo) {
+    const inp = document.getElementById('inp-prompt');
+    if (tipo === 'queda') {
+      inp.value = "Para um circuito terminal monofásico de 127 V com 4.400 W e comprimento de 28 metros em condutores de cobre e eletroduto embutido em alvenaria (Método B1), qual a bitola mínima que atende à ampacidade e ao limite de 4% de queda de tensão da NBR 5410?";
+    } else if (tipo === 'seletividade') {
+      inp.value = "Como coordenar disjuntores DIN Curva B de 32 A nos circuitos de chuveiro contra o Disjuntor Geral Curva C de 63 A no QDC para garantir seletividade total sem desarmes intempestivos do IDR de 30 mA?";
+    } else if (tipo === 'stringbox') {
+      inp.value = "Conforme a NBR 16690:2019, quais são os critérios obrigatórios para dimensionamento de fusíveis gPV, chaves seccionadoras sob carga e DPS Classe II CC em arranjos fotovoltaicos com 2 e 3 strings em paralelo?";
+    } else if (tipo === 'eolica') {
+      inp.value = "Para um pequeno aerogerador de 5 kW segundo a IEC 61400-2, como estimar a potência gerada com vento de 11 m/s aplicando o limite de Betz e quais sistemas de frenagem (cut-out) são mandatórios?";
+    } else if (tipo === 'biogas') {
+      inp.value = "Em uma fazenda com 1.000 suínos em terminação, qual é o volume diário esperado de biogás em lagoa coberta de PEAD e qual a potência elétrica contínua entregue por um motogerador Ciclo Otto CHP?";
+    } else if (tipo === 'pch') {
+      inp.value = "Qual a potência elétrica de uma micro-hidrelétrica PCH rural com vazão de 40 L/s e desnível bruto de 25 m? Como calcular a sobrepressão do golpe de aríete no conduto forçado de PEAD PN10?";
+    } else if (tipo === 'lei14300') {
+      inp.value = "Quais as regras tarifárias de transição da Lei 14.300/2022 para a cobrança da componente TUSD Fio B na microgeração distribuída solar e como maximizar o autoconsumo instantâneo na propriedade?";
+    }
+    inp.focus();
+  }
+
+  function escaparHTML(str) {
+    if (!str) return '';
+    return str
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;")
+      .replace(/'/g, "&#039;");
+  }
+
+  function limparHistoricoChat() {
+    const chatStream = document.getElementById('chat-stream');
+    chatStream.innerHTML = '';
+    const welcomeHero = document.getElementById('welcome-hero');
+    if (welcomeHero) welcomeHero.style.display = 'block';
+    const topBar = document.getElementById('chat-top-bar');
+    if (topBar) topBar.style.display = 'none';
+  }
+
+  async function executarAuditoriaProjeto() {
+    const inp = document.getElementById('inp-prompt');
+    inp.value = "Execute a auditoria de conformidade técnica normativa do projeto elétrico e das fontes renováveis atualmente calculados.";
+    await enviarConsulta();
+  }
+
+  async function enviarConsulta(e) {
+    if (e) e.preventDefault();
+    const promptInput = document.getElementById('inp-prompt');
+    const pergunta = promptInput.value.trim();
+    if (!pergunta) return;
+
+    promptInput.value = '';
+    promptInput.style.height = 'auto';
+
+    const welcomeHero = document.getElementById('welcome-hero');
+    if (welcomeHero) welcomeHero.style.display = 'none';
+    const topBar = document.getElementById('chat-top-bar');
+    if (topBar) topBar.style.display = 'flex';
+
+    const chatStream = document.getElementById('chat-stream');
+    const responseBox = document.getElementById('response-box');
+    const btnSubmit = document.getElementById('btn-submit');
+
+    const msgId = Date.now();
+    const userBubble = document.createElement('div');
+    userBubble.className = 'chat-bubble-user';
+    userBubble.innerHTML = `
+      <div class="user-header"><span>👤</span> <span>Você perguntou:</span></div>
+      <div class="user-text">${escaparHTML(pergunta)}</div>
+    `;
+    chatStream.appendChild(userBubble);
+
+    const aiCard = document.createElement('div');
+    aiCard.className = 'chat-card-ai';
+    aiCard.id = `ai-card-${msgId}`;
+    aiCard.innerHTML = `
+      <div class="ai-loading-bubble">
+        <span style="display:inline-block; animation:spin 1s linear infinite;">⏳</span>
+        <span>Consultando <strong>${(provedorAtivo).toUpperCase()}</strong> (${modeloAtivo || 'modelo padrão'})...</span>
+      </div>
+    `;
+    chatStream.appendChild(aiCard);
+
+    responseBox.scrollTop = responseBox.scrollHeight;
+    btnSubmit.disabled = true;
+    btnSubmit.innerHTML = `<span>⏳</span> <span>Processando...</span>`;
+
+    const apiKey = document.getElementById('inp-api-key').value.trim() || localStorage.getItem(`antigravity_key_${provedorAtivo}`) || undefined;
+
+    try {
+      const resp = await fetch('/api/v1/ai/consultar', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({
+          pergunta: pergunta,
+          provedor: provedorAtivo,
+          modelo: modeloAtivo,
+          api_key: apiKey
+        })
+      });
+
+      const data = await resp.json();
+      renderizarRespostaNoCard(aiCard, data, msgId);
+    } catch (err) {
+      // Fallback local do navegador se servidor desconectado
+      const fallbackData = simularRespostaOfflineLocal(pergunta);
+      renderizarRespostaNoCard(aiCard, fallbackData, msgId);
+    } finally {
+      btnSubmit.disabled = false;
+      btnSubmit.innerHTML = `<span>⚡</span> <span>Consultar IA</span>`;
+      responseBox.scrollTop = responseBox.scrollHeight;
+    }
+  }
+
+  function simularRespostaOfflineLocal(pergunta) {
+    const p = pergunta.toLowerCase();
+    let texto = "";
+    let normas = ["ABNT NBR 5410:2004", "NR-10", "Lei 14.300/2022"];
+    let formulas = ["Delta_V <= 4,00%", "Iz = Iz_tab * Fca * Fct >= In >= Ib"];
+
+    if (p.includes("queda") || p.includes("condutor") || p.includes("bitola") || p.includes("fio")) {
+      texto = "### Parecer Técnico de Condutores e Queda de Tensão (NBR 5410)\n\n" +
+        "Conforme a **ABNT NBR 5410:2004** (Tabela 47 e Seção 6.2.7):\n" +
+        "• A seção mínima é de 1,5 mm² para iluminação e 2,5 mm² para tomadas (TUG/TUE);\n" +
+        "• A queda de tensão máxima acumulada nos circuitos terminais não deve exceder **4,00%**;\n" +
+        "• A ampacidade corrigida do condutor deve satisfazer `Ib <= In <= Iz`, aplicando fatores de agrupamento (Fca) e temperatura (Fct).";
+    } else if (p.includes("seletividade") || p.includes("disjuntor")) {
+      texto = "### Coordenação e Seletividade de Proteções (NBR 5410 & NM 60898)\n\n" +
+        "• Disjuntores Curva B disparam entre 3 e 5x In (ideais para cargas puramente resistivas como chuveiros);\n" +
+        "• Disjuntores Curva C disparam entre 5 e 10x In (recomendados para circuitos de tomadas e cargas indutivas gerais);\n" +
+        "• A seletividade amperimétrica exige relação mínima de 1,6x entre o disjuntor à montante (Geral) e jusante.";
+    } else {
+      texto = "### Motor Analítico Antigravity Elétrica (Modo Offline Local)\n\n" +
+        "Sua consulta foi processada com base nas normas ABNT NBR 5410, NBR 16690 e NBR 5419.\n" +
+        "No ecossistema Antigravity Elétrica, todos os dimensionamentos obedecem a critérios estritos de segurança contra choques, sobrecorrentes e arcos elétricos.";
+    }
+
+    return {
+      texto: texto,
+      provedor_usado: "offline-browser",
+      modelo_usado: "expert-client-engine",
+      latencia_ms: 25,
+      tokens_estimados: 320,
+      normas_referenciadas: normas,
+      formulas_aplicadas: formulas,
+      aviso: "Resposta gerada pelo motor analítico offline local do navegador."
+    };
+  }
+
+  function renderizarRespostaNoCard(card, data, msgId) {
+    const provNome = (data.provedor_usado || provedorAtivo).toUpperCase();
+    const modNome = data.modelo_usado || modeloAtivo;
+    const latencia = data.latencia_ms || 0;
+    const tokens = data.tokens_estimados || 0;
+    const cot = data.raciocinio_cot;
+    const texto = data.texto || data.resposta_tecnica || "Sem resposta.";
+    const normas = data.normas_referenciadas || [];
+
+    let avisoHtml = '';
+    if (data.aviso) {
+      avisoHtml = `
+        <div style="background:rgba(234, 179, 8, 0.15); border:1px solid #eab308; color:#fde047; padding:10px 14px; border-radius:8px; font-size:12px; margin-bottom:12px;">
+          ⚠️ ${escaparHTML(data.aviso)}
+        </div>
+      `;
+    }
+
+    let normasHtml = '';
+    if (normas && normas.length > 0) {
+      normasHtml = `
+        <div style="margin-top:14px; padding-top:12px; border-top:1px solid #1f2937; display:flex; flex-wrap:wrap; gap:6px; align-items:center;">
+          <span style="font-size:11px; color:#9ca3af; font-weight:600;">Normas & Regulamentações:</span>
+          ${normas.map(n => `<span style="font-size:11px; background:#1e293b; color:#fde047; padding:2px 8px; border-radius:4px; border:1px solid #334155;">${escaparHTML(n)}</span>`).join('')}
+        </div>
+      `;
+    }
+
+    let cotHtml = '';
+    if (cot) {
+      cotHtml = `
+        <div class="cot-accordion" style="margin-bottom:14px;">
+          <div class="cot-header" onclick="toggleCotMsg('${msgId}')">
+            <span>🧠 Raciocínio Interno do Modelo (Chain-of-Thought)</span>
+            <span id="cot-chevron-${msgId}">▸</span>
+          </div>
+          <div class="cot-content" id="cot-content-${msgId}" style="display:none;">${escaparHTML(cot)}</div>
+        </div>
+      `;
+    }
+
+    card.innerHTML = `
+      <div class="response-header">
+        <div style="display:flex; gap:8px; align-items:center; flex-wrap:wrap;">
+          <span class="meta-tag" style="background:#1e3a8a; color:#fde047; font-weight:700;">${escaparHTML(provNome)}</span>
+          <span class="meta-tag">${escaparHTML(modNome)}</span>
+          <span class="meta-tag" style="color:#6ee7b7;">⏱️ ${latencia} ms</span>
+          ${tokens ? `<span class="meta-tag">📊 ${tokens} tokens</span>` : ''}
+        </div>
+        <div>
+          <button type="button" onclick="copiarTextoCard('${msgId}')" style="background:#1e293b; border:1px solid #374151; color:#cbd5e1; padding:4px 10px; border-radius:6px; font-size:11px; font-weight:600; cursor:pointer;">📋 Copiar Parecer</button>
+        </div>
+      </div>
+      ${avisoHtml}
+      ${cotHtml}
+      <div class="response-body" id="resp-text-${msgId}">
+        ${formatarMarkdownBasico(texto)}
+      </div>
+      ${normasHtml}
+    `;
+  }
+
+  function toggleCotMsg(msgId) {
+    const c = document.getElementById(`cot-content-${msgId}`);
+    const chev = document.getElementById(`cot-chevron-${msgId}`);
+    if (!c || !chev) return;
+    if (c.style.display === 'none') {
+      c.style.display = 'block';
+      chev.innerText = '▾';
+    } else {
+      c.style.display = 'none';
+      chev.innerText = '▸';
+    }
+  }
+
+  function copiarTextoCard(msgId) {
+    const el = document.getElementById(`resp-text-${msgId}`);
+    if (el) {
+      navigator.clipboard.writeText(el.innerText);
+      alert("Parecer técnico copiado para a área de transferência!");
+    }
+  }
+
+  function formatarMarkdownBasico(txt) {
+    return txt
+      .replace(/^### (.*$)/gim, '<h3>$1</h3>')
+      .replace(/^#### (.*$)/gim, '<h4>$1</h4>')
+      .replace(/\*\*(.*?)\*\*/gim, '<strong>$1</strong>')
+      .replace(/`(.*?)`/gim, '<code>$1</code>');
+  }
+
+  window.addEventListener('DOMContentLoaded', () => {
+    carregarProvedores();
+    const inp = document.getElementById('inp-prompt');
+    if (inp) {
+      inp.addEventListener('keydown', function(e) {
+        if (e.key === 'Enter' && !e.shiftKey) {
+          e.preventDefault();
+          enviarConsulta();
+        }
+      });
+    }
+  });
+</script>
+
+<!-- Widget de Janela Flutuante do Copilot IA -->
+<script src="static/js/antigravity_copilot.js"></script>
+</body>
+</html>

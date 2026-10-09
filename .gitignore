@@ -1,0 +1,40 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+.venv*/
+env/
+venv/
+.pytest_cache/
+*.egg-info/
+dist/
+dist_installer/
+dist_portable/
+build/
+
+# Node / Web
+node_modules/
+.next/
+out/
+*.log
+
+# IDE
+.vscode/
+.idea/
+
+# Custom Outputs & Binaries
+*.pdf
+*.exe
+*.zip
+*.rar
+*.db-shm
+*.db-wal
+.csrf_secret
+
+# Scratch & Temporary
+scratch/
+workspace/
+output_artefatos/
+config/
+*.key
+*.env

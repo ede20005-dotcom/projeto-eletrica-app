@@ -1,0 +1,116 @@
+        <!-- ABA 9: MICRO-HIDRELÉTRICA PCH RURAL (LEI 14.300) -->
+        <div id="aba-hidreletrica" class="tab-pane">
+          <div class="metrics-grid">
+            <div class="metric-card">
+              <span class="metric-title">Vazão Hidráulica de Projeto</span>
+              <span class="metric-value" style="color: var(--accent-blue);">65.0 L/s</span>
+              <span class="metric-desc">0.065 m³/s com Desarenador de Fundo</span>
+            </div>
+            <div class="metric-card">
+              <span class="metric-title">Desnível / Queda Líquida</span>
+              <span class="metric-value" style="color: var(--accent-yellow);">21.4 m</span>
+              <span class="metric-desc">Queda Bruta 24.0m • Perda Carga 2.6m</span>
+            </div>
+            <div class="metric-card">
+              <span class="metric-title">Potência Elétrica Útil</span>
+              <span class="metric-value" style="color: var(--accent-green);">15.0 kW</span>
+              <span class="metric-desc">Turbina Pelton • Gerador Síncrono 380V</span>
+            </div>
+            <div class="metric-card">
+              <span class="metric-title">Geração Contínua de Base</span>
+              <span class="metric-value" style="color: #fff;">9.240 kWh/mês</span>
+              <span class="metric-desc">Operação 24h/dia (Fator Capacidade 85%)</span>
+            </div>
+          </div>
+
+          <!-- Card de Arquitetura e Engenharia da PCH -->
+          <div class="card">
+            <div class="card-header">
+              <div class="card-title">💧 Central Geradora Hidrelétrica (PCH Rural) — Dimensionamento e Componentes</div>
+              <div style="display: flex; gap: 8px; align-items: center;">
+                <span class="tag tag-green">Geração Firme 24 Horas</span>
+                <a href="/api/v1/renovaveis/export/dxf-hidreletrica" class="btn btn-primary" download>📥 Baixar DXF Hidrelétrica PCH</a>
+              </div>
+            </div>
+
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 16px; margin-bottom: 16px;">
+              
+              <div style="background: #0f172a; padding: 14px; border-radius: 6px; border-left: 3px solid var(--accent-blue);">
+                <div style="font-weight: 700; color: #fff; margin-bottom: 6px;">1. Captação & Desarenador</div>
+                <div style="font-size: 11.5px; color: var(--text-muted); line-height: 1.7;">
+                  <div>• Barramento de concreto com vertedouro e comporta regulável.</div>
+                  <div>• Grade metálica inclinada de retenção de folhas, galhos e detritos.</div>
+                  <div>• Caixa de carga e desarenador para decantação de partículas sólidas abrasivas, protegendo as conchas da turbina.</div>
+                </div>
+              </div>
+
+              <div style="background: #0f172a; padding: 14px; border-radius: 6px; border-left: 3px solid var(--accent-yellow);">
+                <div style="font-weight: 700; color: #fff; margin-bottom: 6px;">2. Conduto Forçado sob Pressão</div>
+                <div style="font-size: 11.5px; color: var(--text-muted); line-height: 1.7;">
+                  <div>• Tubulação em PEAD PN10 DN 200 mm (extensão total de 95 metros).</div>
+                  <div>• Velocidade de escoamento econômico: <strong>2,1 m/s</strong> (Fórmula de Bresse).</div>
+                  <div>• Blocos de ancoragem de concreto armado nos pontos de inflexão.</div>
+                  <div>• Proteção contra Golpe de Aríete (Joukowsky): sobrepressão máxima amortecida de <strong>2,8 bar</strong>.</div>
+                </div>
+              </div>
+
+              <div style="background: #0f172a; padding: 14px; border-radius: 6px; border-left: 3px solid var(--accent-green);">
+                <div style="font-weight: 700; color: #fff; margin-bottom: 6px;">3. Casa de Força & Turbina Pelton</div>
+                <div style="font-size: 11.5px; color: var(--text-muted); line-height: 1.7;">
+                  <div>• Roda Pelton com conchas bipartidas em aço inoxidável e injetor com agulha regulável.</div>
+                  <div>• Gerador Síncrono Trifásico Brushless 380V/220V 60Hz a 1800 RPM.</div>
+                  <div>• Regulador Eletrônico de Carga (ELC) com banco de resistores de lastro para estabilização de frequência.</div>
+                  <div>• Canal de fuga que restitui 100% da água ao rio sem qualquer consumo.</div>
+                </div>
+              </div>
+
+            </div>
+
+            <!-- Tabela de Comparação e Especificação Técnica -->
+            <div class="table-container">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Parâmetro de Engenharia</th>
+                    <th>Valor Calculado</th>
+                    <th>Critério Normativo / Equação</th>
+                    <th>Conformidade</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td><strong>Vazão Ecológica Preservada</strong></td>
+                    <td>130.0 L/s no leito do rio</td>
+                    <td>Resolução Conama / Outorga de Uso de Água</td>
+                    <td><span class="tag tag-green">Respeitada (66% mantido)</span></td>
+                  </tr>
+                  <tr>
+                    <td><strong>Diâmetro do Tubo de Pressão</strong></td>
+                    <td>DN 200 mm PEAD PN10</td>
+                    <td>Diâmetro de Bresse D = 1.5 * sqrt(Q)</td>
+                    <td><span class="tag tag-green">Econômico e Otimizado</span></td>
+                  </tr>
+                  <tr>
+                    <td><strong>Perda de Carga Hidráulica</strong></td>
+                    <td>2.60 mca (10.8% da queda)</td>
+                    <td>Equação de Hazen-Williams (C = 140)</td>
+                    <td><span class="tag tag-green">Dentro do Limite (&lt; 15%)</span></td>
+                  </tr>
+                  <tr>
+                    <td><strong>Rendimento Global da PCH</strong></td>
+                    <td>76.0 % (Turbina + Gerador + Painel)</td>
+                    <td>P = 9.81 * Q * Hl * η</td>
+                    <td><span class="tag tag-green">Excelente Eficiência</span></td>
+                  </tr>
+                  <tr>
+                    <td><strong>Regime Operacional</strong></td>
+                    <td>Despacho Contínuo (24h/dia)</td>
+                    <td>Fator de Capacidade 85%</td>
+                    <td><span class="tag tag-yellow">Energia de Base Rural</span></td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+
+          </div>
+        </div>

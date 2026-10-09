@@ -1,0 +1,39 @@
+    <!-- ÁREA DE CONTEÚDO PRINCIPAL -->
+    <div id="main-content">
+      
+      <!-- Topo do Sistema -->
+      <header>
+        <div class="header-left">
+          <button class="btn btn-outline" style="padding: 6px 10px; font-size: 14px;" onclick="toggleSidebar()" title="Expandir/Recolher Menu Lateral">☰</button>
+          <div class="header-brand">
+            <div class="brand-title">Antigravity Electrical & Renewable Energy Platform</div>
+            <div class="brand-subtitle">ABNT NBR 5410 / NR-10 / NBR 5419 / NBR 16690 / IEC 61400 / LEI 14.300 / TCU 2622</div>
+          </div>
+        </div>
+        <div class="header-actions">
+          <a href="/api/v1/eletrica/export/dxf-planta" class="btn btn-outline" download>📥 DXF Planta</a>
+          <a href="/api/v1/eletrica/export/dxf-unifilar" class="btn btn-outline" download>📥 DXF QDC</a>
+          <a href="/api/v1/eletrica/export/dxf-seletividade" class="btn btn-outline" download>📈 DXF Seletividade</a>
+          <a href="/api/v1/renovaveis/export/dxf-stringbox" class="btn btn-outline" download>☀️ DXF Stringbox</a>
+          <a href="/api/v1/renovaveis/export/dxf-hidreletrica" class="btn btn-outline" download>💧 DXF PCH Rural</a>
+          <a href="/api/v1/eletrica/export/docx-memorial" class="btn btn-primary" download>📄 Exportar Laudo DOCX</a>
+        </div>
+      </header>
+
+      <!-- Barra de Abas Superiores (Sincronizada com o Sidebar) -->
+      <nav class="tabs-nav" id="topTabsNav">
+        <button class="tab-btn active" data-tab="aba-visao-geral" onclick="navegarParaAba('aba-visao-geral')">📋 Visão Geral & Normas</button>
+        <button class="tab-btn" data-tab="aba-cargas" onclick="navegarParaAba('aba-cargas')">🏠 Cargas & Cômodos</button>
+        <button class="tab-btn" data-tab="aba-circuitos" onclick="navegarParaAba('aba-circuitos')">⚡ QDC & Fases</button>
+        <button class="tab-btn" data-tab="aba-seletividade" onclick="navegarParaAba('aba-seletividade')">📈 Seletividade NBR 5410</button>
+        <button class="tab-btn" data-tab="aba-2d" onclick="navegarParaAba('aba-2d')">📐 Planta 2D CAD</button>
+        <button class="tab-btn" data-tab="aba-stringbox" onclick="navegarParaAba('aba-stringbox')">☀️ Stringbox Solar CC</button>
+        <button class="tab-btn" data-tab="aba-3d" onclick="navegarParaAba('aba-3d')">🌐 Maquete 3D WebGL</button>
+        <button class="tab-btn" data-tab="aba-renovaveis" onclick="navegarParaAba('aba-renovaveis')">☀️ Renováveis & Biogás</button>
+        <button class="tab-btn" data-tab="aba-hidreletrica" onclick="navegarParaAba('aba-hidreletrica')">💧 Hidrelétrica PCH</button>
+        <button class="tab-btn" data-tab="aba-orcamento" onclick="navegarParaAba('aba-orcamento')">💰 Orçamento BDI & Viabilidade</button>
+        <button class="tab-btn" data-tab="aba-materiais" onclick="navegarParaAba('aba-materiais')">📦 Materiais & ART CREA</button>
+        <button class="tab-btn" data-tab="aba-ia-copilot" onclick="navegarParaAba('aba-ia-copilot')" style="border-left: 2px solid #eab308; color: #fde047;">🤖 Copilot IA Normativo</button>
+      </nav>
+
+      <main>
