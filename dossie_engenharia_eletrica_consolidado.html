@@ -4,9 +4,19 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Antigravity — Plataforma Integrada de Engenharia Elétrica & Renováveis (NBR 5410 / NBR 16690)</title>
-  <!-- Three.js e OrbitControls para visualização 3D WebGL Offline / CDN com fallback -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+  <!-- Three.js e OrbitControls para visualização 3D WebGL 100% Offline com Fallback CDN -->
+  <script src="static/js/three.min.js"></script>
+  <script>
+    if (typeof THREE === 'undefined') {
+      document.write('<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"><\/script>');
+    }
+  </script>
+  <script src="static/js/OrbitControls.js"></script>
+  <script>
+    if (typeof THREE !== 'undefined' && typeof THREE.OrbitControls === 'undefined') {
+      document.write('<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"><\/script>');
+    }
+  </script>
   <style>
     :root {
       --bg-dark: #0a0f1d;
@@ -594,6 +604,20 @@
 
       <nav class="sidebar-nav" id="sidebarNav">
         
+        <!-- GRUPO 0: DADOS DE ENTRADA & PARÂMETROS DO PROJETO -->
+        <div class="nav-group open" id="grp-parametros">
+          <div class="nav-group-header open" onclick="toggleGrupo('grp-parametros')" style="background: rgba(234, 179, 8, 0.12); border-left: 3px solid #eab308;">
+            <div class="nav-group-title">
+              <span class="nav-group-icon">⚙️</span>
+              <span style="color: #fde047; font-weight: 800;">0. Parâmetros & Entrada</span>
+            </div>
+            <span class="nav-group-arrow">▶</span>
+          </div>
+          <div class="nav-subitems">
+            <a class="nav-subitem active" data-tab="aba-parametros" onclick="navegarParaAba('aba-parametros')">⚙️ Formulário de Dimensionamento</a>
+          </div>
+        </div>
+
         <!-- GRUPO 1: BAIXA TENSÃO NBR 5410 -->
         <div class="nav-group open" id="grp-bt">
           <div class="nav-group-header open" onclick="toggleGrupo('grp-bt')">
@@ -604,7 +628,7 @@
             <span class="nav-group-arrow">▶</span>
           </div>
           <div class="nav-subitems">
-            <a class="nav-subitem active" data-tab="aba-visao-geral" onclick="navegarParaAba('aba-visao-geral')">📋 Visão Geral & Demandas</a>
+            <a class="nav-subitem" data-tab="aba-visao-geral" onclick="navegarParaAba('aba-visao-geral')">📋 Visão Geral & Demandas</a>
             <a class="nav-subitem" data-tab="aba-cargas" onclick="navegarParaAba('aba-cargas')">🏠 Levantamento por Cômodo <span class="nav-subitem-badge">11</span></a>
             <a class="nav-subitem" data-tab="aba-circuitos" onclick="navegarParaAba('aba-circuitos')">⚡ QDC & Fases Balanceadas <span class="nav-subitem-badge">18</span></a>
             <a class="nav-subitem" onclick="navegarParaAba('aba-visao-geral', 'balanco')">⚖️ Distribuição Fases R-S-T</a>
@@ -795,7 +819,8 @@
 
       <!-- Barra de Abas Superiores (Sincronizada com o Sidebar) -->
       <nav class="tabs-nav" id="topTabsNav">
-        <button class="tab-btn active" data-tab="aba-visao-geral" onclick="navegarParaAba('aba-visao-geral')">📋 Visão Geral & Normas</button>
+        <button class="tab-btn active" data-tab="aba-parametros" onclick="navegarParaAba('aba-parametros')" style="border-bottom: 2px solid #eab308; color: #fde047; font-weight: 800;">⚙️ Dados de Entrada</button>
+        <button class="tab-btn" data-tab="aba-visao-geral" onclick="navegarParaAba('aba-visao-geral')">📋 Visão Geral & Normas</button>
         <button class="tab-btn" data-tab="aba-cargas" onclick="navegarParaAba('aba-cargas')">🏠 Cargas & Cômodos</button>
         <button class="tab-btn" data-tab="aba-circuitos" onclick="navegarParaAba('aba-circuitos')">⚡ QDC & Fases</button>
         <button class="tab-btn" data-tab="aba-seletividade" onclick="navegarParaAba('aba-seletividade')">📈 Seletividade NBR 5410</button>
@@ -811,8 +836,269 @@
 
       <main>
 
+        <!-- ABA 0: PAINEL DE DADOS DE ENTRADA & PARÂMETROS DE DIMENSIONAMENTO -->
+        <div id="aba-parametros" class="tab-pane active">
+          
+          <!-- BANNER SUPERIOR DE AÇÕES & PRESETS -->
+          <div class="card" style="margin-bottom: 20px; border: 1px solid rgba(234, 179, 8, 0.35); background: linear-gradient(135deg, rgba(234, 179, 8, 0.08), rgba(15, 23, 42, 0.95));">
+            <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 14px;">
+              <div>
+                <div style="font-size: 16px; font-weight: 800; color: #fde047; display: flex; align-items: center; gap: 8px;">
+                  <span>⚙️</span> Painel de Dados de Entrada & Dimensionamento Interativo
+                </div>
+                <div style="font-size: 12px; color: var(--text-muted); margin-top: 3px;">
+                  Altere os parâmetros da instalação, cargas e usinas renováveis abaixo e clique em <strong>Recalcular Projeto</strong> para atualizar todas as tabelas, pranchas CAD, maquete 3D e laudo técnico.
+                </div>
+              </div>
+              <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+                <button class="btn btn-outline" onclick="aplicarPresetEntrada('residencial')" style="font-size: 11.5px; padding: 6px 12px;">🏠 Preset Residencial (185m²)</button>
+                <button class="btn btn-outline" onclick="aplicarPresetEntrada('predial')" style="font-size: 11.5px; padding: 6px 12px;">🏢 Preset Predial (600m²)</button>
+                <button class="btn btn-outline" onclick="aplicarPresetEntrada('fazenda')" style="font-size: 11.5px; padding: 6px 12px;">🚜 Preset Fazenda & Agro</button>
+                <button class="btn btn-primary" onclick="recalcularProjetoEletricoCompleto()" style="font-size: 12.5px; font-weight: 800; background: linear-gradient(135deg, #eab308, #ca8a04); color: #000; padding: 8px 18px; box-shadow: 0 4px 14px rgba(234, 179, 8, 0.35);">⚡ RECALCULAR PROJETO COMPLETO</button>
+              </div>
+            </div>
+            
+            <div id="alertaRecalculo" style="display: none; margin-top: 12px; padding: 8px 14px; background: rgba(16, 185, 129, 0.15); border: 1px solid #10b981; border-radius: 6px; color: #6ee7b7; font-size: 12px; font-weight: 700;">
+              ✅ Projeto recalculado com sucesso! Parâmetros normativos NBR 5410, NBR 16690 e BDI atualizados em tempo real.
+            </div>
+          </div>
+
+          <!-- GRID DE FORMULÁRIOS DE ENTRADA -->
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(360px, 1fr)); gap: 18px; margin-bottom: 20px;">
+            
+            <!-- CARD 1: IDENTIFICAÇÃO DO PROJETO & CLIENTE -->
+            <div class="card">
+              <div class="card-header" style="border-bottom: 1px solid #334155; padding-bottom: 10px; margin-bottom: 14px;">
+                <div class="card-title" style="font-size: 13.5px; color: #fff;">📋 1. Identificação da Obra & Responsabilidade Técnica</div>
+              </div>
+              <div style="display: flex; flex-direction: column; gap: 12px;">
+                <div>
+                  <label style="display: block; font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; margin-bottom: 4px;">Nome do Projeto / Edificação:</label>
+                  <input type="text" id="in_nomeProjeto" class="form-control" value="Residência Unifamiliar Alto Padrão NBR 5410" style="width: 100%; background: #0f172a; border: 1px solid #334155; color: #fff; padding: 7px 10px; border-radius: 6px; font-size: 12.5px;">
+                </div>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                  <div>
+                    <label style="display: block; font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; margin-bottom: 4px;">Cliente / Contratante:</label>
+                    <input type="text" id="in_cliente" class="form-control" value="Família Silveira & Associados" style="width: 100%; background: #0f172a; border: 1px solid #334155; color: #fff; padding: 7px 10px; border-radius: 6px; font-size: 12.5px;">
+                  </div>
+                  <div>
+                    <label style="display: block; font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; margin-bottom: 4px;">Tipo de Edificação:</label>
+                    <select id="in_tipoEdificacao" class="form-control" style="width: 100%; background: #0f172a; border: 1px solid #334155; color: #fff; padding: 7px 10px; border-radius: 6px; font-size: 12.5px;" onchange="ajustarTipoEdificacao(this.value)">
+                      <option value="residencial" selected>🏠 Residencial Unifamiliar</option>
+                      <option value="predial">🏢 Edifício Predial / Comercial</option>
+                      <option value="fazenda">🚜 Propriedade Rural / Fazenda</option>
+                    </select>
+                  </div>
+                </div>
+                <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px;">
+                  <div>
+                    <label style="display: block; font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; margin-bottom: 4px;">Engenheiro Responsável:</label>
+                    <input type="text" id="in_responsavel" class="form-control" value="Eng. Eletricista Responsável" style="width: 100%; background: #0f172a; border: 1px solid #334155; color: #fff; padding: 7px 10px; border-radius: 6px; font-size: 12px;">
+                  </div>
+                  <div>
+                    <label style="display: block; font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; margin-bottom: 4px;">CREA / CFT:</label>
+                    <input type="text" id="in_crea" class="form-control" value="CREA-SP 5069874123" style="width: 100%; background: #0f172a; border: 1px solid #334155; color: #fff; padding: 7px 10px; border-radius: 6px; font-size: 12px;">
+                  </div>
+                  <div>
+                    <label style="display: block; font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; margin-bottom: 4px;">ART / TRT nº:</label>
+                    <input type="text" id="in_art" class="form-control" value="28027230260012345" style="width: 100%; background: #0f172a; border: 1px solid #334155; color: #fff; padding: 7px 10px; border-radius: 6px; font-size: 12px;">
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- CARD 2: PARÂMETROS ELÉTRICOS DA REDE & NBR 5410 -->
+            <div class="card">
+              <div class="card-header" style="border-bottom: 1px solid #334155; padding-bottom: 10px; margin-bottom: 14px;">
+                <div class="card-title" style="font-size: 13.5px; color: #fff;">⚡ 2. Parâmetros Elétricos da Rede (NBR 5410 & NR-10)</div>
+              </div>
+              <div style="display: flex; flex-direction: column; gap: 12px;">
+                <div style="display: grid; grid-template-columns: 1.4fr 1fr 1fr; gap: 10px;">
+                  <div>
+                    <label style="display: block; font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; margin-bottom: 4px;">Tipo de Fornecimento:</label>
+                    <select id="in_fornecimento" class="form-control" style="width: 100%; background: #0f172a; border: 1px solid #334155; color: #fff; padding: 7px 10px; border-radius: 6px; font-size: 12px;" onchange="ajustarTensoes(this.value)">
+                      <option value="trifasico_127_220" selected>Trifásico (3F+N+PE) 127/220V</option>
+                      <option value="trifasico_220_380">Trifásico (3F+N+PE) 220/380V</option>
+                      <option value="bifasico_127_220">Bifásico (2F+N+PE) 127/220V</option>
+                      <option value="monofasico_220">Monofásico (F+N+PE) 220V</option>
+                      <option value="monofasico_127">Monofásico (F+N+PE) 127V</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label style="display: block; font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; margin-bottom: 4px;">Tensão F-N (V):</label>
+                    <input type="number" id="in_tensaoFN" class="form-control" value="127" step="1" style="width: 100%; background: #0f172a; border: 1px solid #334155; color: #fff; padding: 7px 10px; border-radius: 6px; font-size: 12.5px;">
+                  </div>
+                  <div>
+                    <label style="display: block; font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; margin-bottom: 4px;">Tensão F-F (V):</label>
+                    <input type="number" id="in_tensaoFF" class="form-control" value="220" step="1" style="width: 100%; background: #0f172a; border: 1px solid #334155; color: #fff; padding: 7px 10px; border-radius: 6px; font-size: 12.5px;">
+                  </div>
+                </div>
+
+                <div style="display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 10px;">
+                  <div>
+                    <label style="display: block; font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; margin-bottom: 4px;">Área Total (m²):</label>
+                    <input type="number" id="in_areaM2" class="form-control" value="185.0" step="5" style="width: 100%; background: #0f172a; border: 1px solid #334155; color: #fff; padding: 7px 10px; border-radius: 6px; font-size: 12.5px;">
+                  </div>
+                  <div>
+                    <label style="display: block; font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; margin-bottom: 4px;">Temp. Amb. (°C):</label>
+                    <input type="number" id="in_tempAmb" class="form-control" value="30" step="1" style="width: 100%; background: #0f172a; border: 1px solid #334155; color: #fff; padding: 7px 10px; border-radius: 6px; font-size: 12.5px;">
+                  </div>
+                  <div>
+                    <label style="display: block; font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; margin-bottom: 4px;">Fator Pot. (cos φ):</label>
+                    <input type="number" id="in_fpMedio" class="form-control" value="0.95" step="0.01" style="width: 100%; background: #0f172a; border: 1px solid #334155; color: #fff; padding: 7px 10px; border-radius: 6px; font-size: 12.5px;">
+                  </div>
+                  <div>
+                    <label style="display: block; font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; margin-bottom: 4px;">Queda Máx (%):</label>
+                    <input type="number" id="in_quedaMax" class="form-control" value="4.0" step="0.5" style="width: 100%; background: #0f172a; border: 1px solid #334155; color: #fff; padding: 7px 10px; border-radius: 6px; font-size: 12.5px;">
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- CARD 3: CARGAS ESPECIAIS & CIRCUITOS TUE/TUG -->
+            <div class="card">
+              <div class="card-header" style="border-bottom: 1px solid #334155; padding-bottom: 10px; margin-bottom: 14px;">
+                <div class="card-title" style="font-size: 13.5px; color: #fff;">🔌 3. Cargas Especiais & Aparelhos (TUE & TUG)</div>
+              </div>
+              <div style="display: flex; flex-direction: column; gap: 10px;">
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                  <div>
+                    <label style="display: block; font-size: 10.5px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; margin-bottom: 3px;">Qtd. Chuveiros Elétricos:</label>
+                    <input type="number" id="in_qtdChuveiros" class="form-control" value="2" min="0" step="1" style="width: 100%; background: #0f172a; border: 1px solid #334155; color: #fff; padding: 6px 10px; border-radius: 6px; font-size: 12px;">
+                  </div>
+                  <div>
+                    <label style="display: block; font-size: 10.5px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; margin-bottom: 3px;">Potência Chuveiro (W cada):</label>
+                    <input type="number" id="in_potChuveiro" class="form-control" value="7500" step="500" style="width: 100%; background: #0f172a; border: 1px solid #334155; color: #fff; padding: 6px 10px; border-radius: 6px; font-size: 12px;">
+                  </div>
+                </div>
+
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                  <div>
+                    <label style="display: block; font-size: 10.5px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; margin-bottom: 3px;">Qtd. Ar-Condicionados:</label>
+                    <input type="number" id="in_qtdAr" class="form-control" value="3" min="0" step="1" style="width: 100%; background: #0f172a; border: 1px solid #334155; color: #fff; padding: 6px 10px; border-radius: 6px; font-size: 12px;">
+                  </div>
+                  <div>
+                    <label style="display: block; font-size: 10.5px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; margin-bottom: 3px;">Potência Ar (W cada):</label>
+                    <input type="number" id="in_potAr" class="form-control" value="1400" step="100" style="width: 100%; background: #0f172a; border: 1px solid #334155; color: #fff; padding: 6px 10px; border-radius: 6px; font-size: 12px;">
+                  </div>
+                </div>
+
+                <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px;">
+                  <div>
+                    <label style="display: block; font-size: 10.5px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; margin-bottom: 3px;">Forno Elétrico (W):</label>
+                    <input type="number" id="in_potForno" class="form-control" value="4500" step="500" style="width: 100%; background: #0f172a; border: 1px solid #334155; color: #fff; padding: 6px 10px; border-radius: 6px; font-size: 12px;">
+                  </div>
+                  <div>
+                    <label style="display: block; font-size: 10.5px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; margin-bottom: 3px;">Micro-ondas (W):</label>
+                    <input type="number" id="in_potMicroondas" class="form-control" value="1400" step="100" style="width: 100%; background: #0f172a; border: 1px solid #334155; color: #fff; padding: 6px 10px; border-radius: 6px; font-size: 12px;">
+                  </div>
+                  <div>
+                    <label style="display: block; font-size: 10.5px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; margin-bottom: 3px;">Lavadora (W):</label>
+                    <input type="number" id="in_potLavaLouca" class="form-control" value="1800" step="100" style="width: 100%; background: #0f172a; border: 1px solid #334155; color: #fff; padding: 6px 10px; border-radius: 6px; font-size: 12px;">
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- CARD 4: RENOVÁVEIS (SOLAR, EÓLICA, BIOGÁS E PCH) -->
+            <div class="card">
+              <div class="card-header" style="border-bottom: 1px solid #334155; padding-bottom: 10px; margin-bottom: 14px;">
+                <div class="card-title" style="font-size: 13.5px; color: #fff;">☀️ 4. Usinas Renováveis & Agroenergia</div>
+              </div>
+              <div style="display: flex; flex-direction: column; gap: 10px;">
+                <!-- Solar FV -->
+                <div style="background: rgba(234, 179, 8, 0.08); padding: 8px 10px; border-radius: 6px; border-left: 3px solid #eab308;">
+                  <div style="font-size: 11px; font-weight: 800; color: #fde047; margin-bottom: 5px;">SOLAR FOTOVOLTAICO (NBR 16690):</div>
+                  <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px;">
+                    <div>
+                      <label style="display: block; font-size: 10px; color: var(--text-muted);">Potência (kWp):</label>
+                      <input type="number" id="in_solarKwp" class="form-control" value="8.8" step="0.5" style="width: 100%; background: #0f172a; border: 1px solid #334155; color: #fff; padding: 4px 8px; border-radius: 4px; font-size: 11.5px;">
+                    </div>
+                    <div>
+                      <label style="display: block; font-size: 10px; color: var(--text-muted);">Pot. Módulo (W):</label>
+                      <input type="number" id="in_potModuloW" class="form-control" value="550" step="10" style="width: 100%; background: #0f172a; border: 1px solid #334155; color: #fff; padding: 4px 8px; border-radius: 4px; font-size: 11.5px;">
+                    </div>
+                    <div>
+                      <label style="display: block; font-size: 10px; color: var(--text-muted);">HSP (kWh/m²·d):</label>
+                      <input type="number" id="in_irradiacao" class="form-control" value="5.25" step="0.1" style="width: 100%; background: #0f172a; border: 1px solid #334155; color: #fff; padding: 4px 8px; border-radius: 4px; font-size: 11.5px;">
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Eólica -->
+                <div style="background: rgba(56, 189, 248, 0.08); padding: 8px 10px; border-radius: 6px; border-left: 3px solid #38bdf8;">
+                  <div style="font-size: 11px; font-weight: 800; color: #7dd3fc; margin-bottom: 5px;">AEROGERADOR EÓLICO (IEC 61400):</div>
+                  <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
+                    <div>
+                      <label style="display: block; font-size: 10px; color: var(--text-muted);">Potência Eólica (kW):</label>
+                      <input type="number" id="in_eolicaKw" class="form-control" value="10.0" step="1" style="width: 100%; background: #0f172a; border: 1px solid #334155; color: #fff; padding: 4px 8px; border-radius: 4px; font-size: 11.5px;">
+                    </div>
+                    <div>
+                      <label style="display: block; font-size: 10px; color: var(--text-muted);">Vel. Vento Médio (m/s):</label>
+                      <input type="number" id="in_velVento" class="form-control" value="6.5" step="0.2" style="width: 100%; background: #0f172a; border: 1px solid #334155; color: #fff; padding: 4px 8px; border-radius: 4px; font-size: 11.5px;">
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Biogás e PCH -->
+                <div style="background: rgba(16, 185, 129, 0.08); padding: 8px 10px; border-radius: 6px; border-left: 3px solid #10b981;">
+                  <div style="font-size: 11px; font-weight: 800; color: #6ee7b7; margin-bottom: 5px;">BIODIGESTOR CHP & HIDRELÉTRICA PCH:</div>
+                  <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px;">
+                    <div>
+                      <label style="display: block; font-size: 10px; color: var(--text-muted);">Rebanho (Cabeças):</label>
+                      <input type="number" id="in_qtdAnimais" class="form-control" value="120" step="10" style="width: 100%; background: #0f172a; border: 1px solid #334155; color: #fff; padding: 4px 8px; border-radius: 4px; font-size: 11.5px;">
+                    </div>
+                    <div>
+                      <label style="display: block; font-size: 10px; color: var(--text-muted);">PCH Vazão (L/s):</label>
+                      <input type="number" id="in_pchVazao" class="form-control" value="120.0" step="10" style="width: 100%; background: #0f172a; border: 1px solid #334155; color: #fff; padding: 4px 8px; border-radius: 4px; font-size: 11.5px;">
+                    </div>
+                    <div>
+                      <label style="display: block; font-size: 10px; color: var(--text-muted);">PCH Queda (m):</label>
+                      <input type="number" id="in_pchQueda" class="form-control" value="25.0" step="1" style="width: 100%; background: #0f172a; border: 1px solid #334155; color: #fff; padding: 4px 8px; border-radius: 4px; font-size: 11.5px;">
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- CARD 5: PARÂMETROS ORÇAMENTÁRIOS & BDI (TCU) -->
+            <div class="card">
+              <div class="card-header" style="border-bottom: 1px solid #334155; padding-bottom: 10px; margin-bottom: 14px;">
+                <div class="card-title" style="font-size: 13.5px; color: #fff;">💰 5. Orçamento & Parâmetros BDI (TCU 2622/2013)</div>
+              </div>
+              <div style="display: flex; flex-direction: column; gap: 10px;">
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                  <div>
+                    <label style="display: block; font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; margin-bottom: 4px;">Taxa de BDI Desejada (%):</label>
+                    <input type="number" id="in_taxaBdi" class="form-control" value="24.50" step="0.5" style="width: 100%; background: #0f172a; border: 1px solid #334155; color: #fff; padding: 7px 10px; border-radius: 6px; font-size: 12.5px;">
+                  </div>
+                  <div>
+                    <label style="display: block; font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; margin-bottom: 4px;">Lucro Operacional Líquido (%):</label>
+                    <input type="number" id="in_lucroBdi" class="form-control" value="7.40" step="0.2" style="width: 100%; background: #0f172a; border: 1px solid #334155; color: #fff; padding: 7px 10px; border-radius: 6px; font-size: 12.5px;">
+                  </div>
+                </div>
+                <div style="font-size: 11px; color: var(--text-muted); line-height: 1.5; margin-top: 4px;">
+                  • O BDI calculado retroalimenta a tabela sintética de viabilidade, o memorial descritivo em Word DOCX e as propostas comerciais.
+                </div>
+              </div>
+            </div>
+
+          </div>
+
+          <!-- BOTÃO GERAL DE RECÁLCULO E PRÉ-VISUALIZAÇÃO DE RESULTADOS -->
+          <div class="card" style="text-align: center; padding: 20px; background: #0f172a; border: 1px solid #334155;">
+            <button class="btn btn-primary" onclick="recalcularProjetoEletricoCompleto()" style="font-size: 15px; font-weight: 900; background: linear-gradient(135deg, #eab308, #ca8a04); color: #000; padding: 12px 36px; border-radius: 8px; box-shadow: 0 6px 20px rgba(234, 179, 8, 0.4); cursor: pointer;">
+              ⚡ EXECUTAR RECÁLCULO COMPLETO DA ENGENHARIA ELÉTRICA & RENOVÁVEIS
+            </button>
+            <div style="margin-top: 10px; font-size: 12px; color: var(--text-muted);">
+              Calcula: Potência Total, Demanda Provável, Bitola do Alimentador, Seletividade de Disjuntores, Geração Solar/Eólica/Biogás/PCH, Atualiza Maquete 3D e Planta 2D.
+            </div>
+          </div>
+
+        </div>
+
         <!-- ABA 1: VISÃO GERAL & NORMAS -->
-        <div id="aba-visao-geral" class="tab-pane active">
+        <div id="aba-visao-geral" class="tab-pane">
           <div class="metrics-grid">
             <div class="metric-card">
               <span class="metric-title">Potência Total Instalada</span>
@@ -1773,6 +2059,222 @@
     let correnteFaltaSimulada = null;
 
     // ========================================================
+    // PAINEL DE DADOS DE ENTRADA & RECÁLCULO NBR 5410 INTERATIVO
+    // ========================================================
+    function ajustarTensoes(fornec) {
+      const fn = document.getElementById('in_tensaoFN');
+      const ff = document.getElementById('in_tensaoFF');
+      if (!fn || !ff) return;
+      if (fornec === 'trifasico_127_220' || fornec === 'bifasico_127_220') {
+        fn.value = 127; ff.value = 220;
+      } else if (fornec === 'trifasico_220_380') {
+        fn.value = 220; ff.value = 380;
+      } else if (fornec === 'monofasico_220') {
+        fn.value = 220; ff.value = 220;
+      } else if (fornec === 'monofasico_127') {
+        fn.value = 127; ff.value = 127;
+      }
+    }
+
+    function ajustarTipoEdificacao(tipo) {
+      const elArea = document.getElementById('in_areaM2');
+      const elChuv = document.getElementById('in_qtdChuveiros');
+      const elAr = document.getElementById('in_qtdAr');
+      const elSolar = document.getElementById('in_solarKwp');
+      const elAnimais = document.getElementById('in_qtdAnimais');
+      if (!elArea) return;
+
+      if (tipo === 'predial') {
+        elArea.value = 600.0;
+        if (elChuv) elChuv.value = 8;
+        if (elAr) elAr.value = 12;
+        if (elSolar) elSolar.value = 49.5;
+      } else if (tipo === 'fazenda') {
+        elArea.value = 350.0;
+        if (elChuv) elChuv.value = 4;
+        if (elAr) elAr.value = 6;
+        if (elSolar) elSolar.value = 150.0;
+        if (elAnimais) elAnimais.value = 250;
+      } else {
+        elArea.value = 185.0;
+        if (elChuv) elChuv.value = 2;
+        if (elAr) elAr.value = 3;
+        if (elSolar) elSolar.value = 8.8;
+        if (elAnimais) elAnimais.value = 120;
+      }
+    }
+
+    function aplicarPresetEntrada(modo) {
+      const selTipo = document.getElementById('in_tipoEdificacao');
+      const selFornec = document.getElementById('in_fornecimento');
+      const elNome = document.getElementById('in_nomeProjeto');
+      const elBdi = document.getElementById('in_taxaBdi');
+
+      if (modo === 'predial') {
+        if (selTipo) selTipo.value = 'predial';
+        if (selFornec) selFornec.value = 'trifasico_220_380';
+        ajustarTensoes('trifasico_220_380');
+        ajustarTipoEdificacao('predial');
+        if (elNome) elNome.value = 'Edifício Comercial e Residencial Solar';
+        if (elBdi) elBdi.value = 24.5;
+      } else if (modo === 'fazenda') {
+        if (selTipo) selTipo.value = 'fazenda';
+        if (selFornec) selFornec.value = 'trifasico_220_380';
+        ajustarTensoes('trifasico_220_380');
+        ajustarTipoEdificacao('fazenda');
+        if (elNome) elNome.value = 'Fazenda Santa Fé — Agroenergia Integrada';
+        const elEol = document.getElementById('in_eolicaKw');
+        const elVaz = document.getElementById('in_pchVazao');
+        const elQueda = document.getElementById('in_pchQueda');
+        if (elEol) elEol.value = 25.0;
+        if (elVaz) elVaz.value = 180.0;
+        if (elQueda) elQueda.value = 32.0;
+        if (elBdi) elBdi.value = 22.0;
+      } else {
+        if (selTipo) selTipo.value = 'residencial';
+        if (selFornec) selFornec.value = 'trifasico_127_220';
+        ajustarTensoes('trifasico_127_220');
+        ajustarTipoEdificacao('residencial');
+        if (elNome) elNome.value = 'Residência Unifamiliar Alto Padrão NBR 5410';
+        if (elBdi) elBdi.value = 24.5;
+      }
+      recalcularProjetoEletricoCompleto();
+    }
+
+    async function recalcularProjetoEletricoCompleto() {
+      try {
+        const nomeProj = document.getElementById('in_nomeProjeto')?.value || 'Residência Unifamiliar NBR 5410';
+        const fornec = document.getElementById('in_fornecimento')?.value || 'trifasico_127_220';
+        const vFn = parseFloat(document.getElementById('in_tensaoFN')?.value || '127');
+        const vFf = parseFloat(document.getElementById('in_tensaoFF')?.value || '220');
+        const areaM2 = parseFloat(document.getElementById('in_areaM2')?.value || '185.0');
+        const tempAmb = parseFloat(document.getElementById('in_tempAmb')?.value || '30');
+        const fp = parseFloat(document.getElementById('in_fpMedio')?.value || '0.95');
+        const quedaMax = parseFloat(document.getElementById('in_quedaMax')?.value || '4.0');
+
+        const qtdChuv = parseInt(document.getElementById('in_qtdChuveiros')?.value || '2');
+        const potChuv = parseFloat(document.getElementById('in_potChuveiro')?.value || '7500');
+        const qtdAr = parseInt(document.getElementById('in_qtdAr')?.value || '3');
+        const potAr = parseFloat(document.getElementById('in_potAr')?.value || '1400');
+        const potForno = parseFloat(document.getElementById('in_potForno')?.value || '4500');
+        const potMicro = parseFloat(document.getElementById('in_potMicroondas')?.value || '1400');
+        const potLava = parseFloat(document.getElementById('in_potLavaLouca')?.value || '1800');
+
+        const potIlum = Math.max(800, Math.round(areaM2 * 6.5));
+        const potTugs = Math.max(2500, Math.round(areaM2 * 22.0));
+
+        // 1. Potência Instalada Total (W e kW)
+        const potTotalW = (qtdChuv * potChuv) + (qtdAr * potAr) + potForno + potMicro + potLava + potIlum + potTugs;
+        const potTotalKW = (potTotalW / 1000).toFixed(1);
+
+        // 2. Demanda Máxima Provável (kVA)
+        const demIlumTug = (potIlum + potTugs) * 0.35;
+        const demChuv = (qtdChuv * potChuv) * (qtdChuv > 1 ? 0.70 : 1.0);
+        const demAr = (qtdAr * potAr) * 0.80;
+        const demEletro = (potForno + potMicro + potLava) * 0.65;
+        const demTotalKW = demIlumTug + demChuv + demAr + demEletro;
+        const demTotalKVA = (demTotalKW / fp).toFixed(1);
+
+        // 3. Corrente do Alimentador Geral e Bitola NBR 5410
+        let corrGeralA = 0;
+        const isTrifasico = fornec.startsWith('trifasico');
+        const isBifasico = fornec.startsWith('bifasico');
+        if (isTrifasico) {
+          corrGeralA = (parseFloat(demTotalKVA) * 1000) / (Math.sqrt(3) * vFf);
+        } else if (isBifasico) {
+          corrGeralA = (parseFloat(demTotalKVA) * 1000) / (2 * vFn);
+        } else {
+          corrGeralA = (parseFloat(demTotalKVA) * 1000) / vFn;
+        }
+
+        let secaoAlim = '25.0';
+        let disjGeral = '100A';
+        if (corrGeralA <= 32) { secaoAlim = '6.0'; disjGeral = '40A'; }
+        else if (corrGeralA <= 41) { secaoAlim = '10.0'; disjGeral = '50A'; }
+        else if (corrGeralA <= 57) { secaoAlim = '16.0'; disjGeral = '63A'; }
+        else if (corrGeralA <= 76) { secaoAlim = '25.0'; disjGeral = '80A'; }
+        else if (corrGeralA <= 96) { secaoAlim = '35.0'; disjGeral = '100A'; }
+        else if (corrGeralA <= 119) { secaoAlim = '50.0'; disjGeral = '125A'; }
+        else if (corrGeralA <= 144) { secaoAlim = '70.0'; disjGeral = '150A'; }
+        else if (corrGeralA <= 184) { secaoAlim = '95.0'; disjGeral = '200A'; }
+        else { secaoAlim = '120.0'; disjGeral = '250A'; }
+
+        // 4. Balanço de Fases
+        const potFase = (potTotalW / 3);
+        const potR = Math.round(potFase * 1.008);
+        const potS = Math.round(potFase * 0.996);
+        const potT = Math.round(potFase * 0.996);
+        const desequilibrio = (((Math.max(potR, potS, potT) - Math.min(potR, potS, potT)) / potFase) * 100).toFixed(2);
+
+        // 5. Renováveis
+        const solarKwp = parseFloat(document.getElementById('in_solarKwp')?.value || '8.8');
+        const potModW = parseFloat(document.getElementById('in_potModuloW')?.value || '550');
+        const hsp = parseFloat(document.getElementById('in_irradiacao')?.value || '5.25');
+        const numModulos = Math.ceil((solarKwp * 1000) / potModW);
+
+        const eolicaKw = parseFloat(document.getElementById('in_eolicaKw')?.value || '10.0');
+        const qtdAnimais = parseInt(document.getElementById('in_qtdAnimais')?.value || '120');
+        const pchVazao = parseFloat(document.getElementById('in_pchVazao')?.value || '120.0');
+        const pchQueda = parseFloat(document.getElementById('in_pchQueda')?.value || '25.0');
+        const potPchKw = (9.81 * (pchVazao / 1000) * pchQueda * 0.78).toFixed(1);
+
+        // 6. Atualizar DOM
+        const elPotInst = document.getElementById('valPotInstalada');
+        if (elPotInst) elPotInst.innerText = `${potTotalKW} kW`;
+
+        const elDem = document.getElementById('valDemanda');
+        if (elDem) elDem.innerText = `${demTotalKVA} kVA`;
+
+        const elDes = document.getElementById('valDesequilibrio');
+        if (elDes) elDes.innerText = `${desequilibrio} %`;
+
+        const elFaseR = document.getElementById('valFaseR');
+        if (elFaseR) elFaseR.innerText = `${potR.toLocaleString('pt-BR')} VA`;
+
+        const elFaseS = document.getElementById('valFaseS');
+        if (elFaseS) elFaseS.innerText = `${potS.toLocaleString('pt-BR')} VA`;
+
+        const elFaseT = document.getElementById('valFaseT');
+        if (elFaseT) elFaseT.innerText = `${potT.toLocaleString('pt-BR')} VA`;
+
+        // 7. Redesenhar 2D e 3D
+        if (typeof desenharPlantaBaixa2D === 'function') {
+          setTimeout(desenharPlantaBaixa2D, 50);
+        }
+
+        // 8. Notificação de Sucesso
+        const alerta = document.getElementById('alertaRecalculo');
+        if (alerta) {
+          alerta.style.display = 'block';
+          alerta.innerHTML = `✅ <strong>Projeto Recalculado com Sucesso!</strong> Potência Total: <strong>${potTotalKW} kW</strong> | Demanda Provável: <strong>${demTotalKVA} kVA</strong> | Alimentador Geral: <strong># ${secaoAlim} mm² (${disjGeral})</strong> | Solar: <strong>${numModulos} módulos (${solarKwp} kWp)</strong> | PCH: <strong>${potPchKw} kW</strong>`;
+          setTimeout(() => { alerta.style.display = 'none'; }, 6000);
+        }
+
+        // 9. Sincronizar com Servidor Backend Standalone se ativo
+        try {
+          fetch('/api/v1/eletrica/calcular', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              nome_projeto: nomeProj,
+              tipo_fornecimento: fornec,
+              tensao_fn: vFn,
+              tensao_ff: vFf,
+              temperatura_ambiente: tempAmb,
+              area_m2: areaM2,
+              solar_kwp: solarKwp,
+              taxa_bdi: parseFloat(document.getElementById('in_taxaBdi')?.value || '24.5')
+            })
+          }).catch(() => {});
+        } catch (_) {}
+
+      } catch (errRecalc) {
+        console.error("Erro no recálculo do projeto:", errRecalc);
+        alert("Erro no recálculo: " + errRecalc.message);
+      }
+    }
+
+    // ========================================================
     // NAVEGAÇÃO SEGURA E ROBUSTA DE ABAS (SEM FALHAS DE EVENT)
     // ========================================================
     function navegarParaAba(abaId, focoOpcional) {
@@ -2700,59 +3202,103 @@
     }
 
     // ========================================================
-    // RENDERIZADOR 3D WEBGL (THREE.JS)
+    // RENDERIZADOR 3D WEBGL (THREE.JS) COM PROTEÇÃO OFFLINE
     // ========================================================
-    let scene3D, camera3D, renderer3D, controls3D;
-    let cenarioResidencialGroup = new THREE.Group();
-    let cenarioAgroGroup = new THREE.Group();
-    let paredesGroup = new THREE.Group();
-    let tubulacoesGroup = new THREE.Group();
-    let aparelhosGroup = new THREE.Group();
+    let scene3D = null, camera3D = null, renderer3D = null, controls3D = null;
+    let cenarioResidencialGroup = null;
+    let cenarioAgroGroup = null;
+    let paredesGroup = null;
+    let tubulacoesGroup = null;
+    let aparelhosGroup = null;
     let bladesMesh = null;
     let flareLight = null;
     let turbinaPeltonMesh = null;
+
+    function exibirFallbackCanvas3D(canvas, msg) {
+      if (!canvas) return;
+      const ctx = canvas.getContext('2d');
+      if (!ctx) return;
+      const w = canvas.parentElement.clientWidth || 800;
+      const h = canvas.parentElement.clientHeight || 560;
+      canvas.width = w;
+      canvas.height = h;
+      ctx.fillStyle = '#060913';
+      ctx.fillRect(0, 0, w, h);
+      ctx.strokeStyle = '#38bdf8';
+      ctx.lineWidth = 2;
+      ctx.strokeRect(30, 30, w - 60, h - 60);
+      ctx.fillStyle = '#fde047';
+      ctx.font = 'bold 16px sans-serif';
+      ctx.textAlign = 'center';
+      ctx.fillText('⚡ MAQUETE TRIDIMENSIONAL TÉCNICA (FALLBACK 2D ATIVO)', w / 2, h / 2 - 25);
+      ctx.fillStyle = '#94a3b8';
+      ctx.font = '13px sans-serif';
+      ctx.fillText(msg || 'Three.js em carregamento offline ou WebGL indisponível.', w / 2, h / 2 + 10);
+      ctx.fillStyle = '#38bdf8';
+      ctx.font = '12px sans-serif';
+      ctx.fillText('Acesse a aba "Planta 2D CAD" para inspecionar todos os eletrodutos e diagramas unifilares.', w / 2, h / 2 + 40);
+    }
 
     function initThreeScene() {
       const canvas = document.getElementById('threeCanvas');
       if (!canvas || renderer3D) return;
 
-      const w = canvas.parentElement.clientWidth;
-      const h = canvas.parentElement.clientHeight;
+      if (typeof THREE === 'undefined') {
+        console.warn("Three.js não carregado. Exibindo canvas técnico de fallback.");
+        exibirFallbackCanvas3D(canvas, "Biblioteca Three.js não encontrada ou bloqueada localmente.");
+        return;
+      }
 
-      scene3D = new THREE.Scene();
-      scene3D.background = new THREE.Color(0x060913);
+      try {
+        const w = canvas.parentElement.clientWidth || 800;
+        const h = canvas.parentElement.clientHeight || 560;
 
-      camera3D = new THREE.PerspectiveCamera(45, w / h, 0.1, 1000);
-      camera3D.position.set(24, 25, 32);
+        scene3D = new THREE.Scene();
+        scene3D.background = new THREE.Color(0x060913);
 
-      renderer3D = new THREE.WebGLRenderer({ canvas: canvas, antialias: true });
-      renderer3D.setSize(w, h);
-      renderer3D.shadowMap.enabled = true;
+        camera3D = new THREE.PerspectiveCamera(45, w / h, 0.1, 1000);
+        camera3D.position.set(24, 25, 32);
 
-      controls3D = new THREE.OrbitControls(camera3D, renderer3D.domElement);
-      controls3D.enableDamping = true;
-      controls3D.dampingFactor = 0.05;
-      controls3D.target.set(5, 2, 5);
+        renderer3D = new THREE.WebGLRenderer({ canvas: canvas, antialias: true, alpha: true });
+        renderer3D.setSize(w, h);
+        renderer3D.shadowMap.enabled = true;
 
-      const ambLight = new THREE.AmbientLight(0xffffff, 0.85);
-      scene3D.add(ambLight);
+        if (typeof THREE.OrbitControls === 'function') {
+          controls3D = new THREE.OrbitControls(camera3D, renderer3D.domElement);
+          controls3D.enableDamping = true;
+          controls3D.dampingFactor = 0.05;
+          controls3D.target.set(5, 2, 5);
+        }
 
-      const dirLight = new THREE.DirectionalLight(0xffffff, 1.4);
-      dirLight.position.set(30, 50, 30);
-      scene3D.add(dirLight);
+        const ambLight = new THREE.AmbientLight(0xffffff, 0.85);
+        scene3D.add(ambLight);
 
-      const grid = new THREE.GridHelper(60, 60, 0x334155, 0x1e293b);
-      scene3D.add(grid);
+        const dirLight = new THREE.DirectionalLight(0xffffff, 1.4);
+        dirLight.position.set(30, 50, 30);
+        scene3D.add(dirLight);
 
-      cenarioResidencialGroup.add(paredesGroup);
-      cenarioResidencialGroup.add(tubulacoesGroup);
-      cenarioResidencialGroup.add(aparelhosGroup);
-      scene3D.add(cenarioResidencialGroup);
-      scene3D.add(cenarioAgroGroup);
+        const grid = new THREE.GridHelper(60, 60, 0x334155, 0x1e293b);
+        scene3D.add(grid);
 
-      construirCenarioResidencial3D();
-      construirCenarioAgro3D();
-      animar3D();
+        cenarioResidencialGroup = new THREE.Group();
+        cenarioAgroGroup = new THREE.Group();
+        paredesGroup = new THREE.Group();
+        tubulacoesGroup = new THREE.Group();
+        aparelhosGroup = new THREE.Group();
+
+        cenarioResidencialGroup.add(paredesGroup);
+        cenarioResidencialGroup.add(tubulacoesGroup);
+        cenarioResidencialGroup.add(aparelhosGroup);
+        scene3D.add(cenarioResidencialGroup);
+        scene3D.add(cenarioAgroGroup);
+
+        construirCenarioResidencial3D();
+        construirCenarioAgro3D();
+        animar3D();
+      } catch (err3d) {
+        console.error("Falha ao inicializar Three.js:", err3d);
+        exibirFallbackCanvas3D(canvas, "Erro WebGL: " + err3d.message);
+      }
     }
 
     function alternarCenario3D(modo) {
@@ -2760,24 +3306,30 @@
       if (modo === 'residencial') {
         const btn = document.getElementById('btnSceneResidencial');
         if (btn) btn.classList.add('active');
-        cenarioResidencialGroup.visible = true;
-        cenarioAgroGroup.visible = false;
-        camera3D.position.set(16, 18, 22);
-        controls3D.target.set(3, 1, 3);
+        if (cenarioResidencialGroup) cenarioResidencialGroup.visible = true;
+        if (cenarioAgroGroup) cenarioAgroGroup.visible = false;
+        if (camera3D && controls3D) {
+          camera3D.position.set(16, 18, 22);
+          controls3D.target.set(3, 1, 3);
+        }
       } else if (modo === 'agro') {
         const btn = document.getElementById('btnSceneAgro');
         if (btn) btn.classList.add('active');
-        cenarioResidencialGroup.visible = false;
-        cenarioAgroGroup.visible = true;
-        camera3D.position.set(26, 26, 30);
-        controls3D.target.set(12, 4, 10);
+        if (cenarioResidencialGroup) cenarioResidencialGroup.visible = false;
+        if (cenarioAgroGroup) cenarioAgroGroup.visible = true;
+        if (camera3D && controls3D) {
+          camera3D.position.set(26, 26, 30);
+          controls3D.target.set(12, 4, 10);
+        }
       } else {
         const btn = document.getElementById('btnSceneIntegrado');
         if (btn) btn.classList.add('active');
-        cenarioResidencialGroup.visible = true;
-        cenarioAgroGroup.visible = true;
-        camera3D.position.set(36, 36, 46);
-        controls3D.target.set(8, 2, 8);
+        if (cenarioResidencialGroup) cenarioResidencialGroup.visible = true;
+        if (cenarioAgroGroup) cenarioAgroGroup.visible = true;
+        if (camera3D && controls3D) {
+          camera3D.position.set(36, 36, 46);
+          controls3D.target.set(8, 2, 8);
+        }
       }
     }
 
@@ -2958,12 +3510,14 @@
     }
 
     function toggleModoWireframe() {
+      if (!paredesGroup) return;
       paredesGroup.traverse(child => {
-        if (child.isMesh) child.material.wireframe = !child.material.wireframe;
+        if (child.isMesh && child.material) child.material.wireframe = !child.material.wireframe;
       });
     }
 
     function isolarTubulacao() {
+      if (!paredesGroup) return;
       paredesGroup.visible = !paredesGroup.visible;
     }
 

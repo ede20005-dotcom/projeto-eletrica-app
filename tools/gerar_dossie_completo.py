@@ -14,6 +14,7 @@ PARTES_TEMPLATE = [
     "01_head_css.html",
     "02_sidebar.html",
     "03_header_tabs.html",
+    "03b_pane_parametros.html",
     "04_panes_eletrica.html",
     "05_panes_seletividade.html",
     "06_panes_cad2d.html",

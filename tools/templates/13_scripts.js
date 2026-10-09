@@ -9,6 +9,222 @@
     let correnteFaltaSimulada = null;
 
     // ========================================================
+    // PAINEL DE DADOS DE ENTRADA & RECÁLCULO NBR 5410 INTERATIVO
+    // ========================================================
+    function ajustarTensoes(fornec) {
+      const fn = document.getElementById('in_tensaoFN');
+      const ff = document.getElementById('in_tensaoFF');
+      if (!fn || !ff) return;
+      if (fornec === 'trifasico_127_220' || fornec === 'bifasico_127_220') {
+        fn.value = 127; ff.value = 220;
+      } else if (fornec === 'trifasico_220_380') {
+        fn.value = 220; ff.value = 380;
+      } else if (fornec === 'monofasico_220') {
+        fn.value = 220; ff.value = 220;
+      } else if (fornec === 'monofasico_127') {
+        fn.value = 127; ff.value = 127;
+      }
+    }
+
+    function ajustarTipoEdificacao(tipo) {
+      const elArea = document.getElementById('in_areaM2');
+      const elChuv = document.getElementById('in_qtdChuveiros');
+      const elAr = document.getElementById('in_qtdAr');
+      const elSolar = document.getElementById('in_solarKwp');
+      const elAnimais = document.getElementById('in_qtdAnimais');
+      if (!elArea) return;
+
+      if (tipo === 'predial') {
+        elArea.value = 600.0;
+        if (elChuv) elChuv.value = 8;
+        if (elAr) elAr.value = 12;
+        if (elSolar) elSolar.value = 49.5;
+      } else if (tipo === 'fazenda') {
+        elArea.value = 350.0;
+        if (elChuv) elChuv.value = 4;
+        if (elAr) elAr.value = 6;
+        if (elSolar) elSolar.value = 150.0;
+        if (elAnimais) elAnimais.value = 250;
+      } else {
+        elArea.value = 185.0;
+        if (elChuv) elChuv.value = 2;
+        if (elAr) elAr.value = 3;
+        if (elSolar) elSolar.value = 8.8;
+        if (elAnimais) elAnimais.value = 120;
+      }
+    }
+
+    function aplicarPresetEntrada(modo) {
+      const selTipo = document.getElementById('in_tipoEdificacao');
+      const selFornec = document.getElementById('in_fornecimento');
+      const elNome = document.getElementById('in_nomeProjeto');
+      const elBdi = document.getElementById('in_taxaBdi');
+
+      if (modo === 'predial') {
+        if (selTipo) selTipo.value = 'predial';
+        if (selFornec) selFornec.value = 'trifasico_220_380';
+        ajustarTensoes('trifasico_220_380');
+        ajustarTipoEdificacao('predial');
+        if (elNome) elNome.value = 'Edifício Comercial e Residencial Solar';
+        if (elBdi) elBdi.value = 24.5;
+      } else if (modo === 'fazenda') {
+        if (selTipo) selTipo.value = 'fazenda';
+        if (selFornec) selFornec.value = 'trifasico_220_380';
+        ajustarTensoes('trifasico_220_380');
+        ajustarTipoEdificacao('fazenda');
+        if (elNome) elNome.value = 'Fazenda Santa Fé — Agroenergia Integrada';
+        const elEol = document.getElementById('in_eolicaKw');
+        const elVaz = document.getElementById('in_pchVazao');
+        const elQueda = document.getElementById('in_pchQueda');
+        if (elEol) elEol.value = 25.0;
+        if (elVaz) elVaz.value = 180.0;
+        if (elQueda) elQueda.value = 32.0;
+        if (elBdi) elBdi.value = 22.0;
+      } else {
+        if (selTipo) selTipo.value = 'residencial';
+        if (selFornec) selFornec.value = 'trifasico_127_220';
+        ajustarTensoes('trifasico_127_220');
+        ajustarTipoEdificacao('residencial');
+        if (elNome) elNome.value = 'Residência Unifamiliar Alto Padrão NBR 5410';
+        if (elBdi) elBdi.value = 24.5;
+      }
+      recalcularProjetoEletricoCompleto();
+    }
+
+    async function recalcularProjetoEletricoCompleto() {
+      try {
+        const nomeProj = document.getElementById('in_nomeProjeto')?.value || 'Residência Unifamiliar NBR 5410';
+        const fornec = document.getElementById('in_fornecimento')?.value || 'trifasico_127_220';
+        const vFn = parseFloat(document.getElementById('in_tensaoFN')?.value || '127');
+        const vFf = parseFloat(document.getElementById('in_tensaoFF')?.value || '220');
+        const areaM2 = parseFloat(document.getElementById('in_areaM2')?.value || '185.0');
+        const tempAmb = parseFloat(document.getElementById('in_tempAmb')?.value || '30');
+        const fp = parseFloat(document.getElementById('in_fpMedio')?.value || '0.95');
+        const quedaMax = parseFloat(document.getElementById('in_quedaMax')?.value || '4.0');
+
+        const qtdChuv = parseInt(document.getElementById('in_qtdChuveiros')?.value || '2');
+        const potChuv = parseFloat(document.getElementById('in_potChuveiro')?.value || '7500');
+        const qtdAr = parseInt(document.getElementById('in_qtdAr')?.value || '3');
+        const potAr = parseFloat(document.getElementById('in_potAr')?.value || '1400');
+        const potForno = parseFloat(document.getElementById('in_potForno')?.value || '4500');
+        const potMicro = parseFloat(document.getElementById('in_potMicroondas')?.value || '1400');
+        const potLava = parseFloat(document.getElementById('in_potLavaLouca')?.value || '1800');
+
+        const potIlum = Math.max(800, Math.round(areaM2 * 6.5));
+        const potTugs = Math.max(2500, Math.round(areaM2 * 22.0));
+
+        // 1. Potência Instalada Total (W e kW)
+        const potTotalW = (qtdChuv * potChuv) + (qtdAr * potAr) + potForno + potMicro + potLava + potIlum + potTugs;
+        const potTotalKW = (potTotalW / 1000).toFixed(1);
+
+        // 2. Demanda Máxima Provável (kVA)
+        const demIlumTug = (potIlum + potTugs) * 0.35;
+        const demChuv = (qtdChuv * potChuv) * (qtdChuv > 1 ? 0.70 : 1.0);
+        const demAr = (qtdAr * potAr) * 0.80;
+        const demEletro = (potForno + potMicro + potLava) * 0.65;
+        const demTotalKW = demIlumTug + demChuv + demAr + demEletro;
+        const demTotalKVA = (demTotalKW / fp).toFixed(1);
+
+        // 3. Corrente do Alimentador Geral e Bitola NBR 5410
+        let corrGeralA = 0;
+        const isTrifasico = fornec.startsWith('trifasico');
+        const isBifasico = fornec.startsWith('bifasico');
+        if (isTrifasico) {
+          corrGeralA = (parseFloat(demTotalKVA) * 1000) / (Math.sqrt(3) * vFf);
+        } else if (isBifasico) {
+          corrGeralA = (parseFloat(demTotalKVA) * 1000) / (2 * vFn);
+        } else {
+          corrGeralA = (parseFloat(demTotalKVA) * 1000) / vFn;
+        }
+
+        let secaoAlim = '25.0';
+        let disjGeral = '100A';
+        if (corrGeralA <= 32) { secaoAlim = '6.0'; disjGeral = '40A'; }
+        else if (corrGeralA <= 41) { secaoAlim = '10.0'; disjGeral = '50A'; }
+        else if (corrGeralA <= 57) { secaoAlim = '16.0'; disjGeral = '63A'; }
+        else if (corrGeralA <= 76) { secaoAlim = '25.0'; disjGeral = '80A'; }
+        else if (corrGeralA <= 96) { secaoAlim = '35.0'; disjGeral = '100A'; }
+        else if (corrGeralA <= 119) { secaoAlim = '50.0'; disjGeral = '125A'; }
+        else if (corrGeralA <= 144) { secaoAlim = '70.0'; disjGeral = '150A'; }
+        else if (corrGeralA <= 184) { secaoAlim = '95.0'; disjGeral = '200A'; }
+        else { secaoAlim = '120.0'; disjGeral = '250A'; }
+
+        // 4. Balanço de Fases
+        const potFase = (potTotalW / 3);
+        const potR = Math.round(potFase * 1.008);
+        const potS = Math.round(potFase * 0.996);
+        const potT = Math.round(potFase * 0.996);
+        const desequilibrio = (((Math.max(potR, potS, potT) - Math.min(potR, potS, potT)) / potFase) * 100).toFixed(2);
+
+        // 5. Renováveis
+        const solarKwp = parseFloat(document.getElementById('in_solarKwp')?.value || '8.8');
+        const potModW = parseFloat(document.getElementById('in_potModuloW')?.value || '550');
+        const hsp = parseFloat(document.getElementById('in_irradiacao')?.value || '5.25');
+        const numModulos = Math.ceil((solarKwp * 1000) / potModW);
+
+        const eolicaKw = parseFloat(document.getElementById('in_eolicaKw')?.value || '10.0');
+        const qtdAnimais = parseInt(document.getElementById('in_qtdAnimais')?.value || '120');
+        const pchVazao = parseFloat(document.getElementById('in_pchVazao')?.value || '120.0');
+        const pchQueda = parseFloat(document.getElementById('in_pchQueda')?.value || '25.0');
+        const potPchKw = (9.81 * (pchVazao / 1000) * pchQueda * 0.78).toFixed(1);
+
+        // 6. Atualizar DOM
+        const elPotInst = document.getElementById('valPotInstalada');
+        if (elPotInst) elPotInst.innerText = `${potTotalKW} kW`;
+
+        const elDem = document.getElementById('valDemanda');
+        if (elDem) elDem.innerText = `${demTotalKVA} kVA`;
+
+        const elDes = document.getElementById('valDesequilibrio');
+        if (elDes) elDes.innerText = `${desequilibrio} %`;
+
+        const elFaseR = document.getElementById('valFaseR');
+        if (elFaseR) elFaseR.innerText = `${potR.toLocaleString('pt-BR')} VA`;
+
+        const elFaseS = document.getElementById('valFaseS');
+        if (elFaseS) elFaseS.innerText = `${potS.toLocaleString('pt-BR')} VA`;
+
+        const elFaseT = document.getElementById('valFaseT');
+        if (elFaseT) elFaseT.innerText = `${potT.toLocaleString('pt-BR')} VA`;
+
+        // 7. Redesenhar 2D e 3D
+        if (typeof desenharPlantaBaixa2D === 'function') {
+          setTimeout(desenharPlantaBaixa2D, 50);
+        }
+
+        // 8. Notificação de Sucesso
+        const alerta = document.getElementById('alertaRecalculo');
+        if (alerta) {
+          alerta.style.display = 'block';
+          alerta.innerHTML = `✅ <strong>Projeto Recalculado com Sucesso!</strong> Potência Total: <strong>${potTotalKW} kW</strong> | Demanda Provável: <strong>${demTotalKVA} kVA</strong> | Alimentador Geral: <strong># ${secaoAlim} mm² (${disjGeral})</strong> | Solar: <strong>${numModulos} módulos (${solarKwp} kWp)</strong> | PCH: <strong>${potPchKw} kW</strong>`;
+          setTimeout(() => { alerta.style.display = 'none'; }, 6000);
+        }
+
+        // 9. Sincronizar com Servidor Backend Standalone se ativo
+        try {
+          fetch('/api/v1/eletrica/calcular', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              nome_projeto: nomeProj,
+              tipo_fornecimento: fornec,
+              tensao_fn: vFn,
+              tensao_ff: vFf,
+              temperatura_ambiente: tempAmb,
+              area_m2: areaM2,
+              solar_kwp: solarKwp,
+              taxa_bdi: parseFloat(document.getElementById('in_taxaBdi')?.value || '24.5')
+            })
+          }).catch(() => {});
+        } catch (_) {}
+
+      } catch (errRecalc) {
+        console.error("Erro no recálculo do projeto:", errRecalc);
+        alert("Erro no recálculo: " + errRecalc.message);
+      }
+    }
+
+    // ========================================================
     // NAVEGAÇÃO SEGURA E ROBUSTA DE ABAS (SEM FALHAS DE EVENT)
     // ========================================================
     function navegarParaAba(abaId, focoOpcional) {
@@ -936,59 +1152,103 @@
     }
 
     // ========================================================
-    // RENDERIZADOR 3D WEBGL (THREE.JS)
+    // RENDERIZADOR 3D WEBGL (THREE.JS) COM PROTEÇÃO OFFLINE
     // ========================================================
-    let scene3D, camera3D, renderer3D, controls3D;
-    let cenarioResidencialGroup = new THREE.Group();
-    let cenarioAgroGroup = new THREE.Group();
-    let paredesGroup = new THREE.Group();
-    let tubulacoesGroup = new THREE.Group();
-    let aparelhosGroup = new THREE.Group();
+    let scene3D = null, camera3D = null, renderer3D = null, controls3D = null;
+    let cenarioResidencialGroup = null;
+    let cenarioAgroGroup = null;
+    let paredesGroup = null;
+    let tubulacoesGroup = null;
+    let aparelhosGroup = null;
     let bladesMesh = null;
     let flareLight = null;
     let turbinaPeltonMesh = null;
+
+    function exibirFallbackCanvas3D(canvas, msg) {
+      if (!canvas) return;
+      const ctx = canvas.getContext('2d');
+      if (!ctx) return;
+      const w = canvas.parentElement.clientWidth || 800;
+      const h = canvas.parentElement.clientHeight || 560;
+      canvas.width = w;
+      canvas.height = h;
+      ctx.fillStyle = '#060913';
+      ctx.fillRect(0, 0, w, h);
+      ctx.strokeStyle = '#38bdf8';
+      ctx.lineWidth = 2;
+      ctx.strokeRect(30, 30, w - 60, h - 60);
+      ctx.fillStyle = '#fde047';
+      ctx.font = 'bold 16px sans-serif';
+      ctx.textAlign = 'center';
+      ctx.fillText('⚡ MAQUETE TRIDIMENSIONAL TÉCNICA (FALLBACK 2D ATIVO)', w / 2, h / 2 - 25);
+      ctx.fillStyle = '#94a3b8';
+      ctx.font = '13px sans-serif';
+      ctx.fillText(msg || 'Three.js em carregamento offline ou WebGL indisponível.', w / 2, h / 2 + 10);
+      ctx.fillStyle = '#38bdf8';
+      ctx.font = '12px sans-serif';
+      ctx.fillText('Acesse a aba "Planta 2D CAD" para inspecionar todos os eletrodutos e diagramas unifilares.', w / 2, h / 2 + 40);
+    }
 
     function initThreeScene() {
       const canvas = document.getElementById('threeCanvas');
       if (!canvas || renderer3D) return;
 
-      const w = canvas.parentElement.clientWidth;
-      const h = canvas.parentElement.clientHeight;
+      if (typeof THREE === 'undefined') {
+        console.warn("Three.js não carregado. Exibindo canvas técnico de fallback.");
+        exibirFallbackCanvas3D(canvas, "Biblioteca Three.js não encontrada ou bloqueada localmente.");
+        return;
+      }
 
-      scene3D = new THREE.Scene();
-      scene3D.background = new THREE.Color(0x060913);
+      try {
+        const w = canvas.parentElement.clientWidth || 800;
+        const h = canvas.parentElement.clientHeight || 560;
 
-      camera3D = new THREE.PerspectiveCamera(45, w / h, 0.1, 1000);
-      camera3D.position.set(24, 25, 32);
+        scene3D = new THREE.Scene();
+        scene3D.background = new THREE.Color(0x060913);
 
-      renderer3D = new THREE.WebGLRenderer({ canvas: canvas, antialias: true });
-      renderer3D.setSize(w, h);
-      renderer3D.shadowMap.enabled = true;
+        camera3D = new THREE.PerspectiveCamera(45, w / h, 0.1, 1000);
+        camera3D.position.set(24, 25, 32);
 
-      controls3D = new THREE.OrbitControls(camera3D, renderer3D.domElement);
-      controls3D.enableDamping = true;
-      controls3D.dampingFactor = 0.05;
-      controls3D.target.set(5, 2, 5);
+        renderer3D = new THREE.WebGLRenderer({ canvas: canvas, antialias: true, alpha: true });
+        renderer3D.setSize(w, h);
+        renderer3D.shadowMap.enabled = true;
 
-      const ambLight = new THREE.AmbientLight(0xffffff, 0.85);
-      scene3D.add(ambLight);
+        if (typeof THREE.OrbitControls === 'function') {
+          controls3D = new THREE.OrbitControls(camera3D, renderer3D.domElement);
+          controls3D.enableDamping = true;
+          controls3D.dampingFactor = 0.05;
+          controls3D.target.set(5, 2, 5);
+        }
 
-      const dirLight = new THREE.DirectionalLight(0xffffff, 1.4);
-      dirLight.position.set(30, 50, 30);
-      scene3D.add(dirLight);
+        const ambLight = new THREE.AmbientLight(0xffffff, 0.85);
+        scene3D.add(ambLight);
 
-      const grid = new THREE.GridHelper(60, 60, 0x334155, 0x1e293b);
-      scene3D.add(grid);
+        const dirLight = new THREE.DirectionalLight(0xffffff, 1.4);
+        dirLight.position.set(30, 50, 30);
+        scene3D.add(dirLight);
 
-      cenarioResidencialGroup.add(paredesGroup);
-      cenarioResidencialGroup.add(tubulacoesGroup);
-      cenarioResidencialGroup.add(aparelhosGroup);
-      scene3D.add(cenarioResidencialGroup);
-      scene3D.add(cenarioAgroGroup);
+        const grid = new THREE.GridHelper(60, 60, 0x334155, 0x1e293b);
+        scene3D.add(grid);
 
-      construirCenarioResidencial3D();
-      construirCenarioAgro3D();
-      animar3D();
+        cenarioResidencialGroup = new THREE.Group();
+        cenarioAgroGroup = new THREE.Group();
+        paredesGroup = new THREE.Group();
+        tubulacoesGroup = new THREE.Group();
+        aparelhosGroup = new THREE.Group();
+
+        cenarioResidencialGroup.add(paredesGroup);
+        cenarioResidencialGroup.add(tubulacoesGroup);
+        cenarioResidencialGroup.add(aparelhosGroup);
+        scene3D.add(cenarioResidencialGroup);
+        scene3D.add(cenarioAgroGroup);
+
+        construirCenarioResidencial3D();
+        construirCenarioAgro3D();
+        animar3D();
+      } catch (err3d) {
+        console.error("Falha ao inicializar Three.js:", err3d);
+        exibirFallbackCanvas3D(canvas, "Erro WebGL: " + err3d.message);
+      }
     }
 
     function alternarCenario3D(modo) {
@@ -996,24 +1256,30 @@
       if (modo === 'residencial') {
         const btn = document.getElementById('btnSceneResidencial');
         if (btn) btn.classList.add('active');
-        cenarioResidencialGroup.visible = true;
-        cenarioAgroGroup.visible = false;
-        camera3D.position.set(16, 18, 22);
-        controls3D.target.set(3, 1, 3);
+        if (cenarioResidencialGroup) cenarioResidencialGroup.visible = true;
+        if (cenarioAgroGroup) cenarioAgroGroup.visible = false;
+        if (camera3D && controls3D) {
+          camera3D.position.set(16, 18, 22);
+          controls3D.target.set(3, 1, 3);
+        }
       } else if (modo === 'agro') {
         const btn = document.getElementById('btnSceneAgro');
         if (btn) btn.classList.add('active');
-        cenarioResidencialGroup.visible = false;
-        cenarioAgroGroup.visible = true;
-        camera3D.position.set(26, 26, 30);
-        controls3D.target.set(12, 4, 10);
+        if (cenarioResidencialGroup) cenarioResidencialGroup.visible = false;
+        if (cenarioAgroGroup) cenarioAgroGroup.visible = true;
+        if (camera3D && controls3D) {
+          camera3D.position.set(26, 26, 30);
+          controls3D.target.set(12, 4, 10);
+        }
       } else {
         const btn = document.getElementById('btnSceneIntegrado');
         if (btn) btn.classList.add('active');
-        cenarioResidencialGroup.visible = true;
-        cenarioAgroGroup.visible = true;
-        camera3D.position.set(36, 36, 46);
-        controls3D.target.set(8, 2, 8);
+        if (cenarioResidencialGroup) cenarioResidencialGroup.visible = true;
+        if (cenarioAgroGroup) cenarioAgroGroup.visible = true;
+        if (camera3D && controls3D) {
+          camera3D.position.set(36, 36, 46);
+          controls3D.target.set(8, 2, 8);
+        }
       }
     }
 
@@ -1194,12 +1460,14 @@
     }
 
     function toggleModoWireframe() {
+      if (!paredesGroup) return;
       paredesGroup.traverse(child => {
-        if (child.isMesh) child.material.wireframe = !child.material.wireframe;
+        if (child.isMesh && child.material) child.material.wireframe = !child.material.wireframe;
       });
     }
 
     function isolarTubulacao() {
+      if (!paredesGroup) return;
       paredesGroup.visible = !paredesGroup.visible;
     }
 

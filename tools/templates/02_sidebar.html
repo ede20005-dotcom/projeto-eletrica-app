@@ -17,6 +17,20 @@
 
       <nav class="sidebar-nav" id="sidebarNav">
         
+        <!-- GRUPO 0: DADOS DE ENTRADA & PARÂMETROS DO PROJETO -->
+        <div class="nav-group open" id="grp-parametros">
+          <div class="nav-group-header open" onclick="toggleGrupo('grp-parametros')" style="background: rgba(234, 179, 8, 0.12); border-left: 3px solid #eab308;">
+            <div class="nav-group-title">
+              <span class="nav-group-icon">⚙️</span>
+              <span style="color: #fde047; font-weight: 800;">0. Parâmetros & Entrada</span>
+            </div>
+            <span class="nav-group-arrow">▶</span>
+          </div>
+          <div class="nav-subitems">
+            <a class="nav-subitem active" data-tab="aba-parametros" onclick="navegarParaAba('aba-parametros')">⚙️ Formulário de Dimensionamento</a>
+          </div>
+        </div>
+
         <!-- GRUPO 1: BAIXA TENSÃO NBR 5410 -->
         <div class="nav-group open" id="grp-bt">
           <div class="nav-group-header open" onclick="toggleGrupo('grp-bt')">
@@ -27,7 +41,7 @@
             <span class="nav-group-arrow">▶</span>
           </div>
           <div class="nav-subitems">
-            <a class="nav-subitem active" data-tab="aba-visao-geral" onclick="navegarParaAba('aba-visao-geral')">📋 Visão Geral & Demandas</a>
+            <a class="nav-subitem" data-tab="aba-visao-geral" onclick="navegarParaAba('aba-visao-geral')">📋 Visão Geral & Demandas</a>
             <a class="nav-subitem" data-tab="aba-cargas" onclick="navegarParaAba('aba-cargas')">🏠 Levantamento por Cômodo <span class="nav-subitem-badge">11</span></a>
             <a class="nav-subitem" data-tab="aba-circuitos" onclick="navegarParaAba('aba-circuitos')">⚡ QDC & Fases Balanceadas <span class="nav-subitem-badge">18</span></a>
             <a class="nav-subitem" onclick="navegarParaAba('aba-visao-geral', 'balanco')">⚖️ Distribuição Fases R-S-T</a>

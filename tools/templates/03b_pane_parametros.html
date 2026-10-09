@@ -1,0 +1,260 @@
+        <!-- ABA 0: PAINEL DE DADOS DE ENTRADA & PARÂMETROS DE DIMENSIONAMENTO -->
+        <div id="aba-parametros" class="tab-pane active">
+          
+          <!-- BANNER SUPERIOR DE AÇÕES & PRESETS -->
+          <div class="card" style="margin-bottom: 20px; border: 1px solid rgba(234, 179, 8, 0.35); background: linear-gradient(135deg, rgba(234, 179, 8, 0.08), rgba(15, 23, 42, 0.95));">
+            <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 14px;">
+              <div>
+                <div style="font-size: 16px; font-weight: 800; color: #fde047; display: flex; align-items: center; gap: 8px;">
+                  <span>⚙️</span> Painel de Dados de Entrada & Dimensionamento Interativo
+                </div>
+                <div style="font-size: 12px; color: var(--text-muted); margin-top: 3px;">
+                  Altere os parâmetros da instalação, cargas e usinas renováveis abaixo e clique em <strong>Recalcular Projeto</strong> para atualizar todas as tabelas, pranchas CAD, maquete 3D e laudo técnico.
+                </div>
+              </div>
+              <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+                <button class="btn btn-outline" onclick="aplicarPresetEntrada('residencial')" style="font-size: 11.5px; padding: 6px 12px;">🏠 Preset Residencial (185m²)</button>
+                <button class="btn btn-outline" onclick="aplicarPresetEntrada('predial')" style="font-size: 11.5px; padding: 6px 12px;">🏢 Preset Predial (600m²)</button>
+                <button class="btn btn-outline" onclick="aplicarPresetEntrada('fazenda')" style="font-size: 11.5px; padding: 6px 12px;">🚜 Preset Fazenda & Agro</button>
+                <button class="btn btn-primary" onclick="recalcularProjetoEletricoCompleto()" style="font-size: 12.5px; font-weight: 800; background: linear-gradient(135deg, #eab308, #ca8a04); color: #000; padding: 8px 18px; box-shadow: 0 4px 14px rgba(234, 179, 8, 0.35);">⚡ RECALCULAR PROJETO COMPLETO</button>
+              </div>
+            </div>
+            
+            <div id="alertaRecalculo" style="display: none; margin-top: 12px; padding: 8px 14px; background: rgba(16, 185, 129, 0.15); border: 1px solid #10b981; border-radius: 6px; color: #6ee7b7; font-size: 12px; font-weight: 700;">
+              ✅ Projeto recalculado com sucesso! Parâmetros normativos NBR 5410, NBR 16690 e BDI atualizados em tempo real.
+            </div>
+          </div>
+
+          <!-- GRID DE FORMULÁRIOS DE ENTRADA -->
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(360px, 1fr)); gap: 18px; margin-bottom: 20px;">
+            
+            <!-- CARD 1: IDENTIFICAÇÃO DO PROJETO & CLIENTE -->
+            <div class="card">
+              <div class="card-header" style="border-bottom: 1px solid #334155; padding-bottom: 10px; margin-bottom: 14px;">
+                <div class="card-title" style="font-size: 13.5px; color: #fff;">📋 1. Identificação da Obra & Responsabilidade Técnica</div>
+              </div>
+              <div style="display: flex; flex-direction: column; gap: 12px;">
+                <div>
+                  <label style="display: block; font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; margin-bottom: 4px;">Nome do Projeto / Edificação:</label>
+                  <input type="text" id="in_nomeProjeto" class="form-control" value="Residência Unifamiliar Alto Padrão NBR 5410" style="width: 100%; background: #0f172a; border: 1px solid #334155; color: #fff; padding: 7px 10px; border-radius: 6px; font-size: 12.5px;">
+                </div>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                  <div>
+                    <label style="display: block; font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; margin-bottom: 4px;">Cliente / Contratante:</label>
+                    <input type="text" id="in_cliente" class="form-control" value="Família Silveira & Associados" style="width: 100%; background: #0f172a; border: 1px solid #334155; color: #fff; padding: 7px 10px; border-radius: 6px; font-size: 12.5px;">
+                  </div>
+                  <div>
+                    <label style="display: block; font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; margin-bottom: 4px;">Tipo de Edificação:</label>
+                    <select id="in_tipoEdificacao" class="form-control" style="width: 100%; background: #0f172a; border: 1px solid #334155; color: #fff; padding: 7px 10px; border-radius: 6px; font-size: 12.5px;" onchange="ajustarTipoEdificacao(this.value)">
+                      <option value="residencial" selected>🏠 Residencial Unifamiliar</option>
+                      <option value="predial">🏢 Edifício Predial / Comercial</option>
+                      <option value="fazenda">🚜 Propriedade Rural / Fazenda</option>
+                    </select>
+                  </div>
+                </div>
+                <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px;">
+                  <div>
+                    <label style="display: block; font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; margin-bottom: 4px;">Engenheiro Responsável:</label>
+                    <input type="text" id="in_responsavel" class="form-control" value="Eng. Eletricista Responsável" style="width: 100%; background: #0f172a; border: 1px solid #334155; color: #fff; padding: 7px 10px; border-radius: 6px; font-size: 12px;">
+                  </div>
+                  <div>
+                    <label style="display: block; font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; margin-bottom: 4px;">CREA / CFT:</label>
+                    <input type="text" id="in_crea" class="form-control" value="CREA-SP 5069874123" style="width: 100%; background: #0f172a; border: 1px solid #334155; color: #fff; padding: 7px 10px; border-radius: 6px; font-size: 12px;">
+                  </div>
+                  <div>
+                    <label style="display: block; font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; margin-bottom: 4px;">ART / TRT nº:</label>
+                    <input type="text" id="in_art" class="form-control" value="28027230260012345" style="width: 100%; background: #0f172a; border: 1px solid #334155; color: #fff; padding: 7px 10px; border-radius: 6px; font-size: 12px;">
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- CARD 2: PARÂMETROS ELÉTRICOS DA REDE & NBR 5410 -->
+            <div class="card">
+              <div class="card-header" style="border-bottom: 1px solid #334155; padding-bottom: 10px; margin-bottom: 14px;">
+                <div class="card-title" style="font-size: 13.5px; color: #fff;">⚡ 2. Parâmetros Elétricos da Rede (NBR 5410 & NR-10)</div>
+              </div>
+              <div style="display: flex; flex-direction: column; gap: 12px;">
+                <div style="display: grid; grid-template-columns: 1.4fr 1fr 1fr; gap: 10px;">
+                  <div>
+                    <label style="display: block; font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; margin-bottom: 4px;">Tipo de Fornecimento:</label>
+                    <select id="in_fornecimento" class="form-control" style="width: 100%; background: #0f172a; border: 1px solid #334155; color: #fff; padding: 7px 10px; border-radius: 6px; font-size: 12px;" onchange="ajustarTensoes(this.value)">
+                      <option value="trifasico_127_220" selected>Trifásico (3F+N+PE) 127/220V</option>
+                      <option value="trifasico_220_380">Trifásico (3F+N+PE) 220/380V</option>
+                      <option value="bifasico_127_220">Bifásico (2F+N+PE) 127/220V</option>
+                      <option value="monofasico_220">Monofásico (F+N+PE) 220V</option>
+                      <option value="monofasico_127">Monofásico (F+N+PE) 127V</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label style="display: block; font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; margin-bottom: 4px;">Tensão F-N (V):</label>
+                    <input type="number" id="in_tensaoFN" class="form-control" value="127" step="1" style="width: 100%; background: #0f172a; border: 1px solid #334155; color: #fff; padding: 7px 10px; border-radius: 6px; font-size: 12.5px;">
+                  </div>
+                  <div>
+                    <label style="display: block; font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; margin-bottom: 4px;">Tensão F-F (V):</label>
+                    <input type="number" id="in_tensaoFF" class="form-control" value="220" step="1" style="width: 100%; background: #0f172a; border: 1px solid #334155; color: #fff; padding: 7px 10px; border-radius: 6px; font-size: 12.5px;">
+                  </div>
+                </div>
+
+                <div style="display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 10px;">
+                  <div>
+                    <label style="display: block; font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; margin-bottom: 4px;">Área Total (m²):</label>
+                    <input type="number" id="in_areaM2" class="form-control" value="185.0" step="5" style="width: 100%; background: #0f172a; border: 1px solid #334155; color: #fff; padding: 7px 10px; border-radius: 6px; font-size: 12.5px;">
+                  </div>
+                  <div>
+                    <label style="display: block; font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; margin-bottom: 4px;">Temp. Amb. (°C):</label>
+                    <input type="number" id="in_tempAmb" class="form-control" value="30" step="1" style="width: 100%; background: #0f172a; border: 1px solid #334155; color: #fff; padding: 7px 10px; border-radius: 6px; font-size: 12.5px;">
+                  </div>
+                  <div>
+                    <label style="display: block; font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; margin-bottom: 4px;">Fator Pot. (cos φ):</label>
+                    <input type="number" id="in_fpMedio" class="form-control" value="0.95" step="0.01" style="width: 100%; background: #0f172a; border: 1px solid #334155; color: #fff; padding: 7px 10px; border-radius: 6px; font-size: 12.5px;">
+                  </div>
+                  <div>
+                    <label style="display: block; font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; margin-bottom: 4px;">Queda Máx (%):</label>
+                    <input type="number" id="in_quedaMax" class="form-control" value="4.0" step="0.5" style="width: 100%; background: #0f172a; border: 1px solid #334155; color: #fff; padding: 7px 10px; border-radius: 6px; font-size: 12.5px;">
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- CARD 3: CARGAS ESPECIAIS & CIRCUITOS TUE/TUG -->
+            <div class="card">
+              <div class="card-header" style="border-bottom: 1px solid #334155; padding-bottom: 10px; margin-bottom: 14px;">
+                <div class="card-title" style="font-size: 13.5px; color: #fff;">🔌 3. Cargas Especiais & Aparelhos (TUE & TUG)</div>
+              </div>
+              <div style="display: flex; flex-direction: column; gap: 10px;">
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                  <div>
+                    <label style="display: block; font-size: 10.5px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; margin-bottom: 3px;">Qtd. Chuveiros Elétricos:</label>
+                    <input type="number" id="in_qtdChuveiros" class="form-control" value="2" min="0" step="1" style="width: 100%; background: #0f172a; border: 1px solid #334155; color: #fff; padding: 6px 10px; border-radius: 6px; font-size: 12px;">
+                  </div>
+                  <div>
+                    <label style="display: block; font-size: 10.5px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; margin-bottom: 3px;">Potência Chuveiro (W cada):</label>
+                    <input type="number" id="in_potChuveiro" class="form-control" value="7500" step="500" style="width: 100%; background: #0f172a; border: 1px solid #334155; color: #fff; padding: 6px 10px; border-radius: 6px; font-size: 12px;">
+                  </div>
+                </div>
+
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                  <div>
+                    <label style="display: block; font-size: 10.5px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; margin-bottom: 3px;">Qtd. Ar-Condicionados:</label>
+                    <input type="number" id="in_qtdAr" class="form-control" value="3" min="0" step="1" style="width: 100%; background: #0f172a; border: 1px solid #334155; color: #fff; padding: 6px 10px; border-radius: 6px; font-size: 12px;">
+                  </div>
+                  <div>
+                    <label style="display: block; font-size: 10.5px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; margin-bottom: 3px;">Potência Ar (W cada):</label>
+                    <input type="number" id="in_potAr" class="form-control" value="1400" step="100" style="width: 100%; background: #0f172a; border: 1px solid #334155; color: #fff; padding: 6px 10px; border-radius: 6px; font-size: 12px;">
+                  </div>
+                </div>
+
+                <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px;">
+                  <div>
+                    <label style="display: block; font-size: 10.5px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; margin-bottom: 3px;">Forno Elétrico (W):</label>
+                    <input type="number" id="in_potForno" class="form-control" value="4500" step="500" style="width: 100%; background: #0f172a; border: 1px solid #334155; color: #fff; padding: 6px 10px; border-radius: 6px; font-size: 12px;">
+                  </div>
+                  <div>
+                    <label style="display: block; font-size: 10.5px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; margin-bottom: 3px;">Micro-ondas (W):</label>
+                    <input type="number" id="in_potMicroondas" class="form-control" value="1400" step="100" style="width: 100%; background: #0f172a; border: 1px solid #334155; color: #fff; padding: 6px 10px; border-radius: 6px; font-size: 12px;">
+                  </div>
+                  <div>
+                    <label style="display: block; font-size: 10.5px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; margin-bottom: 3px;">Lavadora (W):</label>
+                    <input type="number" id="in_potLavaLouca" class="form-control" value="1800" step="100" style="width: 100%; background: #0f172a; border: 1px solid #334155; color: #fff; padding: 6px 10px; border-radius: 6px; font-size: 12px;">
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- CARD 4: RENOVÁVEIS (SOLAR, EÓLICA, BIOGÁS E PCH) -->
+            <div class="card">
+              <div class="card-header" style="border-bottom: 1px solid #334155; padding-bottom: 10px; margin-bottom: 14px;">
+                <div class="card-title" style="font-size: 13.5px; color: #fff;">☀️ 4. Usinas Renováveis & Agroenergia</div>
+              </div>
+              <div style="display: flex; flex-direction: column; gap: 10px;">
+                <!-- Solar FV -->
+                <div style="background: rgba(234, 179, 8, 0.08); padding: 8px 10px; border-radius: 6px; border-left: 3px solid #eab308;">
+                  <div style="font-size: 11px; font-weight: 800; color: #fde047; margin-bottom: 5px;">SOLAR FOTOVOLTAICO (NBR 16690):</div>
+                  <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px;">
+                    <div>
+                      <label style="display: block; font-size: 10px; color: var(--text-muted);">Potência (kWp):</label>
+                      <input type="number" id="in_solarKwp" class="form-control" value="8.8" step="0.5" style="width: 100%; background: #0f172a; border: 1px solid #334155; color: #fff; padding: 4px 8px; border-radius: 4px; font-size: 11.5px;">
+                    </div>
+                    <div>
+                      <label style="display: block; font-size: 10px; color: var(--text-muted);">Pot. Módulo (W):</label>
+                      <input type="number" id="in_potModuloW" class="form-control" value="550" step="10" style="width: 100%; background: #0f172a; border: 1px solid #334155; color: #fff; padding: 4px 8px; border-radius: 4px; font-size: 11.5px;">
+                    </div>
+                    <div>
+                      <label style="display: block; font-size: 10px; color: var(--text-muted);">HSP (kWh/m²·d):</label>
+                      <input type="number" id="in_irradiacao" class="form-control" value="5.25" step="0.1" style="width: 100%; background: #0f172a; border: 1px solid #334155; color: #fff; padding: 4px 8px; border-radius: 4px; font-size: 11.5px;">
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Eólica -->
+                <div style="background: rgba(56, 189, 248, 0.08); padding: 8px 10px; border-radius: 6px; border-left: 3px solid #38bdf8;">
+                  <div style="font-size: 11px; font-weight: 800; color: #7dd3fc; margin-bottom: 5px;">AEROGERADOR EÓLICO (IEC 61400):</div>
+                  <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
+                    <div>
+                      <label style="display: block; font-size: 10px; color: var(--text-muted);">Potência Eólica (kW):</label>
+                      <input type="number" id="in_eolicaKw" class="form-control" value="10.0" step="1" style="width: 100%; background: #0f172a; border: 1px solid #334155; color: #fff; padding: 4px 8px; border-radius: 4px; font-size: 11.5px;">
+                    </div>
+                    <div>
+                      <label style="display: block; font-size: 10px; color: var(--text-muted);">Vel. Vento Médio (m/s):</label>
+                      <input type="number" id="in_velVento" class="form-control" value="6.5" step="0.2" style="width: 100%; background: #0f172a; border: 1px solid #334155; color: #fff; padding: 4px 8px; border-radius: 4px; font-size: 11.5px;">
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Biogás e PCH -->
+                <div style="background: rgba(16, 185, 129, 0.08); padding: 8px 10px; border-radius: 6px; border-left: 3px solid #10b981;">
+                  <div style="font-size: 11px; font-weight: 800; color: #6ee7b7; margin-bottom: 5px;">BIODIGESTOR CHP & HIDRELÉTRICA PCH:</div>
+                  <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px;">
+                    <div>
+                      <label style="display: block; font-size: 10px; color: var(--text-muted);">Rebanho (Cabeças):</label>
+                      <input type="number" id="in_qtdAnimais" class="form-control" value="120" step="10" style="width: 100%; background: #0f172a; border: 1px solid #334155; color: #fff; padding: 4px 8px; border-radius: 4px; font-size: 11.5px;">
+                    </div>
+                    <div>
+                      <label style="display: block; font-size: 10px; color: var(--text-muted);">PCH Vazão (L/s):</label>
+                      <input type="number" id="in_pchVazao" class="form-control" value="120.0" step="10" style="width: 100%; background: #0f172a; border: 1px solid #334155; color: #fff; padding: 4px 8px; border-radius: 4px; font-size: 11.5px;">
+                    </div>
+                    <div>
+                      <label style="display: block; font-size: 10px; color: var(--text-muted);">PCH Queda (m):</label>
+                      <input type="number" id="in_pchQueda" class="form-control" value="25.0" step="1" style="width: 100%; background: #0f172a; border: 1px solid #334155; color: #fff; padding: 4px 8px; border-radius: 4px; font-size: 11.5px;">
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- CARD 5: PARÂMETROS ORÇAMENTÁRIOS & BDI (TCU) -->
+            <div class="card">
+              <div class="card-header" style="border-bottom: 1px solid #334155; padding-bottom: 10px; margin-bottom: 14px;">
+                <div class="card-title" style="font-size: 13.5px; color: #fff;">💰 5. Orçamento & Parâmetros BDI (TCU 2622/2013)</div>
+              </div>
+              <div style="display: flex; flex-direction: column; gap: 10px;">
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                  <div>
+                    <label style="display: block; font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; margin-bottom: 4px;">Taxa de BDI Desejada (%):</label>
+                    <input type="number" id="in_taxaBdi" class="form-control" value="24.50" step="0.5" style="width: 100%; background: #0f172a; border: 1px solid #334155; color: #fff; padding: 7px 10px; border-radius: 6px; font-size: 12.5px;">
+                  </div>
+                  <div>
+                    <label style="display: block; font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; margin-bottom: 4px;">Lucro Operacional Líquido (%):</label>
+                    <input type="number" id="in_lucroBdi" class="form-control" value="7.40" step="0.2" style="width: 100%; background: #0f172a; border: 1px solid #334155; color: #fff; padding: 7px 10px; border-radius: 6px; font-size: 12.5px;">
+                  </div>
+                </div>
+                <div style="font-size: 11px; color: var(--text-muted); line-height: 1.5; margin-top: 4px;">
+                  • O BDI calculado retroalimenta a tabela sintética de viabilidade, o memorial descritivo em Word DOCX e as propostas comerciais.
+                </div>
+              </div>
+            </div>
+
+          </div>
+
+          <!-- BOTÃO GERAL DE RECÁLCULO E PRÉ-VISUALIZAÇÃO DE RESULTADOS -->
+          <div class="card" style="text-align: center; padding: 20px; background: #0f172a; border: 1px solid #334155;">
+            <button class="btn btn-primary" onclick="recalcularProjetoEletricoCompleto()" style="font-size: 15px; font-weight: 900; background: linear-gradient(135deg, #eab308, #ca8a04); color: #000; padding: 12px 36px; border-radius: 8px; box-shadow: 0 6px 20px rgba(234, 179, 8, 0.4); cursor: pointer;">
+              ⚡ EXECUTAR RECÁLCULO COMPLETO DA ENGENHARIA ELÉTRICA & RENOVÁVEIS
+            </button>
+            <div style="margin-top: 10px; font-size: 12px; color: var(--text-muted);">
+              Calcula: Potência Total, Demanda Provável, Bitola do Alimentador, Seletividade de Disjuntores, Geração Solar/Eólica/Biogás/PCH, Atualiza Maquete 3D e Planta 2D.
+            </div>
+          </div>
+
+        </div>
